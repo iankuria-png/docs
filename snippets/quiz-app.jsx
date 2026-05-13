@@ -1,3 +1,5 @@
+import { useState } from "react"
+
 const departments = [
   "Sales & CS",
   "Finance",
