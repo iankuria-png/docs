@@ -1,7 +1,13 @@
 ---
 title: "Stage 5b — Payment initiation"
+sidebarTitle: "5b · Payment"
 description: "How payment is initiated — M-Pesa STK Push and hosted checkout — and what the escort experiences at each step."
+icon: "mobile-screen-button"
 ---
+
+<Card title="Stage 5b of 8 — Payment initiation" icon="mobile-screen-button" horizontal>
+  M-Pesa STK Push sends a PIN prompt to the escort's phone. Hosted checkout (Paystack / Pesapal / PawaPay) opens a third-party page. **Owner: IT Infrastructure for gateway health; CS for retry/link.**
+</Card>
 
 ## What the customer sees
 
@@ -194,3 +200,14 @@ The `BillingMarketProviderBinding` table controls which providers are available 
     **D.** 24 hours
   </Accordion>
 </AccordionGroup>
+
+---
+
+<CardGroup cols={2}>
+  <Card title="← Stage 5a — Subscription selection" icon="list-check" href="/product/stage-5a-subscription-selection">
+    Package and duration selection on checkout
+  </Card>
+  <Card title="Stage 5c — Payment confirmation →" icon="circle-check" href="/product/stage-5c-payment-confirmation">
+    Webhook callbacks, matching, and provisioning trigger
+  </Card>
+</CardGroup>

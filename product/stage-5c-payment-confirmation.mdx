@@ -1,7 +1,13 @@
 ---
 title: "Stage 5c — Payment confirmation"
+sidebarTitle: "5c · Confirmation"
 description: "How the payment provider notifies the CRM, how the payment is matched to the escort's account, and what triggers subscription provisioning."
+icon: "circle-check"
 ---
+
+<Card title="Stage 5c of 8 — Payment confirmation" icon="circle-check" horizontal>
+  Provider webhook fires into the CRM, payment is matched to the client record, and subscription provisioning is triggered. **Owner: IT Infrastructure (webhooks); Finance (reconciliation & manual review).**
+</Card>
 
 ## What the customer sees
 
@@ -210,3 +216,14 @@ This is the most technically complex stage. A webhook (callback) fires from the 
     **D.** Whether the WordPress site is down
   </Accordion>
 </AccordionGroup>
+
+---
+
+<CardGroup cols={2}>
+  <Card title="← Stage 5b — Payment initiation" icon="mobile-screen-button" href="/product/stage-5b-payment-initiation">
+    How STK Push and hosted checkout work
+  </Card>
+  <Card title="Stage 5d — Profile activation →" icon="rocket" href="/product/stage-5d-profile-activation">
+    CRM provisions subscription; WordPress publishes profile
+  </Card>
+</CardGroup>

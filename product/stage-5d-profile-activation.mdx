@@ -1,7 +1,13 @@
 ---
 title: "Stage 5d — Profile activation"
+sidebarTitle: "5d · Activation"
 description: "How the CRM provisions the subscription, syncs with WordPress, and makes the escort's profile publicly visible."
+icon: "rocket"
 ---
+
+<Card title="Stage 5d of 8 — Profile activation" icon="rocket" horizontal>
+  CRM creates the Deal, calls WordPress to publish the profile, syncs back the result. Profile goes live in **30–60 seconds**. **Owner: IT Infrastructure for failures; CS for escort confirmation.**
+</Card>
 
 ## What the customer sees
 
@@ -189,3 +195,14 @@ Activation is a multi-step automated sequence: the CRM creates a deal, calls Wor
     **D.** The escort receives an email and has 30 days to renew before the profile is removed
   </Accordion>
 </AccordionGroup>
+
+---
+
+<CardGroup cols={2}>
+  <Card title="← Stage 5c — Confirmation" icon="circle-check" href="/product/stage-5c-payment-confirmation">
+    Webhook callbacks and payment matching
+  </Card>
+  <Card title="Stage 5e — Failures & recovery →" icon="triangle-exclamation" href="/product/stage-5e-failure-modes">
+    What goes wrong and how to fix it
+  </Card>
+</CardGroup>

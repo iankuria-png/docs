@@ -1,39 +1,184 @@
 ---
 title: "Stage 1 — Discover"
-description: "How escorts first learn about Exotic Online and enter the sales pipeline."
+sidebarTitle: "1 · Discover"
+description: "How escorts across Africa first learn about Exotic and enter the sales pipeline."
+icon: "magnifying-glass"
 ---
+
+<Card title="Stage 1 of 8 — Discover" icon="magnifying-glass" horizontal>
+  Prospects learn about Exotic via referral, outbound call, or organic search — and enter the CRM as a Lead. **Owner: Sales & CS.**
+</Card>
 
 ## What the customer sees
 
-An escort discovers Exotic through one of three channels — a referral from a friend or colleague already on the platform, an outbound call from a member of the Exotic sales team, or an organic Google search for escort listing sites. In all cases, their first impression is either the public Exotic website or a direct conversation with a sales agent.
+An escort discovers Exotic through one of three channels — a referral from a friend or colleague already on the platform, an outbound call from a member of the Exotic sales team, or an organic Google search for escort listing sites in their country.
 
-Referrals are the highest-converting channel: an escort who hears "I'm on Exotic and I'm getting good clients" from a trusted colleague arrives with strong intent. Outbound calls from agents are the highest-volume channel. Organic SEO arrivals are self-service and require the least sales effort but may need guidance through registration.
+**Referrals** are the highest-converting channel. An escort who hears "I'm on Exotic and I'm getting good clients" from a trusted colleague arrives with strong intent and minimal objections. Referred escorts typically convert faster and have better first-year retention.
+
+**Outbound sales calls** are the highest-volume channel. The sales team proactively calls prospects identified through competitor site scraping, industry contacts, or market intelligence. These calls require the most sales skill — the escort has not expressed prior interest.
+
+**Organic search (SEO)** produces self-service arrivals — escorts who found Exotic on Google and visit the site without any staff interaction. These escorts may register and even start the subscription flow without speaking to anyone. They often need more hand-holding during payment and activation.
 
 ---
 
 ## Under the hood
 
-When a prospective escort is identified by the sales team, they are created as a **Lead** in the CRM.
+When a prospect is identified, they enter the CRM as a **Lead**. Every lead belongs to a market (country/platform) and moves through a defined lifecycle.
 
 | What happens | Code reference |
 |---|---|
 | Lead created manually by sales agent | `LeadController` — `app/Http/Controllers/CRM/LeadController.php` |
-| Lead imported via CSV or web scraper | `app/Services/SupportBoardLeadImportService.php`; Scraper sources in Settings |
-| Lead record fields | `app/Models/Lead.php` — stores name, phone (normalised), email, source, status, assigned agent |
+| Lead imported from competitor scraping | Scraper sources — CRM → Settings → Integrations → Scraper sources |
+| SupportBoard chat contact auto-imported as lead | `SupportBoardLeadImportService` — `app/Services/SupportBoardLeadImportService.php` |
+| Lead record fields | `app/Models/Lead.php` — name, phone (normalised), email, source, status, assigned agent |
+| Phone normalised on creation | Local format (e.g. `0712...`) → international (e.g. `254712...` for Kenya) |
 | Lead status lifecycle | `new` → `contacted` → `qualified` → `converted` → `lost` |
-| Phone normalised automatically | Local format (e.g. `0712...`) → international format (e.g. `254712...`) |
 
 ---
 
-<Note>
-  **Interview pending — content to be added:** The following sections require input from the Sales & CS team on actual scripts, objection handling at discovery stage, and SEO-specific notes on how organic arrivals differ in behaviour from referred/outbound leads.
-</Note>
+## Step-by-step SOP
+
+<Steps>
+  <Step title="Identify the prospect">
+    Prospects come from three sources:
+    - **Referral:** An existing client provides a contact. Log the referral in the CRM lead record under Source = `referral` and note the referring client's name.
+    - **Outbound:** Sales agent scrapes or identifies a prospect from a competitor site. Use CRM → Leads → Scrape Entry or bulk Scrape Preview to import.
+    - **SEO/inbound:** Escort visits the site and registers. They may appear in the Leads list automatically if they initiated a SupportBoard chat.
+
+    **Screenshot slot:** *CRM Leads list showing new leads from different sources*
+  </Step>
+  <Step title="Create or confirm the lead in CRM">
+    If the prospect is not yet in the CRM:
+    1. CRM → Leads → New Lead
+    2. Enter name, phone (local format is fine — CRM normalises it), email, select market
+    3. Set source: `registration`, `referral`, `outbound`, or `import`
+    4. Assign to yourself or the relevant agent
+
+    If the prospect already exists (duplicate check): search by phone number first. Do not create duplicates.
+  </Step>
+  <Step title="Make first contact">
+    Call, WhatsApp, or SMS the prospect. Your goal at this stage is one thing: **confirm interest**. Do not try to close the sale on the first contact.
+
+    Key questions to answer in the first call:
+    - Are they currently listed on any other site?
+    - What market are they in (city/country)?
+    - Do they have a smartphone and M-Pesa / mobile money set up?
+
+    After contact, update the lead status to `contacted` in the CRM.
+  </Step>
+  <Step title="Qualify the lead">
+    A lead is **qualified** when the escort has expressed genuine interest and you've confirmed they can pay (they have mobile money access). Update status to `qualified`.
+
+    Unqualified leads (wrong market, not interested, no mobile money) should be marked `lost` with a reason — don't leave them in `new` indefinitely.
+  </Step>
+  <Step title="Hand off to registration">
+    Once qualified, guide the escort to register on the public Exotic site. The lead continues to Stage 2.
+  </Step>
+</Steps>
+
+---
+
+## Department notes
+
+<AccordionGroup>
+  <Accordion title="Sales & CS">
+    **Outbound call script (opening):**
+    > *"Hi, I'm [Name] calling from Exotic Online. We're Africa's leading adult advertising platform — you may have seen some of the profiles on [site URL]. I'm reaching out because we're currently accepting new listings in [city/country] and I'd love to tell you about what we offer. Do you have 2 minutes?"*
+
+    **Top objection at discovery stage:**
+    *"I already list on [competitor site]"*
+    > *"That's great — a lot of our most successful clients cross-list. Exotic tends to attract clients who are willing to pay for a better experience, which means higher-quality enquiries. Would you be open to trying it alongside what you're already doing?"*
+
+    **Referral follow-up:** Always ask happy clients for referrals at renewal time. A single happy client can bring in 3–5 referrals over their lifetime. Log every referral in the CRM with the referring client's name for attribution tracking.
+  </Accordion>
+
+  <Accordion title="RD Team">
+    RD decides which new African markets to open and when. If you're working with a prospect in a market that isn't yet configured in the CRM, do not manually create a market — escalate to RD. Opening a new market requires platform configuration, payment provider setup, and pricing decisions by RD.
+  </Accordion>
+
+  <Accordion title="SEO & IT Infrastructure">
+    **SEO:** Organic arrivals come from Google ranking for country-specific terms (e.g. "escort listings Nairobi", "escort ads Lagos"). The quality of landing pages and profile SEO is owned by the SEO function — if escorts are finding the site but not converting, flag the landing page to SEO, not to IT Infrastructure.
+
+    **IT Infrastructure:** No infrastructure involvement at the Discover stage. Leads are created in the CRM by staff, not by automated systems (except SupportBoard imports).
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Frequently asked questions
+
+<AccordionGroup>
+  <Accordion title="How do I handle an escort who found us on Google and registered without calling us first?">
+    Check if they appear in CRM → Clients (synced from WordPress) or CRM → Leads (if they used the chat widget). If they've registered, assign them to an agent and make proactive contact — welcome them, offer to walk them through profile setup, and guide them toward subscription. Self-service registrants often drop off at the payment stage without a nudge.
+  </Accordion>
+
+  <Accordion title="What if a prospect is in a country where Exotic isn't configured yet?">
+    Log the lead in the CRM and mark them as `qualified` with a note about the market gap. Escalate to your manager who will flag it to the RD Team. Do not promise a launch date — that's RD's decision.
+  </Accordion>
+
+  <Accordion title="How do I log a referral properly?">
+    Create the new lead in CRM → Leads → New Lead. Set Source = `referral`. In the notes field, write the referring client's name and CRM client ID. This enables referral attribution in reports.
+  </Accordion>
+
+  <Accordion title="How long should I chase a prospect before marking them Lost?">
+    Standard practice: 3 contact attempts over 7 days. If no response after the third attempt, mark `lost` with reason "no response". You can always re-open a lost lead if they contact you later.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+| Symptom | Likely cause | Where to look | Fix |
+|---|---|---|---|
+| Prospect doesn't appear in CRM after registration | WordPress → CRM sync hasn't run | CRM → Settings → Integrations → market → Sync clients | Run manual sync; check sync status |
+| Duplicate lead records for same prospect | Lead created twice (manual + auto-import) | CRM → Leads → search by phone | Archive the duplicate; keep the one with more information |
+| Scraper returning no results for a competitor URL | Site blocks automated access or URL format changed | CRM → Settings → Scraper sources → Run now → check error | Update source URL; check robots.txt compliance |
+| Lead assigned to wrong market | Phone prefix mismatch during normalisation | CRM → Leads → lead detail → market field | Manually update the market on the lead record |
+
+---
+
+## Certification — MCQ
+
+<AccordionGroup>
+  <Accordion title="Q1: Which discovery channel typically produces the highest conversion rate?">
+    **A.** Organic SEO arrivals
+
+    **B.** Outbound cold calls
+
+    **C.** Referrals from existing escorts ✅
+
+    **D.** Social media advertising
+  </Accordion>
+
+  <Accordion title="Q2: An escort from a country where Exotic has no market configured wants to register. What do you do?">
+    **A.** Create a market for them in CRM → Settings
+
+    **B.** Log the lead, mark qualified, escalate to your manager to flag to RD Team ✅
+
+    **C.** Tell them Exotic doesn't operate there
+
+    **D.** Ask IT Infrastructure to set up the market
+  </Accordion>
+
+  <Accordion title="Q3: After how many failed contact attempts should you mark a prospect as 'Lost'?">
+    **A.** 1 attempt
+
+    **B.** 10 attempts over a month
+
+    **C.** 3 attempts over 7 days ✅
+
+    **D.** Only when they explicitly say they're not interested
+  </Accordion>
+</AccordionGroup>
+
+---
 
 <CardGroup cols={2}>
-  <Card title="Next: Register & profile setup →" icon="arrow-right" href="/product/stage-2-register">
-    What happens when the escort decides to sign up
+  <Card title="← Overview" icon="house" href="/product/overview">
+    Return to the full journey map
   </Card>
-  <Card title="Lead pipeline (CRM guide)" icon="funnel" href="/leads/overview">
-    How to manage leads in the CRM
+  <Card title="Stage 2 — Register →" icon="user-plus" href="/product/stage-2-register">
+    Account creation and CRM onboarding
   </Card>
 </CardGroup>

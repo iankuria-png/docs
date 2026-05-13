@@ -1,7 +1,13 @@
 ---
 title: "Stage 5a — Subscription selection"
+sidebarTitle: "5a · Subscription"
 description: "How an escort selects a package and duration on the self-checkout page, and what the system does behind the scenes."
+icon: "list-check"
 ---
+
+<Card title="Stage 5a of 8 — Subscription selection" icon="list-check" horizontal>
+  Escort picks Basic → VVIP and a billing period on the self-checkout page. A `Payment` record is created with status `initiated`. **Owner: Sales & CS (guidance); RD Team (pricing).**
+</Card>
 
 ## What the customer sees
 
@@ -80,10 +86,16 @@ The `payment_data` field captures the product ID, duration, and any FX overrides
     Pricing is configured per market under Settings → Integrations → Packages. If an escort reports a price they were quoted doesn't match the checkout price, check whether the market's `ProductPrice` records have been updated recently.
   </Accordion>
 
-  <Accordion title="SEO & IT">
-    **SEO:** Package tier directly affects profile placement in search results on the Exotic site. Higher tiers (VIP, VVIP) appear above lower tiers. This is a key selling point for escorts asking about visibility.
+  <Accordion title="RD Team">
+    **RD Team owns all package tiers and pricing.** If an escort or manager requests a new package, a price change, or a new tier, this must be escalated to RD — not handled by Sales or IT Infrastructure.
 
-    **IT:** If the checkout page doesn't load available packages, the likely cause is `BillingMarketProviderBinding` misconfiguration — no active `subscription_push` binding exists for the market. Check the bindings table and confirm at least one provider is enabled with status `active`.
+    Package changes take effect immediately once RD updates the `ProductPrice` records. If escorts are reporting prices that don't match what was communicated, flag this to RD first — they may have updated pricing without a communication broadcast.
+  </Accordion>
+
+  <Accordion title="SEO & IT Infrastructure">
+    **SEO:** Package tier directly affects profile placement in search results across all Exotic markets. Higher tiers (VIP, VVIP) appear above lower tiers. This is a key selling point for escorts asking about visibility.
+
+    **IT Infrastructure:** If the checkout page doesn't load available packages, the likely cause is `BillingMarketProviderBinding` misconfiguration — no active `subscription_push` binding exists for the market. Check the bindings table and confirm at least one provider is enabled with status `active`.
   </Accordion>
 </AccordionGroup>
 
@@ -172,3 +184,14 @@ The `payment_data` field captures the product ID, duration, and any FX overrides
     **D.** The callback URL for the payment provider
   </Accordion>
 </AccordionGroup>
+
+---
+
+<CardGroup cols={2}>
+  <Card title="← Stage 4 — Verification" icon="shield-check" href="/product/stage-4-verification">
+    Identity and age verification — must be complete before subscribing
+  </Card>
+  <Card title="Stage 5b — Payment →" icon="mobile-screen-button" href="/product/stage-5b-payment-initiation">
+    M-Pesa STK Push and hosted checkout flows
+  </Card>
+</CardGroup>

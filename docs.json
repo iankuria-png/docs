@@ -25,12 +25,14 @@
         "groups": [
           {
             "group": "Exotic Online University",
+            "icon": "graduation-cap",
             "pages": [
               "product/overview"
             ]
           },
           {
-            "group": "Customer Lifecycle",
+            "group": "Customer Journey — Stages 1–4",
+            "icon": "map",
             "pages": [
               "product/stage-1-discover",
               "product/stage-2-register",
@@ -39,7 +41,8 @@
             ]
           },
           {
-            "group": "Stage 5 — Subscription, Payment & Activation",
+            "group": "Stage 5 — Subscribe, Pay & Activate",
+            "icon": "credit-card",
             "pages": [
               "product/stage-5a-subscription-selection",
               "product/stage-5b-payment-initiation",
@@ -49,7 +52,8 @@
             ]
           },
           {
-            "group": "Post-Activation",
+            "group": "Post-Activation — Stages 6–8",
+            "icon": "arrow-trend-up",
             "pages": [
               "product/stage-6-contact",
               "product/stage-7-renewal",
@@ -58,6 +62,7 @@
           },
           {
             "group": "Certification",
+            "icon": "medal",
             "pages": [
               "product/certification"
             ]

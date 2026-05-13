@@ -1,7 +1,13 @@
 ---
 title: "Stage 5e — Failures & recovery"
+sidebarTitle: "5e · Failures"
 description: "Every failure mode across the subscription, payment, and activation flow — symptoms, causes, and step-by-step recovery for each department."
+icon: "triangle-exclamation"
 ---
+
+<Card title="Stage 5e — Failures & recovery" icon="triangle-exclamation" horizontal>
+  10 documented failure modes (F1–F10) covering the full payment flow. The single fastest fix: **always get the M-Pesa transaction code first.** CS, Finance, and IT Infrastructure each own distinct failure types.
+</Card>
 
 ## Overview
 
@@ -334,3 +340,14 @@ The Subscription → Payment → Activation flow has nine documented failure mod
     6. Post-incident: set up a monitoring alert for `webhook_verification_failed` errors so future failures are caught within minutes, not hours
   </Accordion>
 </AccordionGroup>
+
+---
+
+<CardGroup cols={2}>
+  <Card title="← Stage 5d — Activation" icon="rocket" href="/product/stage-5d-profile-activation">
+    Profile activation and WordPress sync
+  </Card>
+  <Card title="Stage 6 — Customer contact →" icon="message" href="/product/stage-6-contact">
+    How clients reach escorts after the profile goes live
+  </Card>
+</CardGroup>

@@ -1,111 +1,195 @@
 ---
-title: "Exotic Online University — Overview"
-description: "How the platform works from the customer's perspective. Every department's reference for the full escort lifecycle."
+title: "Exotic Online University"
+sidebarTitle: "Overview"
+description: "The complete internal training guide — every stage of the escort journey, every department's responsibilities."
+icon: "house"
 ---
 
-# Exotic Online University
+<Note>
+  **Internal use only.** This documentation is for Exotic staff across all departments. Do not share directly with escorts or clients.
+</Note>
 
-This section exists for one reason: **no one can effectively sell, support, market, or improve a product they don't fully understand.**
+## What this is and why it exists
 
-The pages in this tab explain how the platform works from the **escort's point of view** — from the moment they first hear about Exotic to the moment they renew their subscription. Each stage is documented with the actual system behaviour, department-specific notes, FAQs, troubleshooting steps, and certification questions so that every team member can speak confidently about the product.
+No one can effectively sell, support, market, or improve a product they don't fully understand. The Exotic Online University gives every team member — Sales, CS, Finance, RD Team, SEO, and IT Infrastructure — a shared, accurate view of how the platform works from the **escort's perspective**.
 
-<Info>
-  **Who this is for:** All internal staff — Sales & Customer Service, Finance, SEO, and IT. The content is internal only and should not be shared directly with customers.
-</Info>
+Every stage is documented with real system behaviour, department-specific guidance, SOPs, troubleshooting, and certification questions.
+
+---
+
+## Scope — 54 African markets
+
+Exotic Online is a **pan-African platform**. Our mission is to serve adult advertising markets across all 54 African nations. Kenya is the launch and reference market used throughout this documentation — but every process described here applies to every market.
+
+<Tip>
+  When you read "KES" → substitute your market's currency. When you read "M-Pesa" → substitute the dominant mobile money provider (MTN MoMo for West Africa, Airtel Money for East/Central Africa, and others by region).
+</Tip>
+
+---
+
+## The escort journey — 8 stages
+
+The complete lifecycle from first contact to repeat subscriber.
+
+<CardGroup cols={3}>
+  <Card title="1 — Discover" icon="magnifying-glass" href="/product/stage-1-discover">
+    Escort learns about Exotic via referral, outbound sales call, or organic Google search
+  </Card>
+  <Card title="2 — Register" icon="user-plus" href="/product/stage-2-register">
+    Account created on the WordPress site; Lead converts to Client in the CRM
+  </Card>
+  <Card title="3 — Profile setup" icon="camera" href="/product/stage-3-media">
+    Bio, rates, city, and up to 20 photos uploaded — completeness drives performance
+  </Card>
+  <Card title="4 — Verification" icon="shield-check" href="/product/stage-4-verification">
+    Staff verify identity and age via WhatsApp; CRM verified flag set — mandatory
+  </Card>
+  <Card title="5 — Subscription & Payment" icon="credit-card" href="/product/stage-5a-subscription-selection">
+    Escort selects a package, pays via mobile money or hosted checkout, profile goes live
+  </Card>
+  <Card title="6 — Customer contact" icon="message" href="/product/stage-6-contact">
+    Visitors contact the escort via WhatsApp, phone, Viber, or Exotic Chat (coming soon)
+  </Card>
+  <Card title="7 — Renewal" icon="rotate-right" href="/product/stage-7-renewal">
+    CRM sends renewal reminders; agent calls; escort repurchases to stay live
+  </Card>
+  <Card title="8 — Upgrades" icon="circle-arrow-up" href="/product/stage-8-upgrades">
+    Escort moves to a higher-visibility package tier via agent-assisted deal update
+  </Card>
+</CardGroup>
+
+---
+
+## Stage 5 — Payment in detail
+
+Stage 5 is the most technically complex and the source of most customer support tickets. It has its own sub-stages:
+
+```mermaid
+flowchart LR
+    A("5a\nSubscription\nselection") --> B("5b\nPayment\ninitiation")
+    B --> C("5c\nPayment\nconfirmation")
+    C --> D("5d\nProfile\nactivation")
+    D --> E("✅ Live")
+    C --> F("⚠️ 5e\nFailure &\nrecovery")
+    F --> D
+    style A fill:#fff0ef,stroke:#fc2c24,color:#1f2937
+    style B fill:#fff0ef,stroke:#fc2c24,color:#1f2937
+    style C fill:#fff0ef,stroke:#fc2c24,color:#1f2937
+    style D fill:#fff0ef,stroke:#fc2c24,color:#1f2937
+    style E fill:#dcfce7,stroke:#16a34a,color:#1f2937
+    style F fill:#fef3c7,stroke:#d97706,color:#1f2937
+```
 
 ---
 
 ## Who is the customer?
 
-The Exotic customer (referred to throughout as the **escort**) is an independent adult service provider who lists their profile on one of Exotic's WordPress-powered advertising markets (ExoticKenya.com and similar).
-
-| Attribute | Details |
-|---|---|
-| **Primary goal** | Get their profile visible to potential clients, generate contact enquiries, and earn income |
-| **Primary concern** | Is my profile live? Am I getting contacts? Is my payment confirmed? |
-| **Tech literacy** | Moderate — comfortable with smartphones and mobile money (M-Pesa), less familiar with web dashboards |
-| **Payment preference** | M-Pesa (STK Push or Till number), occasionally card via hosted checkout |
-| **Contact channels** | WhatsApp (primary), phone call, SMS, Viber; Telegram coming soon |
-| **Relationship with Exotic** | Vendor–platform — Exotic hosts and promotes their profile in exchange for a subscription fee |
-
----
-
-## End-to-end journey map
-
-The escort lifecycle has nine stages. The pilot documentation (fully written, with SOPs, FAQs, and certification) covers **Stage 5 — Subscription, Payment & Activation** because it is the most cross-departmental and revenue-critical. All other stages are documented as structured stubs with "interview pending" callouts for sections that require staff input to complete.
-
-| Stage | What happens | Documentation status |
-|---|---|---|
-| **1 — Discover** | Escort learns about Exotic via referral from another escort, an outbound sales call, or organic Google search | [Stub →](/product/stage-1-discover) |
-| **2 — Register** | Escort creates a WordPress account and basic profile on the public site | [Stub →](/product/stage-2-register) |
-| **3 — Profile setup & media** | Escort fills in bio, rates, city, contact details, and uploads photos/videos | [Stub →](/product/stage-3-media) |
-| **4 — Verification** | Staff verify the escort's identity and age via WhatsApp ID photo; CRM verified toggle is set | [Stub →](/product/stage-4-verification) |
-| **5a — Subscription selection** | Escort chooses a package and duration on the self-checkout page | [Full →](/product/stage-5a-subscription-selection) |
-| **5b — Payment initiation** | Escort pays via M-Pesa STK Push or hosted checkout | [Full →](/product/stage-5b-payment-initiation) |
-| **5c — Payment confirmation** | Payment provider callback confirms receipt; payment is matched to client | [Full →](/product/stage-5c-payment-confirmation) |
-| **5d — Profile activation** | CRM provisions the subscription and WordPress publishes the profile | [Full →](/product/stage-5d-profile-activation) |
-| **5e — Failures & recovery** | What goes wrong, how to detect it, and how to fix it | [Full →](/product/stage-5e-failure-modes) |
-| **6 — Customer contact** | A site visitor contacts the escort via WhatsApp, phone, SMS, or Viber | [Stub →](/product/stage-6-contact) |
-| **7 — Renewal** | Subscription nears expiry; CRM sends reminders; escort repurchases | [Stub →](/product/stage-7-renewal) |
-| **8 — Upgrades** | Escort moves to a higher package tier | [Stub →](/product/stage-8-upgrades) |
-
----
-
-## Department touchpoint matrix
-
-Use this matrix to understand where your team's work intersects with each customer stage.
-
-| Stage | Sales & CS | Finance | SEO & IT |
-|---|---|---|---|
-| Discover | Outbound calls, referral tracking | — | SEO ranking drives organic arrivals |
-| Register | Guide escort through sign-up; catch failed registrations | — | WordPress account creation health |
-| Profile setup | Review completeness score in CRM; prompt escorts to upload photos | — | Photo quality + profile fields affect search ranking |
-| Verification | **Own this stage** — collect ID, verify age, set CRM toggle | — | — |
-| Subscription selection | Answer package questions; handle objections | Aware of package pricing and currency | Payment link providers configured per market |
-| Payment initiation | Send payment link if escort needs help; retry STK Push failures | Monitor initiated payments in recovery queue | STK Push gateway health; provider routing |
-| Payment confirmation | Answer "did my payment go through?" questions | **Own this stage** — reconciliation, reversals, settlement | Callback endpoint health; webhook signature failures |
-| Profile activation | Confirm profile is live; handle "my profile isn't showing" tickets | — | WP sync endpoint health; activation failures |
-| Customer contact | — | — | SEO: profile visibility; IT: contact channel integrations |
-| Renewal | **Own this stage** — run campaigns, make calls, close renewals | Track renewal revenue per market | — |
-| Upgrades | Handle upgrade requests; apply discounts with approval | Approve upgrade pricing changes | Tier change provisioning |
-
----
-
-## Subscription packages
-
-The following tiers are available on most markets. Exact pricing is configured per market in Settings → Integrations.
-
-| Tier | Typical benefits | Target escort |
-|---|---|---|
-| **Basic** | Standard listing, limited photos | New escorts testing the platform |
-| **Featured** | Highlighted in search results, more photos | Established escorts wanting more exposure |
-| **Premium** | Top placement, full photo gallery, priority support | High-volume escorts |
-| **VIP** | Premium placement + additional visibility boosts | — |
-| **VVIP** | Maximum visibility, all features | Top-tier escorts |
-
----
-
-## What to read next
-
-Start with the Stage 5 pilot documentation — it is the deepest and most complete:
-
 <CardGroup cols={2}>
-  <Card title="5a — Subscription selection" icon="tag" href="/product/stage-5a-subscription-selection">
-    How an escort picks a package and reaches the payment screen
+  <Card title="Primary goal" icon="bullseye">
+    Get profile visible to clients, generate contact enquiries, and earn income from their listing
   </Card>
-  <Card title="5b — Payment initiation" icon="mobile" href="/product/stage-5b-payment-initiation">
-    M-Pesa STK Push and hosted checkout flows
+  <Card title="Primary worry" icon="circle-question">
+    "Is my profile live? Am I getting contacts? Was my payment confirmed?"
   </Card>
-  <Card title="5c — Payment confirmation" icon="circle-check" href="/product/stage-5c-payment-confirmation">
-    Callbacks, matching, and what happens after the PIN is entered
+  <Card title="Tech comfort level" icon="mobile-screen-button">
+    Comfortable with smartphones and mobile money — less familiar with web dashboards and CRM tools
   </Card>
-  <Card title="5d — Profile activation" icon="rocket" href="/product/stage-5d-profile-activation">
-    How the CRM provisions the subscription and WordPress publishes the profile
-  </Card>
-  <Card title="5e — Failures & recovery" icon="triangle-exclamation" href="/product/stage-5e-failure-modes">
-    Every failure mode, symptom, cause, and fix in one place
-  </Card>
-  <Card title="Certification" icon="graduation-cap" href="/product/certification">
-    Final exam — test your knowledge of the full customer journey
+  <Card title="Payment preference" icon="wallet">
+    Mobile money first (M-Pesa, MTN MoMo, Airtel Money by market) — card via hosted checkout as secondary
   </Card>
 </CardGroup>
+
+---
+
+## Package tiers
+
+All tiers are defined and priced by the **RD Team** per market. Sales staff do not modify pricing.
+
+| Tier | Position in search | Target escort |
+|---|---|---|
+| **VVIP** | Highest | Top-earning escorts wanting maximum exposure |
+| **VIP** | Very high | High-volume escorts |
+| **Premium** | High | Established escorts wanting more clients |
+| **Featured** | Above Basic | Escorts wanting better visibility |
+| **Basic** | Standard | New escorts testing the platform |
+
+<Warning>
+  Package tiers, features, and pricing are **owned by the RD Team**. If an escort asks you to change a price, create a new tier, or grant a discount beyond the approved threshold — escalate to your manager. Do not contact IT Infrastructure for pricing changes.
+</Warning>
+
+---
+
+## Department responsibilities at a glance
+
+<AccordionGroup>
+  <Accordion title="Sales & CS — what you own" icon="headset">
+    | Stage | Responsibility |
+    |---|---|
+    | Discover | Outbound calls, referral tracking, lead qualification |
+    | Register | Guide registration, deliver credentials, handle failed signups |
+    | Profile setup | Coach bio quality, completeness check before subscription |
+    | Verification | **Full ownership** — WhatsApp ID collection, age check, CRM toggle |
+    | Payment | Retry failed STK Push, send payment links, troubleshoot F2/F3 |
+    | Activation | Confirm profile is live; handle "I paid but profile isn't live" |
+    | Renewal | **Full ownership** — campaigns, calls, objection handling, close |
+    | Upgrades | Pitch, process, and confirm upgrades |
+  </Accordion>
+
+  <Accordion title="Finance — what you own" icon="calculator">
+    | Stage | Responsibility |
+    |---|---|
+    | Payment confirmation | **Full ownership** — daily reconciliation, manual review queue, reversals |
+    | Settlement review | Approve/reject amount-mismatch payments (±5% tolerance) |
+    | Client resolution | Match payments to clients when auto-match fails |
+    | Renewal revenue | Track renewal MRR; separate trial vs. paid activations |
+    | Discounts | Review all deals with `discount_percentage > 0`; flag unapproved discounts |
+  </Accordion>
+
+  <Accordion title="RD Team — what you own" icon="lightbulb">
+    | Area | Responsibility |
+    |---|---|
+    | Package tiers | Define tier features, names, and search position logic |
+    | Pricing | Set and update `ProductPrice` records per market |
+    | Market expansion | Decide which African countries to launch in and when |
+    | Verification policy | Set ID types accepted, age threshold, re-verification rules |
+    | Exotic Chat | Product roadmap and launch timeline for native messaging app |
+    | Contact channels | Add, remove, or change contact channel types on profiles |
+  </Accordion>
+
+  <Accordion title="SEO & IT Infrastructure — what you own" icon="server">
+    | Area | Responsibility |
+    |---|---|
+    | SEO | Organic search ranking, landing page quality, profile SEO signals |
+    | Payment infrastructure | Webhook health, provider routing, `BillingMarketProviderBinding` config |
+    | WordPress sync | `WpSyncService` health, activation endpoint, plugin maintenance |
+    | Failure recovery | F1, F4, F5, F6, F10 failure modes — escalate from CS |
+    | Monitoring | `laravel.log`, webhook delivery dashboard, scheduled tasks |
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Start your learning path
+
+Choose the path that matches your role:
+
+<CardGroup cols={2}>
+  <Card title="Sales & CS agents" icon="headset" href="/product/stage-1-discover">
+    Start at Stage 1 — Discover. Follow the journey in order. Pay special attention to Stages 4 (Verification), 5e (Failures), and 7 (Renewal).
+  </Card>
+  <Card title="Finance team" icon="calculator" href="/product/stage-5c-payment-confirmation">
+    Start at Stage 5c — Payment confirmation. Then read 5e — Failures, then Stage 7 — Renewal for revenue context.
+  </Card>
+  <Card title="RD Team" icon="lightbulb" href="/product/stage-5a-subscription-selection">
+    Start at Stage 5a — Subscription selection to understand the customer checkout experience, then Stage 6 — Contact for the Exotic Chat context.
+  </Card>
+  <Card title="SEO & IT Infrastructure" icon="server" href="/product/stage-5b-payment-initiation">
+    Start at Stage 5b — Payment initiation. Then 5c, 5d, and 5e. These cover the systems you own.
+  </Card>
+</CardGroup>
+
+---
+
+<Card title="Ready to get certified? →" icon="graduation-cap" href="/product/certification">
+  Take the 20-question quiz and earn your Exotic Online University certificate. Pass mark: 80%.
+</Card>
