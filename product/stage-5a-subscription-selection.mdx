@@ -6,7 +6,7 @@ icon: "list-check"
 ---
 
 <Card title="Stage 5a of 8 — Subscription selection" icon="list-check" horizontal>
-  Escort picks Basic → VVIP and a billing period on the self-checkout page. A `Payment` record is created with status `initiated`. **Owner: Sales & CS (guidance); RD Team & IT Infrastructure (tiers, pricing, market config).**
+  Escort picks Basic → VVIP and a billing period on the self-checkout page. A `Payment` record is created with status `initiated`. **Owner: Sales & CS (guidance, tier and pricing decisions through market CS leadership); RD Team & IT Infrastructure (market config and technical application).**
 </Card>
 
 ## What the customer sees
@@ -87,9 +87,9 @@ The `payment_data` field captures the product ID, duration, and any FX overrides
   </Accordion>
 
   <Accordion title="RD Team & IT Infrastructure">
-    **RD owns all package tiers and pricing.** If an escort or manager requests a new package, a price change, or a new tier, this must be escalated here — not handled by Sales or SEO & Marketing.
+    RD Team & IT Infrastructure do not own the commercial decision for package tiers or pricing. If an escort or manager requests a new package, a price change, or a new tier, escalate it to the **CS head for that market or region**. Final approval sits with the **Head of CS/Sales**.
 
-    Package changes take effect immediately once RD updates the `ProductPrice` records. If escorts are reporting prices that don't match what was communicated, flag this here first — they may have updated pricing without a communication broadcast.
+    Once commercial approval is given, the approved prices must be applied in `ProductPrice` records. If escorts are reporting prices that don't match what was communicated, first confirm the approved commercial price with Sales & CS leadership, then verify the system configuration.
 
     If the checkout page doesn't load available packages, the likely cause is `BillingMarketProviderBinding` misconfiguration — no active `subscription_push` binding exists for the market. Check the bindings table and confirm at least one provider is enabled with status `active`.
   </Accordion>

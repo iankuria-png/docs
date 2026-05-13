@@ -132,12 +132,13 @@ When the escort renews, their profile goes live again immediately — the same f
   </Accordion>
 
   <Accordion title="RD Team & IT Infrastructure">
-    RD owns decisions about:
-    - Renewal pricing (any changes to package prices at renewal)
+    RD Team & IT Infrastructure do not own renewal pricing. Commercial ownership sits with Sales & CS leadership:
+    - CS head for each market or region proposes renewal pricing or market-specific adjustments
+    - Head of CS/Sales approves renewal pricing changes
     - Any loyalty or long-tenure pricing programmes
     - New renewal campaign types (e.g. annual subscription options, multi-period discounts)
 
-    If sales agents are fielding frequent requests for annual subscriptions or long-term discounts that aren't currently available, escalate that feedback here as a product request.
+    If sales agents are fielding frequent requests for annual subscriptions or long-term discounts that aren't currently available, escalate that feedback through Sales & CS leadership first. IT Infrastructure only supports the technical setup after commercial approval.
 
     The expiry job that sets deals to `expired` and profiles to `private` runs on a scheduled cron task. If profiles are not going private after expiry, check the Laravel scheduler health. If profiles are going private prematurely (before the `expires_at` date), check for timezone mismatch between the CRM server timezone and `deals.expires_at` storage.
   </Accordion>

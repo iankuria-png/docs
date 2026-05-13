@@ -6,7 +6,7 @@ icon: "circle-arrow-up"
 ---
 
 <Card title="Stage 8 of 8 — Upgrades" icon="circle-arrow-up" horizontal>
-  Escort moves from Basic/Featured → Premium/VIP/VVIP. Staff-assisted via CRM deal update — not self-service. Profile re-provisions at the new tier within 30–60 seconds of payment. **Owner: Sales & CS; RD Team & IT Infrastructure own tier definitions and re-provisioning support.**
+  Escort moves from Basic/Featured → Premium/VIP/VVIP. Staff-assisted via CRM deal update — not self-service. Profile re-provisions at the new tier within 30–60 seconds of payment. **Owner: Sales & CS for tier and pricing decisions; RD Team & IT Infrastructure for re-provisioning support.**
 </Card>
 
 ## What the customer sees
@@ -126,12 +126,9 @@ Once upgraded and payment is confirmed, the escort's profile is re-provisioned a
   </Accordion>
 
   <Accordion title="RD Team & IT Infrastructure">
-    RD owns all package tiers, tier features, and tier pricing. Decisions about:
-    - What features each tier includes (number of photos, video allowance, badge type, search position logic)
-    - Pricing for each tier in each market
-    - Whether to introduce new tiers or retire existing ones
+    RD Team & IT Infrastructure do not own the commercial decision for tier structure or pricing. Those decisions sit with the **CS head for each market or region** and require approval from the **Head of CS/Sales**.
 
-    ...are all made by RD. If sales agents notice that a tier's pricing is losing upgrades to a competitor, or if escorts are asking for features that no current tier provides, feed that back here via the product feedback process.
+    If sales agents notice that a tier's pricing is losing upgrades to a competitor, or if escorts are asking for features that no current tier provides, feed that back through Sales & CS leadership. IT Infrastructure only supports the technical reconfiguration after approval.
 
     Profile re-provisioning at a new tier follows the same path as Stage 5d activation. If a profile doesn't update to the new tier after the upgrade payment confirms, check `laravel.log` for `WpSyncService` errors. Manual recovery: CRM → Deals → [deal] → Activate manually, which re-sends the `product_type` to WordPress.
   </Accordion>

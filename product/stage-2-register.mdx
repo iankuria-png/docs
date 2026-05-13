@@ -115,12 +115,12 @@ This is also the moment a **Lead** in the CRM becomes a **Client**. The sales ag
   </Accordion>
 
   <Accordion title="RD Team & IT Infrastructure">
-    RD owns the decision to open new markets. A market cannot accept registrations until it has:
+    RD Team & IT Infrastructure do not own the decision to open new markets. A market can only accept registrations after the **CEO** approves launch, guided by Sales input, RD input, and market research. Once approved, the technical rollout must include:
     - A configured WordPress site with the `exotic-crm-sync` plugin installed and credentials set up in the CRM
     - A Platform record in the CRM with country code, currency, phone prefix, and timezone
     - At least one payment provider configured
 
-    If a prospect is in an unconfigured country, log the lead with a note, escalate to your manager, and do **not** promise a launch date. RD will assess market viability and prioritise accordingly; IT Infrastructure handles the technical rollout once that decision is made.
+    If a prospect is in an unconfigured country, log the lead with a note, escalate to your manager, and do **not** promise a launch date. The CEO owns the final launch decision; IT Infrastructure handles the technical rollout once that decision is made.
 
     Registration failures — where a client record is created in the CRM but the `wp_post_id` is missing — indicate the WordPress API call failed. Check `laravel.log` for `WpSyncService` exceptions around the time of registration. Run a manual sync (CRM → Settings → Integrations → [market] → Sync clients) or re-trigger the WordPress profile creation manually.
   </Accordion>
