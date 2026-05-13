@@ -29,6 +29,26 @@ The escort does not need to do anything at this stage. The system handles everyt
 
 This is the most technically complex stage. A webhook (callback) fires from the payment provider into the CRM, triggering a chain of events.
 
+```mermaid
+sequenceDiagram
+    participant Escort
+    participant Provider as Payment Provider
+    participant CRM
+    participant Prov as Provisioning
+    participant WP as WordPress
+    participant Browser
+
+    Escort->>Provider: Complete PIN / hosted checkout
+    Provider->>Escort: Confirmation SMS
+    Provider->>CRM: Webhook callback
+    CRM->>CRM: Verify signature + locate payment_id
+    CRM->>CRM: Mark payment completed + match client
+    CRM->>Prov: Trigger subscription provisioning
+    Prov->>WP: Publish / activate profile
+    CRM->>Browser: Polling sees completed state
+    Browser->>Escort: "Payment received - activating your profile"
+```
+
 | What happens | Code reference |
 |---|---|
 | Payment provider posts callback to CRM | `POST /billing/mpesa/callback` → `BillingController::mpesaCallback()` — `app/Http/Controllers/API/BillingController.php:169` |

@@ -34,6 +34,27 @@ The Subscription → Payment → Activation flow has nine documented failure mod
 | F9 | Profile not activated — `client_unresolved` | 5c/5d | Sales & CS market operations + Finance exception support | High |
 | F10 | WordPress activation endpoint unreachable | 5d | IT Infrastructure | High |
 
+```mermaid
+flowchart TD
+    A[Escort says: I paid but my profile is not live] --> B{Do you have the M-Pesa code?}
+    B -- No --> C[Ask for the payment SMS first]
+    B -- Yes --> D[Search CRM Payments by transaction code]
+    D --> E{What status do you find?}
+    E -- initiated / pending --> F[F2 or F3: retry / wait / send payment link]
+    E -- completed + pending --> G[F9: resolve client match or provisioning block]
+    E -- manual_review --> H[F8: Finance reviews mismatch / exception]
+    E -- reversed --> I[F7: explain reversal and arrange repayment]
+    E -- no record --> J[F5 / F6 / lost callback: R&D/Product investigates webhook path]
+    G --> K{WP activation failing?}
+    K -- Yes --> L[F10: IT Infrastructure checks WP connection]
+    K -- No --> M[Sales & CS market ops resolves match same day]
+    style A fill:#fff0ef,stroke:#fc2c24,color:#0f172a
+    style H fill:#fef3c7,stroke:#d97706,color:#0f172a
+    style I fill:#fee2e2,stroke:#dc2626,color:#0f172a
+    style J fill:#dbeafe,stroke:#2563eb,color:#0f172a
+    style L fill:#ede9fe,stroke:#7c3aed,color:#0f172a
+```
+
 ---
 
 ## Failure detail and recovery

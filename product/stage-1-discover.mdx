@@ -25,6 +25,23 @@ An escort discovers Exotic through one of three channels — a referral from a f
 
 When a prospect is identified, they enter the CRM as a **Lead**. Every lead belongs to a market (country/platform) and moves through a defined lifecycle.
 
+```mermaid
+flowchart LR
+    A[Referral] --> D[CRM Lead]
+    B[Outbound call] --> D
+    C[Organic search / inbound] --> D
+    D --> E[Contacted]
+    E --> F[Qualified]
+    F --> G[Guided to registration]
+    E --> H[Lost]
+    style A fill:#ecfeff,stroke:#0891b2,color:#0f172a
+    style B fill:#fff7ed,stroke:#ea580c,color:#0f172a
+    style C fill:#ecfccb,stroke:#65a30d,color:#0f172a
+    style D fill:#fff0ef,stroke:#fc2c24,color:#0f172a
+    style F fill:#dcfce7,stroke:#16a34a,color:#0f172a
+    style H fill:#f3f4f6,stroke:#6b7280,color:#0f172a
+```
+
 | What happens | Code reference |
 |---|---|
 | Lead created manually by sales agent | `LeadController` — `app/Http/Controllers/CRM/LeadController.php` |

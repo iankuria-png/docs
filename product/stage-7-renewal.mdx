@@ -36,6 +36,23 @@ When the escort renews, their profile goes live again immediately — the same f
 | Profile auto-deactivated at expiry | `deals.status = 'expired'` → `WpSyncService` sets WordPress `post_status = 'private'` |
 | Renewal payment flow | Same flow as first-time subscription — Stage 5a through 5d |
 
+```mermaid
+flowchart LR
+    A[Active] --> B[At risk 14-7 days]
+    B --> C[Reminder campaigns + agent outreach]
+    C --> D{Renews?}
+    D -- Yes --> E[Payment flow 5a-5d]
+    E --> A
+    D -- No --> F[Pending / expired]
+    F --> G[Lapsed]
+    G --> H[Win-back / reactivation call]
+    H --> D
+    style A fill:#dcfce7,stroke:#16a34a,color:#0f172a
+    style B fill:#fef3c7,stroke:#d97706,color:#0f172a
+    style F fill:#fee2e2,stroke:#dc2626,color:#0f172a
+    style G fill:#f3f4f6,stroke:#6b7280,color:#0f172a
+```
+
 ---
 
 ## Step-by-step SOP

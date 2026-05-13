@@ -44,6 +44,27 @@ Once an escort's profile is live, website visitors can contact them immediately.
 
 **Phone reveal:** Numbers are hidden by default and only shown after the visitor taps the reveal button. This reduces spam and bot scraping of escort phone numbers from the site.
 
+```mermaid
+flowchart LR
+    A[Visitor lands on live profile] --> B{Chooses channel}
+    B --> C[WhatsApp]
+    B --> D[Phone reveal]
+    B --> E[SMS]
+    B --> F[Viber]
+    B --> G[SupportBoard chat]
+    C --> H[Direct to escort phone]
+    D --> H
+    E --> H
+    F --> H
+    G --> I[Lead imported into CRM]
+    H --> J[Analytics tap / engagement signal]
+    I --> K[Sales follow-up if needed]
+    style A fill:#fff0ef,stroke:#fc2c24,color:#0f172a
+    style G fill:#dbeafe,stroke:#2563eb,color:#0f172a
+    style I fill:#dcfce7,stroke:#16a34a,color:#0f172a
+    style J fill:#fef3c7,stroke:#d97706,color:#0f172a
+```
+
 ---
 
 ## Step-by-step SOP
