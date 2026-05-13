@@ -6,7 +6,7 @@ icon: "message"
 ---
 
 <Card title="Stage 6 of 8 — Customer contact" icon="message" horizontal>
-  Visitors contact escorts via WhatsApp (highest volume), phone reveal, SMS, and Viber. **Exotic Chat** — native pan-African messaging — coming soon. Direct contacts are device-to-device; only SupportBoard chat creates CRM leads.
+  Visitors contact escorts via WhatsApp (highest volume), phone reveal, SMS, and Viber. **Exotic Chat** — native pan-African messaging — coming soon. Direct contacts are device-to-device; only SupportBoard chat creates CRM leads/clients at the moment.
 </Card>
 
 ## What the customer sees
@@ -16,7 +16,7 @@ Once an escort's profile is live, website visitors can contact them immediately.
 **Available contact channels by status:**
 
 | Channel | How it works | Status |
-|---|---|---|
+| --- | --- | --- |
 | **WhatsApp** | Tap button → opens pre-filled WhatsApp message to the escort's number | Live |
 | **Phone call** | Tap to reveal number → dial directly | Live |
 | **SMS** | Tap to reveal number → SMS | Live |
@@ -34,7 +34,7 @@ Once an escort's profile is live, website visitors can contact them immediately.
 ## Under the hood
 
 | What happens | Code reference |
-|---|---|
+| --- | --- |
 | SupportBoard chat contacts auto-imported as leads | `SupportBoardLeadImportService` — `app/Services/SupportBoardLeadImportService.php` |
 | Lead stores SupportBoard references | `leads.sb_user_id`, `leads.sb_conversation_id`, `leads.sb_last_activity_at` |
 | Contact event analytics tracking | `class-analytics-tracker.php` in `exotic-crm-sync` plugin — tracks button taps by type |
@@ -52,6 +52,7 @@ Once an escort's profile is live, website visitors can contact them immediately.
 <Steps>
   <Step title="Confirm contact channels are active on the escort's profile">
     When an escort is newly activated, confirm that the correct channels are showing on their profile:
+
     1. Open the profile on the public Exotic site
     2. Verify the WhatsApp button appears and links to the correct number (international format, e.g. `+254712345678` for Kenya)
     3. Verify the phone reveal button shows the correct number on tap
@@ -62,29 +63,32 @@ Once an escort's profile is live, website visitors can contact them immediately.
   <Step title="Brief the escort on how enquiries will arrive">
     Many newly activated escorts don't realise enquiries go straight to their WhatsApp — they expect some kind of dashboard notification. Set expectations clearly:
 
-    > *"Clients will WhatsApp or call you directly on the number in your profile. You won't get a notification on the Exotic site — the contact happens on your phone. Keep your WhatsApp on and respond quickly — the faster you respond, the better your reputation with repeat clients."*
+    > _"Clients will WhatsApp or call you directly on the number in your profile. You won't get a notification on the Exotic site — the contact happens on your phone. Keep your WhatsApp on and respond quickly — the faster you respond, the better your reputation with repeat clients."_
 
     **Key coaching points:**
+
     - Respond to messages within 1–2 hours, ideally faster
     - A polite, professional first message sets the tone
     - Save client contacts — returning clients prefer to feel remembered
   </Step>
   <Step title="Advise on managing multiple contact channels">
     Escorts often list on multiple platforms or have multiple WhatsApp numbers. Advise:
+
     - Pin the Exotic clients' conversations in WhatsApp so they're easy to find
     - Use a dedicated phone number for the Exotic profile if they want separation (relevant for escorts in markets where number privacy is important)
     - The Viber channel is useful in markets where Viber adoption is high — East Africa and some Southern Africa markets
 
-    **Exotic Chat (coming soon):** When Exotic Chat launches, it will provide a native messaging experience built into the platform — encrypted, no need for the client to have WhatsApp or any third-party app. Advise escorts this is coming and will be a major differentiator vs. free sites.
+    **Exotic Chat (coming soon):** When Exotic Chat launches, it will provide a native messaging experience built for the Exotic Panafrican  users (escorts and end-users). Advise escorts this is coming and will be a major differentiator enabling us to have uniterrupred communication - groups, live updates, featured stories, faster replies, no lost conversations
   </Step>
   <Step title="Handle 'I'm not getting any contacts' complaints">
     This is the most common complaint from active escorts who are not new to the platform. It is almost never a contact channel problem — it is usually a **visibility or profile quality** issue.
 
     Diagnostic path:
+
     1. Check the subscription tier — is the escort on Basic? Premium and above get significantly more search visibility.
-    2. Check the profile completeness score in the CRM — is it above 80%?
-    3. Check the profile photos — are there at least 5 quality photos, with a strong cover image?
-    4. Check the bio — is it compelling, with the city mentioned?
+    2. Check the profile analytics CRM (what is the data showing) and profile completeness score in the CRM — is it above 80%?
+    3. Check the profile photos — are there at least 3 quality photos, with a strong cover image?
+    4. Check the bio — is it compelling, with the city mentioned, and not generic?
     5. Check the market — how competitive is the listing density in the escort's city?
 
     If all profile factors are good, discuss upgrading the subscription tier (see Stage 8 — Upgrades).
@@ -101,20 +105,20 @@ Once an escort's profile is live, website visitors can contact them immediately.
 
     This is the #1 post-activation complaint. Walk through the profile checklist before escalating or offering refunds:
 
-    1. *"How many photos do you have uploaded? Profiles with fewer than 5 photos receive significantly fewer contacts."*
-    2. *"What's your current package? Basic listings appear below Featured, Premium, VIP, and VVIP. Would you like to talk about upgrading?"*
-    3. *"Is your bio complete? Clients read the bio before messaging — a well-written bio makes a big difference."*
-    4. *"Which city is listed on your profile? If you've moved recently, we should update it."*
+    1. _"How many photos do you have uploaded? Profiles with fewer than 5 photos receive significantly fewer contacts."_
+    2. _"What's your current package? Basic listings appear below Featured, Premium, VIP, and VVIP. Would you like to talk about upgrading?"_
+    3. _"Is your bio complete? Clients read the bio before messaging — a well-written bio makes a big difference."_
+    4. _"Which city is listed on your profile? If you've moved recently, we should update it."_
 
-    **WhatsApp contact troubleshooting:**
-    If the escort says WhatsApp contacts aren't arriving:
+    **WhatsApp contact troubleshooting:** If the escort says WhatsApp contacts aren't arriving:
+
     - Confirm the correct international number is in their profile (e.g. `+254...` not `0...`)
     - Ask them to tap their own WhatsApp button on their profile — does it open the correct chat?
     - Check if the escort's WhatsApp number is active and not blocked
 
-    **Exotic Chat — talking point:**
-    When prospects ask about privacy or ask "do clients need WhatsApp?" — you can proactively mention Exotic Chat:
-    > *"We're also launching Exotic Chat — a built-in messaging app so clients can contact you directly within the Exotic platform, without needing WhatsApp or any other app. It's coming soon and will be available to all listings at no extra cost."*
+    **Exotic Chat — talking point:** When prospects ask about privacy or ask "do clients need WhatsApp?" — you can proactively mention Exotic Chat:
+
+    > _"We're also launching Exotic Chat — a built-in messaging app so clients can contact you directly within the Exotic platform, without needing WhatsApp or any other app. It's coming soon and will be available to all listings at no extra cost."_
   </Accordion>
 
   <Accordion title="RD Team">
@@ -125,6 +129,7 @@ Once an escort's profile is live, website visitors can contact them immediately.
 
   <Accordion title="SEO & IT Infrastructure">
     **SEO:** Contact channel design has a direct SEO impact:
+
     - **Phone numbers hidden by default** (reveal-on-tap): prevents search engine and bot indexing of personal numbers — protects escorts from scraping while keeping the UX clean
     - **WhatsApp links** are followed by some crawlers but don't count as outbound links for ranking purposes
     - The **contact rate** (how often visitors tap a contact button) is an engagement signal — profiles with clear, prominent contact buttons typically have higher engagement, which correlates with better internal ranking
@@ -147,15 +152,16 @@ Once an escort's profile is live, website visitors can contact them immediately.
   </Accordion>
 
   <Accordion title="Does Exotic track how many clients contact an escort?">
-    Exotic tracks contact button tap events via the analytics tracker on the WordPress site. This data is visible in reporting for aggregate platform analytics. Individual escorts do not see their contact tap count in any dashboard view — this is a platform-level metric, not a personal stat shown to escorts.
+    Exotic tracks contact button tap events via the analytics tracker on the WordPress site. This data is visible in reporting for aggregate platform analytics. Individual escorts on vip and premium tiers get to have analytics in their dashboard with optimization tips
   </Accordion>
 
   <Accordion title="What is Exotic Chat and when is it launching?">
-    Exotic Chat is a native pan-African messaging app being developed by Exotic. It will allow website visitors to message escorts directly within the Exotic platform — no need for WhatsApp, Viber, or any third-party app. It is designed for markets where WhatsApp adoption is lower or where escorts prefer a channel they can separate from their personal messaging. Launch timing is owned by RD Team — do not promise a specific date.
+    Exotic Chat is a native pan-African messaging app being developed by Exotic. It will allow admins to message escorts directly with a native experience. It is designed for markets where WhatsApp adoption is lower or where escorts prefer a channel they can separate from their personal messaging. 
   </Accordion>
 
   <Accordion title="An escort says a client is harassing them via WhatsApp — what do we do?">
     WhatsApp messages happen outside the Exotic platform and outside Exotic's control — we cannot block a client on WhatsApp. Advise the escort to:
+
     1. Block the number on WhatsApp
     2. Report it to WhatsApp via the in-app report function
     3. If they feel unsafe, contact local authorities
@@ -169,7 +175,7 @@ Once an escort's profile is live, website visitors can contact them immediately.
 ## Troubleshooting
 
 | Symptom | Likely cause | Where to look | Fix |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | WhatsApp button opens wrong number | Phone number stored in local format, not international | Escort's WordPress profile → contact details | Update number to international format (e.g. `254712...` not `0712...`) |
 | WhatsApp button not visible on profile | Channel not enabled in profile contact preferences | WordPress → Edit Profile → Contact channels | Enable WhatsApp channel in contact preferences |
 | Viber button not working | Viber app not installed on visitor's device | N/A | Inform escort — Viber links only work for visitors who have Viber installed |
@@ -204,7 +210,7 @@ Once an escort's profile is live, website visitors can contact them immediately.
   <Accordion title="Q3: What is Exotic Chat and what problem does it solve?">
     **A.** A CRM tool for staff to message escorts internally
 
-    **B.** A native in-app messaging channel for visitors to contact escorts without needing WhatsApp or other third-party apps ✅
+    **B.** A native in-app messaging channel for admins to contact escorts without needing WhatsApp or other third-party apps ✅
 
     **C.** A replacement for the SupportBoard chat widget on the website
 
@@ -228,6 +234,7 @@ Once an escort's profile is live, website visitors can contact them immediately.
   <Card title="← Stage 5 — Subscription & Payment" icon="credit-card" href="/product/stage-5e-failure-modes">
     Subscription, payment, activation, and failure recovery
   </Card>
+
   <Card title="Stage 7 — Renewal →" icon="rotate-right" href="/product/stage-7-renewal">
     How subscriptions renew and what CS should do
   </Card>

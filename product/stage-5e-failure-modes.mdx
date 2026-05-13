@@ -22,17 +22,17 @@ The Subscription → Payment → Activation flow has nine documented failure mod
 ## Master failure reference
 
 | # | Symptom | Stage | Owner | Severity |
-|---|---|---|---|---|
-| F1 | Provider not configured — no payment options shown | 5a | IT | High |
+| --- | --- | --- | --- | --- |
+| F1 | Provider not configured — no payment options shown | 5a | RD | High |
 | F2 | STK Push never arrives on escort's phone | 5b | CS | Medium |
 | F3 | Escort dismissed STK prompt / insufficient funds | 5b | CS | Low |
-| F4 | Hosted checkout page doesn't load | 5b | IT | Medium |
-| F5 | Webhook signature invalid — callback rejected | 5c | IT | High |
-| F6 | Webhook missing `payment_id` — callback not matched | 5c | IT | High |
-| F7 | M-Pesa reversal after payment confirmed | 5c | Finance + CS | High |
-| F8 | Amount mismatch — payment in settlement review | 5c | Finance | Medium |
-| F9 | Profile not activated — `client_unresolved` | 5c/5d | Finance + IT | High |
-| F10 | WordPress activation endpoint unreachable | 5d | IT | High |
+| F4 | Hosted checkout page doesn't load | 5b | RD | Medium |
+| F5 | Webhook signature invalid — callback rejected | 5c | RD | High |
+| F6 | Webhook missing `payment_id` — callback not matched | 5c | RD | High |
+| F7 | M-Pesa reversal after payment confirmed | 5c | Finance \+ CS | High |
+| F8 | Amount mismatch — payment in settlement review | 5c | CS | Medium |
+| F9 | Profile not activated — `client_unresolved` | 5c/5d | RD | High |
+| F10 | WordPress activation endpoint unreachable | 5d | RD | High |
 
 ---
 
@@ -45,27 +45,30 @@ The Subscription → Payment → Activation flow has nine documented failure mod
     **Cause:** No active `subscription_push` provider binding exists for the market.
 
     **Recovery:**
-    1. CRM → Settings → Integrations → [market] → Payment providers
+
+    1. CRM → Settings → Integrations → \[market\] → Payment providers
     2. Confirm at least one provider is enabled with a `subscription_push` binding
     3. If no binding exists, create one — select provider (KopoKopo / Daraja / Paystack), set type to `subscription_push`, toggle Active
     4. Test the checkout page after saving
 
-    **Owner:** IT / Admin
+    **Owner:** RD / Admin
   </Accordion>
 
   <Accordion title="F2 — STK Push never arrives">
     **Symptom:** Escort pays, enters phone number, clicks Pay — no M-Pesa prompt appears on their phone.
 
     **Causes (in order of likelihood):**
+
     - Poor phone signal / no data connection
     - Wrong phone number entered
     - M-Pesa service outage
     - Phone not M-Pesa registered
 
     **Recovery:**
+
     1. Ask the escort to move to better signal and wait 60 seconds
     2. Confirm their M-Pesa registered phone number
-    3. If still no prompt, send a **payment link** via CRM → Deals → [deal] → action menu → Activate → method = `link`
+    3. If still no prompt, send a **payment link** via CRM → Deals → \[deal\] → action menu → Activate → method = `link`
     4. The payment link can be opened on any device — the escort pays from there
 
     **Owner:** CS
@@ -77,8 +80,9 @@ The Subscription → Payment → Activation flow has nine documented failure mod
     **CRM state:** `PaymentAttempt.status = 'failed'`; `payments.status = 'initiated'` (still waiting)
 
     **Recovery:**
+
     1. Ask the escort to top up M-Pesa balance if `insufficient_funds`
-    2. Trigger a new STK Push: CRM → Deals → [deal] → Activate → choose `stk` → confirm
+    2. Trigger a new STK Push: CRM → Deals → \[deal\] → Activate → choose `stk` → confirm
     3. The original attempt will expire automatically; the new one is independent
 
     **Owner:** CS
@@ -88,17 +92,19 @@ The Subscription → Payment → Activation flow has nine documented failure mod
     **Symptom:** Escort is redirected to Paystack / Pesapal / PawaPay but the page shows an error or blank screen.
 
     **Causes:**
+
     - Browser compatibility issue (older Android WebView)
     - Provider temporary outage
     - CRM callback URL misconfiguration
 
     **Recovery:**
+
     1. Ask escort to try Chrome browser on their phone
     2. Check the provider's status page for outages
     3. If provider is down, switch the escort to M-Pesa STK Push if available for the market
     4. If persistent, escalate to IT — check provider callback URL in Settings → Integrations
 
-    **Owner:** CS → IT escalation
+    **Owner:** CS → RD escalation
   </Accordion>
 
   <Accordion title="F5 — Webhook signature invalid (401)">
@@ -107,12 +113,13 @@ The Subscription → Payment → Activation flow has nine documented failure mod
     **Cause:** The HMAC secret used to sign KopoKopo webhooks doesn't match what's configured in the CRM.
 
     **Recovery:**
+
     1. Check `laravel.log` for `webhook_verification_failed` entries
     2. Log in to KopoKopo dashboard → Webhook settings → copy the current secret
-    3. CRM → Settings → Integrations → [market] → update KopoKopo webhook secret
+    3. CRM → Settings → Integrations → \[market\] → update KopoKopo webhook secret
     4. For payments already received but not processed: manually re-trigger from KopoKopo dashboard if supported, or manually activate the deal in CRM with the confirmed M-Pesa reference
 
-    **Owner:** IT
+    **Owner:** RD
   </Accordion>
 
   <Accordion title="F6 — Webhook missing payment_id (422)">
@@ -121,12 +128,13 @@ The Subscription → Payment → Activation flow has nine documented failure mod
     **Cause:** The checkout flow didn't embed the CRM `payment_id` in the provider webhook metadata correctly.
 
     **Recovery:**
+
     1. Check `laravel.log` for `webhook_invalid_payload` entries — note the provider reference
     2. Look up the transaction in the provider dashboard using the provider reference
     3. Find the corresponding CRM payment record by amount, phone, and timestamp
     4. Finance manually matches and confirms the payment in the recovery queue
 
-    **Owner:** IT + Finance
+    **Owner:** RD
   </Accordion>
 
   <Accordion title="F7 — M-Pesa reversal after activation">
@@ -137,12 +145,13 @@ The Subscription → Payment → Activation flow has nine documented failure mod
     **CRM state:** `payments.status = 'reversed'`; deal automatically deactivated; WordPress profile set to `private`.
 
     **Recovery:**
+
     1. CS contacts the escort to explain what happened — the profile was deactivated because the payment was reversed
     2. Finance notes the reversal in the reconciliation log
     3. If the reversal was an error (M-Pesa's mistake), provide the escort with the transaction reference and advise them to contact M-Pesa
     4. To reactivate: escort must pay again. Create a new activation via CRM → Deals → Activate
 
-    **Owner:** Finance (reconciliation) + CS (escort communication)
+    **Owner:** Finance (reconciliation) \+ CS (escort communication)
   </Accordion>
 
   <Accordion title="F8 — Amount mismatch — settlement review">
@@ -151,12 +160,13 @@ The Subscription → Payment → Activation flow has nine documented failure mod
     **Cause:** The amount received differs from the expected subscription price by more than 5% (tolerance threshold).
 
     **Recovery:**
+
     1. Finance reviews the payment in CRM → Payments → filter: Review state = manual review
     2. Confirm whether the amount difference is acceptable (e.g. due to agreed discount)
     3. If acceptable: Finance confirms the match → provisioning proceeds automatically
     4. If not acceptable: reject and contact the escort to pay the correct amount
 
-    **Owner:** Finance
+    **Owner:** RD CS
   </Accordion>
 
   <Accordion title="F9 — Profile not activated — client_unresolved">
@@ -165,13 +175,14 @@ The Subscription → Payment → Activation flow has nine documented failure mod
     **Cause:** The payment could not be automatically linked to a CRM client record. This happens when the phone number on the payment doesn't match any client, or the escort registered with a different number than they paid from.
 
     **Recovery:**
+
     1. CRM → Payments → find the payment → check `provisioning_status`
     2. Look at the phone number on the payment record
     3. Search CRM → Clients for a client with a matching or similar phone number
-    4. If found: Finance manually links the payment to the client via the recovery queue → confirm match
+    4. If found: CS manually links the payment to the client via the recovery queue → confirm match
     5. If not found: check if the escort registered with a different number; create the client if needed; then match
 
-    **Owner:** Finance + CS
+    **Owner:** RD \+ CS
   </Accordion>
 
   <Accordion title="F10 — WordPress activation endpoint unreachable">
@@ -180,13 +191,14 @@ The Subscription → Payment → Activation flow has nine documented failure mod
     **Cause:** The WordPress site is down, the CRM Sync plugin is deactivated, or the Application Password credentials are expired/revoked.
 
     **Recovery:**
-    1. Test the WordPress connection: CRM → Settings → Integrations → [market] → Test connection
+
+    1. Test the WordPress connection: CRM → Settings → Integrations → \[market\] → Test connection
     2. If connection fails: check that the WordPress site is online and the `exotic-crm-sync` plugin is active
     3. If credentials expired: generate a new Application Password in WordPress → update in CRM Settings
-    4. Once connection is restored: re-trigger activation from CRM → Deals → [deal] → Activate manually
+    4. Once connection is restored: re-trigger activation from CRM → Deals → \[deal\] → Activate manually
     5. For bulk failures during an outage: IT runs a recovery script to re-activate all deals that activated during the outage window
 
-    **Owner:** IT
+    **Owner:** RD
   </Accordion>
 </AccordionGroup>
 
@@ -197,11 +209,13 @@ The Subscription → Payment → Activation flow has nine documented failure mod
 <AccordionGroup>
   <Accordion title="Sales & CS — Daily checklist">
     At the start of each shift, check:
+
     1. **Recovery queue:** CRM → Payments → filter: Status = Recovery queue. Any `completed` payments not yet matched to clients need Finance attention today.
     2. **Pending deals over 10 minutes old:** CRM → Deals → filter: Status = pending, sort by created. Any deal pending for more than 10 minutes after payment is likely stuck.
     3. **M-Pesa review panel:** Run the M-Pesa review panel (CRM → Payments → M-Pesa review) at the start of each day to catch overnight payments that need activation.
 
     **Escalation path:**
+
     - CS resolves F2, F3 independently
     - CS escalates F4, F5, F6, F9, F10 to IT
     - CS hands F7, F8 to Finance for reconciliation, then contacts the escort
@@ -215,13 +229,15 @@ The Subscription → Payment → Activation flow has nine documented failure mod
     5. Check settlement status on provider dashboards for previous day's batch
 
     **Settlement timing reminder:**
-    - KopoKopo: same day or T+1
-    - M-Pesa Daraja: T+1
+
+    - KopoKopo: same day or T\+1
+    - M-Pesa Daraja: T\+1
     - Paystack / Pesapal / PawaPay: per your provider agreement
   </Accordion>
 
   <Accordion title="IT — Monitoring checklist">
     Check weekly (or after any escort payment complaints spike):
+
     1. `laravel.log` for `webhook_verification_failed`, `webhook_invalid_payload`, WpSyncService errors
     2. `BillingWebhookEvent` table — unusual spike in duplicate events = provider retrying = possible earlier failure
     3. KopoKopo webhook delivery dashboard — look for 4xx/5xx delivery failures
@@ -252,13 +268,13 @@ The Subscription → Payment → Activation flow has nine documented failure mod
 
     CS needs Finance: F7 (reversal), F8 (amount mismatch), F9 (client unresolved)
 
-    CS needs IT: F1 (no provider), F4 (hosted checkout), F5 (webhook signature), F6 (missing payment_id), F10 (WordPress down)
+    CS needs IT: F1 (no provider), F4 (hosted checkout), F5 (webhook signature), F6 (missing payment\_id), F10 (WordPress down)
   </Accordion>
 </AccordionGroup>
 
 ---
 
-## Certification — MCQ + Scenarios
+## Certification — MCQ \+ Scenarios
 
 <AccordionGroup>
   <Accordion title="Q1: Which failure mode is owned entirely by Finance to resolve?">
@@ -301,11 +317,12 @@ The Subscription → Payment → Activation flow has nine documented failure mod
     **Walk through exactly what you check and do:**
 
     **Model answer:**
+
     1. Ask her to send you the M-Pesa SMS to confirm the transaction details
     2. CRM → Payments → search for `ABC1234567`
     3. Check payment status:
-       - If `completed` + deal `active` → profile should be live; ask her to hard-refresh her browser; check the profile URL directly
-       - If `completed` + deal `pending` → provisioning stuck; escalate to IT
+       - If `completed` \+ deal `active` → profile should be live; ask her to hard-refresh her browser; check the profile URL directly
+       - If `completed` \+ deal `pending` → provisioning stuck; escalate to IT
        - If `manual_review` → Finance needs to confirm the payment match first
        - If `reversed` → M-Pesa reversed it; she needs to pay again; inform her clearly and apologetically
        - If not found → escalate to IT to check KopoKopo dashboard for the transaction
@@ -318,6 +335,7 @@ The Subscription → Payment → Activation flow has nine documented failure mod
     **Walk through what you do:**
 
     **Model answer:**
+
     1. Run the M-Pesa review panel: CRM → Payments → M-Pesa review — this surfaces exactly these cases
     2. For each unmatched payment: check the phone number → search for a matching client in CRM
     3. If a match is found: Finance confirms the payment match → provisioning triggers automatically
@@ -332,6 +350,7 @@ The Subscription → Payment → Activation flow has nine documented failure mod
     **Walk through the recovery:**
 
     **Model answer:**
+
     1. Root cause: HMAC secret mismatch — KopoKopo's secret changed and the CRM wasn't updated
     2. Fix: Log in to KopoKopo dashboard → copy current webhook secret → CRM → Settings → Integrations → update secret
     3. Test: trigger a test payment to confirm new webhooks are now accepted
@@ -347,6 +366,7 @@ The Subscription → Payment → Activation flow has nine documented failure mod
   <Card title="← Stage 5d — Activation" icon="rocket" href="/product/stage-5d-profile-activation">
     Profile activation and WordPress sync
   </Card>
+
   <Card title="Stage 6 — Customer contact →" icon="message" href="/product/stage-6-contact">
     How clients reach escorts after the profile goes live
   </Card>

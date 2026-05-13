@@ -11,7 +11,7 @@ icon: "rotate-right"
 
 ## What the customer sees
 
-As an escort's subscription approaches expiry, they receive a series of reminder messages — via SMS or WhatsApp — on a cadence configured by the sales team. A typical reminder sequence:
+As an escort's subscription approaches expiry, they receive a series of reminder messages — via SMS  — on a cadence configured by the sales team. A typical reminder sequence:
 
 - **14 days before expiry:** First reminder — "Your Exotic listing expires in 14 days."
 - **7 days before:** Second reminder — "7 days left — renew now to keep your profile live."
@@ -27,7 +27,7 @@ When the escort renews, their profile goes live again immediately — the same f
 ## Under the hood
 
 | What happens | Code reference |
-|---|---|
+| --- | --- |
 | Renewal overview buckets | `RenewalService::buildOverview()` — `app/Services/RenewalService.php:38` — segments deals into: `active`, `at_risk` (expiring soon), `pending` (expired, not renewed), `lapsed` (long expired) |
 | Running a renewal campaign | `RenewalController::run()` — `app/Http/Controllers/CRM/RenewalController.php:23` — dispatches SMS/WhatsApp reminders to the target cohort |
 | Campaign configuration | `RenewalCampaign` model — configures trigger days before/after expiry, product filter, message template, channel (SMS/WhatsApp) |
@@ -43,42 +43,47 @@ When the escort renews, their profile goes live again immediately — the same f
 <Steps>
   <Step title="Identify the at-risk cohort">
     At the start of each week (or daily in high-volume markets), check the renewal overview:
+
     1. CRM → Renewals → Overview
-    2. Look at the **at_risk** bucket — escorts whose subscriptions expire in the next 7–14 days
+    2. Look at the **at\_risk** bucket — escorts whose subscriptions expire in the next 7–14 days
     3. Sort by expiry date (soonest first)
     4. Prioritise high-value tiers (VIP, VVIP) and long-tenure escorts (repeat renewers) first
 
-    **Screenshot slot:** *CRM Renewals Overview showing at_risk, pending, and lapsed buckets with counts*
+    **Screenshot slot:** _CRM Renewals Overview showing at\_risk, pending, and lapsed buckets with counts_
   </Step>
   <Step title="Confirm automated reminders are running">
     Before making manual calls, confirm the automated campaign is active:
+
     1. CRM → Renewals → Campaigns
     2. Check the campaign for your market is active and the trigger days are set correctly (recommended: 14, 7, 3, 0 days before expiry)
     3. Check the last run date — confirm it ran as scheduled
 
     If no campaign is running, this must be set up. Contact your manager — automated reminders are the first line of renewal outreach.
 
-    **Screenshot slot:** *CRM Renewal Campaigns list showing active campaign with trigger configuration*
+    **Screenshot slot:** _CRM Renewal Campaigns list showing active campaign with trigger configuration_
   </Step>
   <Step title="Make personal renewal calls">
     Automated reminders alone are not enough — personal outreach from the assigned agent significantly improves renewal rates. Call or WhatsApp your at-risk escorts:
 
     **Renewal call opening:**
-    > *"Hi [Name], it's [Agent] from Exotic. I can see your listing is coming up for renewal on [date] — I wanted to make sure you're sorted and your profile stays live. Shall we get that renewed today?"*
 
-    **Objection: "I'm not getting enough clients."**
-    Before offering any concession:
+    > _"Hi \[Name\], it's \[Agent\] from Exotic. I can see your listing is coming up for renewal on \[date\] — I wanted to make sure you're sorted and your profile stays live. Shall we get that renewed today?"_
+
+    **Objection: "I'm not getting enough clients."** Before offering any concession:
+
     1. Check the profile completeness — is there an obvious fix (more photos, better cover image, updated bio)?
     2. Discuss upgrading the tier — moving from Basic to Featured or Premium often dramatically increases enquiry volume
     3. If genuine low-period: acknowledge it, explain it's often seasonal or market-specific, offer to refresh their profile
 
     **Objection: "I want to take a break."**
-    > *"Totally fine — let's just make sure you renew before the expiry date so your profile, photos, and reviews stay intact. If you go offline for too long, you lose search position and we'd essentially be starting fresh. A short renewal keeps your ranking."*
+
+    > _"Totally fine — let's just make sure you renew before the expiry date so your profile, photos, and reviews stay intact. If you go offline for too long, you lose search position and we'd essentially be starting fresh. A short renewal keeps your ranking."_
   </Step>
   <Step title="Process the renewal payment">
     When the escort is ready to renew:
+
     - **Self-service:** Guide them to their WordPress profile dashboard → Renew / Subscribe button — they go through the same payment flow as Stage 5a–5d
-    - **Agent-assisted:** CRM → Deals → [expired deal] → Renew (creates a new deal linked to the same client; triggers payment initiation)
+    - **Agent-assisted:** CRM → Deals → \[expired deal\] → Renew (creates a new deal linked to the same client; triggers payment initiation)
 
     The renewal payment flow is identical to a first-time subscription. All payment methods available at first subscription are available at renewal.
 
@@ -86,10 +91,11 @@ When the escort renews, their profile goes live again immediately — the same f
   </Step>
   <Step title="Confirm the profile is live after renewal">
     After payment confirmation:
-    1. Check CRM → Clients → [client] → active deal
+
+    1. Check CRM → Clients → \[client\] → active deal
     2. Confirm `deals.status = 'active'` and `expires_at` is set to the new expiry date
     3. Open the profile URL and confirm it is live on the public site
-    4. Send the escort a quick WhatsApp: *"You're live again! Your listing is active until [expiry date]. Let me know if you need anything."*
+    4. Send the escort a quick WhatsApp: _"You're live again! Your listing is active until \[expiry date\]. Let me know if you need anything."_
     5. Add a timeline note confirming the renewal.
   </Step>
 </Steps>
@@ -102,18 +108,19 @@ When the escort renews, their profile goes live again immediately — the same f
   <Accordion title="Sales & CS">
     **Renewal is your highest-ROI sales activity.** A renewal is far easier than acquiring a new escort — the relationship already exists, the profile is already built, and verification is already done. Treat every renewal conversation as a relationship management call, not just a transaction.
 
-    **When to offer a discount:**
-    Renewal discounts are at supervisor discretion. As a guideline:
-    - An escort who has renewed 3+ times and has a genuine complaint about low traffic → discuss a one-period discount while addressing the profile issue
+    **When to offer a discount:** Renewal discounts are at supervisor discretion. As a guideline:
+
+    - An escort who has renewed 3\+ times and has a genuine complaint about low traffic → discuss a one-period discount while addressing the profile issue
     - An escort threatening to leave for a competitor → standard response: reinforce the value points (lead quality, visibility, support). A discount is a last resort, not a first offer.
     - All discounts above a threshold require a supervisor PIN (same as free trials) and are recorded in the deal record
 
     **The lapsed escort:** An escort who expired more than 30 days ago (in the `lapsed` bucket) is harder to re-activate. Treat them like a new outbound lead — re-qualify interest, refresh the profile, walk them through what's changed on the platform since they were last active.
 
     **Renewal call cadence (per agent):**
-    - At-risk (7–14 days): one outbound call + one WhatsApp
+
+    - At-risk (7–14 days): one outbound call \+ one WhatsApp
     - Pending (expired, 0–7 days): daily contact until renewed or officially churned
-    - Lapsed (7+ days expired): monthly check-in call as part of win-back campaign
+    - Lapsed (7\+ days expired): monthly check-in call as part of win-back campaign
   </Accordion>
 
   <Accordion title="Finance">
@@ -126,6 +133,7 @@ When the escort renews, their profile goes live again immediately — the same f
 
   <Accordion title="RD Team">
     RD Team owns decisions about:
+
     - Renewal pricing (any changes to package prices at renewal)
     - Any loyalty or long-tenure pricing programmes
     - New renewal campaign types (e.g. annual subscription options, multi-period discounts)
@@ -156,11 +164,11 @@ When the escort renews, their profile goes live again immediately — the same f
   </Accordion>
 
   <Accordion title="How do I run the renewal reminder campaign manually?">
-    CRM → Renewals → Campaigns → [select campaign] → Run now. This sends the configured SMS/WhatsApp messages to all escorts who match the campaign's trigger criteria (e.g. expiring in the next 7 days). Review the run history to confirm messages were sent.
+    CRM → Renewals → Campaigns → \[select campaign\] → Run now. This sends the configured SMS/WhatsApp messages to all escorts who match the campaign's trigger criteria (e.g. expiring in the next 7 days). Review the run history to confirm messages were sent.
   </Accordion>
 
   <Accordion title="An escort renewed but their profile is still private — what happened?">
-    Check the deal status: CRM → Clients → [client] → active deal. If the deal shows `active` but the profile is still private, the WordPress sync failed — escalate to IT Infrastructure (same as Stage 5d profile activation failures). If the deal is `pending`, the payment may not have confirmed yet — check the payment record.
+    Check the deal status: CRM → Clients → \[client\] → active deal. If the deal shows `active` but the profile is still private, the WordPress sync failed — escalate to IT Infrastructure (same as Stage 5d profile activation failures). If the deal is `pending`, the payment may not have confirmed yet — check the payment record.
   </Accordion>
 
   <Accordion title="Can a lapsed escort use the same profile, photos, and contact details?">
@@ -173,11 +181,11 @@ When the escort renews, their profile goes live again immediately — the same f
 ## Troubleshooting
 
 | Symptom | Likely cause | Where to look | Fix |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Profile not going private after expiry | Laravel scheduler not running expiry job | `laravel.log`; check `deals.expires_at` vs. current time | Check scheduler health; manually set deal to `expired` and trigger WP sync |
 | Profile went private before expiry date | Timezone mismatch in `expires_at` storage | `deals.expires_at` field value vs. server timezone | Correct timezone config; update `expires_at`; re-activate deal |
-| Renewal reminder campaign not sending | Campaign paused, misconfigured, or scheduler not running | CRM → Renewals → Campaigns → [campaign] → last run date | Check campaign config; run manually; check Laravel scheduler |
-| Escort renewed but profile still private | WordPress sync failed after renewal payment | CRM → Deals → deal status; `laravel.log` | Manually activate the deal: CRM → Deals → [deal] → Activate manually |
+| Renewal reminder campaign not sending | Campaign paused, misconfigured, or scheduler not running | CRM → Renewals → Campaigns → \[campaign\] → last run date | Check campaign config; run manually; check Laravel scheduler |
+| Escort renewed but profile still private | WordPress sync failed after renewal payment | CRM → Deals → deal status; `laravel.log` | Manually activate the deal: CRM → Deals → \[deal\] → Activate manually |
 | Renewal discount not reflected in deal | Discount not entered at time of deal creation | `deals.discount_percentage` field | Update the deal record with the correct discount; get supervisor approval |
 
 ---
@@ -232,6 +240,7 @@ When the escort renews, their profile goes live again immediately — the same f
   <Card title="← Stage 6 — Contact" icon="message" href="/product/stage-6-contact">
     How clients reach active escorts
   </Card>
+
   <Card title="Stage 8 — Upgrades →" icon="circle-arrow-up" href="/product/stage-8-upgrades">
     Moving escorts to higher-visibility tiers
   </Card>
