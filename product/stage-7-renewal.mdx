@@ -87,7 +87,7 @@ When the escort renews, their profile goes live again immediately — the same f
 
     The renewal payment flow is identical to a first-time subscription. All payment methods available at first subscription are available at renewal.
 
-    **Discount on renewal:** Discounts may be offered at renewal with supervisor approval — see the Department Notes section.
+    **Discount on renewal:** Agents may discount within the approved market threshold. Above-threshold discounts still require supervisor approval or PIN where configured — see the Department Notes section.
   </Step>
   <Step title="Confirm the profile is live after renewal">
     After payment confirmation:
@@ -110,11 +110,16 @@ When the escort renews, their profile goes live again immediately — the same f
 
     **Market-operations note:** Inside Sales & CS, the Head of Markets function is responsible for making sure renewal payments are being confirmed, matched, and moved toward activation consistently in each market.
 
-    **When to offer a discount:** Renewal discounts are at supervisor discretion. As a guideline:
+    **When to offer a discount:** Agents can apply discounts up to the approved market threshold when there is a clear commercial reason. Common examples:
 
-    - An escort who has renewed 3\+ times and has a genuine complaint about low traffic → discuss a one-period discount while addressing the profile issue
-    - An escort threatening to leave for a competitor → standard response: reinforce the value points (lead quality, visibility, support). A discount is a last resort, not a first offer.
-    - All discounts above a threshold require a supervisor PIN (same as free trials) and are recorded in the deal record
+    - Payment adaptation support in a market where a customer needs help crossing the line
+    - Service recovery after poor customer service or a bad support experience
+    - Bulk payments, frequent customers, or strong long-tenure retention value
+    - A real low-performance period where the profile issue is also being actively addressed
+
+    Discounts above the market threshold still require supervisor approval or PIN where configured, and every discount must be recorded in the deal record.
+
+    **Balance matters:** Great customer experience reduces churn and creates referrals. Poorly controlled discounting trains customers to wait for concessions. Solve the real problem first, then use discounting carefully as a commercial tool.
 
     **The lapsed escort:** An escort who expired more than 30 days ago (in the `lapsed` bucket) is harder to re-activate. Treat them like a new outbound lead — re-qualify interest, refresh the profile, walk them through what's changed on the platform since they were last active.
 
@@ -127,8 +132,6 @@ When the escort renews, their profile goes live again immediately — the same f
 
   <Accordion title="Finance">
     **Renewal revenue tracking:** Each renewal creates a new `Deal` record with `status = 'active'` and a fresh `activated_at` → `expires_at` window. Finance reports should track renewal MRR separately from first-time subscription MRR to measure platform retention.
-
-    **Discount tracking:** Renewal discounts are stored in `deals.discount_percentage` and `deals.discount_approved_by`. Finance reconciliation should flag deals with discounts above 20% for review.
 
     **Lapsed escorts:** Escorts in the `lapsed` bucket represent lost revenue. Finance tracks the conversion rate from `lapsed → renewed` as a churn recovery metric.
   </Accordion>

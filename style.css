@@ -1,0 +1,10 @@
+html.dark #sidebar svg,
+html.dark #table-of-contents svg,
+html.dark #pagination svg,
+html.dark #content-area svg,
+html[data-theme="dark"] #sidebar svg,
+html[data-theme="dark"] #table-of-contents svg,
+html[data-theme="dark"] #pagination svg,
+html[data-theme="dark"] #content-area svg {
+  color: #f6d1bf;
+}

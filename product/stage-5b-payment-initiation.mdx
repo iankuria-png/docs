@@ -110,6 +110,11 @@ The `BillingMarketProviderBinding` table controls which providers are available 
     2. Check `raw_payload` on the attempt for the provider error code
     3. Common codes: insufficient balance (M-Pesa), phone not M-Pesa registered, network timeout
     4. KopoKopo dashboard → check webhook delivery logs for the payment reference
+
+    **Configuration and resilience checks:**
+    - Confirm provider credentials, callback URLs, and webhook signatures match the live market configuration
+    - Check whether the affected market has a backup or alternative payment path available if the primary provider is unstable
+    - If multiple escorts in one market report the same failure pattern, treat it as a routing/configuration incident first, not an isolated customer mistake
   </Accordion>
 
   <Accordion title="IT Infrastructure">

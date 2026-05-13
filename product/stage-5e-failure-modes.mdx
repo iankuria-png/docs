@@ -212,7 +212,8 @@ The Subscription → Payment → Activation flow has nine documented failure mod
 
     1. **Recovery queue:** CRM → Payments → filter: Status = Recovery queue. Any `completed` payments not yet matched to clients need Sales & CS market operations attention today.
     2. **Pending deals over 10 minutes old:** CRM → Deals → filter: Status = pending, sort by created. Any deal pending for more than 10 minutes after payment is likely stuck.
-    3. **M-Pesa review panel:** Run the M-Pesa review panel (CRM → Payments → M-Pesa review) at the start of each day to catch overnight payments that need activation.
+    3. **Failed payment queue:** Check failed or aging `initiated` payments and contact customers who still show purchase intent with the best retry path for that market.
+    4. **M-Pesa review panel:** Run the M-Pesa review panel (CRM → Payments → M-Pesa review) at the start of each day to catch overnight payments that need activation.
 
     **Escalation path:**
 
@@ -243,6 +244,7 @@ The Subscription → Payment → Activation flow has nine documented failure mod
     1. `laravel.log` for `webhook_verification_failed`, `webhook_invalid_payload`, WpSyncService errors
     2. `BillingWebhookEvent` table — unusual spike in duplicate events = provider retrying = possible earlier failure
     3. `PaymentAttempt` records with `status = 'failed'` — cluster of failures = provider issue or routing problem
+    4. Confirm market-level provider credentials, webhook signatures, callback routes, and fallback provider readiness where an alternative exists
   </Accordion>
 
   <Accordion title="IT Infrastructure — Environment checklist">

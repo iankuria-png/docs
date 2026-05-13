@@ -112,9 +112,11 @@ The same commercial and technical pattern is also useful for **reactivation conv
 
     **Discount policy for upgrades:**
     - A first-upgrade discount ("try Premium at 20% off for one month") can be a strong conversion tool
+    - Agents can discount within the approved market threshold when there is a valid reason: payment adaptation, service recovery, bulk payment value, frequent-customer retention, or a justified conversion push
     - Discounts above the threshold (set by your market manager) require a supervisor PIN
-    - Discount is recorded in `deals.discount_percentage` and `deals.discount_approved_by` — Finance reviews these
-    - Never offer a discount and then fail to record it — it creates a reconciliation problem
+    - Never offer a discount and then fail to record it — it creates an audit and reporting problem
+
+    **Balance matters:** A thoughtful discount can save a customer and improve long-term retention. Poor discount discipline creates dependency and weakens pricing power. Use it with judgment.
 
     **Downgrade requests:** If an escort wants to downgrade to a lower tier (e.g. VIP → Featured), follow the same deal update process but select the lower product. This typically happens at renewal. Note in the client timeline why they downgraded — this is useful for win-back conversations later.
   </Accordion>
@@ -123,8 +125,6 @@ The same commercial and technical pattern is also useful for **reactivation conv
     **Upgrade revenue:** Each upgrade creates a new payment record. Finance should track upgrade revenue separately from first-time subscription and renewal revenue to measure upsell performance.
 
     **Prorated refunds:** Exotic does not offer prorated refunds for mid-period upgrades. If an escort upgrades mid-period, they pay the full new-tier rate for the next period. This should be communicated clearly before processing the upgrade.
-
-    **Discount reconciliation:** All deals with `discount_percentage > 0` are flagged in Finance reconciliation reports. Confirm every discounted deal has a `discount_approved_by` value — if it's null, that's an unapproved discount and must be investigated.
   </Accordion>
 
   <Accordion title="R&D/Product">
