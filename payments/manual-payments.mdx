@@ -1,0 +1,248 @@
+---
+title: "Manual payment submissions and bundles"
+sidebarTitle: "Manual Payments"
+description: "Process manual payment submissions from clients, approve or reject them, and use payment bundles to record and split multi-client manual payments."
+---
+
+Not every payment in Exotic CRM arrives through an automated gateway. Clients sometimes pay via bank transfer, mobile money outside the STK push flow, or other offline methods and then submit proof of payment through the platform. These are called manual payment submissions. Separately, when a single physical payment covers multiple clients, you record it as a payment bundle and the system splits it across the relevant subscriptions.
+
+## Manual payment submissions
+
+A manual payment submission is created when a client completes payment outside the standard gateway flow and uploads proof — such as a transaction screenshot or receipt — through the client-facing interface. The submission enters the CRM queue in `manual_review` state and waits for your action.
+
+When a submission is pending review, the payment row shows a **Pending review** badge. If the client's subscription was activated at the point of submission (activated on submit), the badge changes to **Verification pending** instead, indicating the subscription is already live but the proof still needs to be checked.
+
+### Viewing submission proof
+
+Open the diagnostics panel on a manual submission payment to access the proof image and submission details, including:
+
+- Sender name as entered by the client.
+- Transaction reference number.
+- Customer note (if provided).
+- The payment destination shown to the client at the time of submission.
+
+**API reference:** `GET /api/crm/payments/manual-submissions/{submission}/proof`
+
+## Approving a manual submission
+
+Approving a submission activates the client's subscription when it was not activated on submit.
+
+<Steps>
+  <Step title="Locate the submission in the queue">
+    Filter the payment queue by **Review state: Manual review** to see all pending manual submissions.
+  </Step>
+  <Step title="Review the proof">
+    Open the payment row and check the proof image and transaction details in the diagnostics panel. Confirm the amount, reference, and sender match what you expect.
+  </Step>
+  <Step title="Approve">
+    Click **Approve & activate** on the payment row or in the diagnostics panel. The subscription is activated and the submission is marked as approved.
+  </Step>
+</Steps>
+
+**API reference:** `POST /api/crm/payments/{payment}/manual-approve`
+
+<Note>
+Approving a submission also records the reviewer's identity and timestamp in the submission record. This information is visible in the diagnostics panel.
+</Note>
+
+## Verifying a manual submission
+
+If the client's subscription was already activated when they submitted the proof, the action changes from **Approve & activate** to **Mark verified**. Verifying confirms that the proof is legitimate without re-triggering activation.
+
+<Steps>
+  <Step title="Review the proof">
+    Open the diagnostics panel and check the transaction reference against your records or the payment provider's dashboard.
+  </Step>
+  <Step title="Mark as verified">
+    Click **Mark verified**. The submission transitions out of `manual_review` state and the **Verification pending** badge is removed.
+  </Step>
+</Steps>
+
+**API reference:** `POST /api/crm/payments/{payment}/manual-verify`
+
+## Rejecting a manual submission
+
+If the proof is invalid, the amount does not match, or you cannot verify the transaction, reject the submission.
+
+<Steps>
+  <Step title="Open the reject dialog">
+    Click the action menu on the payment row and select **Reject**, or use the reject option in the diagnostics panel.
+  </Step>
+  <Step title="Enter a rejection reason">
+    Type a clear reason for the rejection. The client's state in the CRM is updated to **Rejected** and the reason is stored against the submission record.
+  </Step>
+  <Step title="Confirm">
+    Click **Reject**. The submission is closed and the client's subscription is not activated (or is flagged for follow-up if it was already active).
+  </Step>
+</Steps>
+
+**API reference:** `POST /api/crm/payments/{payment}/manual-reject`
+
+Request body:
+
+```json
+{
+  "reason": "Transaction reference does not match any record on our M-Pesa statement."
+}
+```
+
+<Warning>
+Rejection is not reversible through the UI. If you reject a submission in error, contact your administrator to investigate and take corrective action via the audit log.
+</Warning>
+
+## Payment bundles
+
+A payment bundle lets you record a single incoming payment that should be split across multiple clients and their subscriptions. This is common when an agency or reseller makes one bank transfer to cover several accounts.
+
+### What a bundle contains
+
+| Field | Description |
+|---|---|
+| `reference_root` | A unique identifier for the bundle (for example, a bank transfer reference). |
+| `total_amount` | The full amount received. |
+| `currency` | Currency of the payment. |
+| `items` | One entry per client, specifying the client, product, subscription duration, and allocated amount. |
+
+The system validates that the sum of allocated amounts does not exceed the total amount. Any remainder is tracked as `unallocated_amount`.
+
+### Creating a bundle
+
+Bundle creation is a two-step process: preview first, then commit.
+
+#### Step 1 — Preview
+
+Before writing any data, submit a preview request to validate your inputs and see how the bundle will be split.
+
+<Steps>
+  <Step title="Check the reference is available">
+    Call the reference check endpoint to confirm the reference root you plan to use has not already been used in the same market.
+
+    **API reference:** `GET /api/crm/payments/reference-check`
+  </Step>
+  <Step title="Submit the preview">
+    Send a preview request with the full bundle details. The response shows each item's allocated amount, any validation errors, and the unallocated remainder.
+
+    **API reference:** `POST /api/crm/manual-payment-bundles/preview`
+  </Step>
+  <Step title="Review the output">
+    Confirm the allocated amounts and item count look correct before proceeding.
+  </Step>
+</Steps>
+
+Preview request body:
+
+```json
+{
+  "platform_id": 1,
+  "reference_root": "BANK-TXN-20260512",
+  "total_amount": 7500,
+  "currency": "KES",
+  "reason": "Reseller payment for May batch",
+  "items": [
+    {
+      "client_id": 101,
+      "product_id": 3,
+      "duration": "monthly",
+      "allocated_amount": 2500
+    },
+    {
+      "client_id": 102,
+      "product_id": 3,
+      "duration": "monthly",
+      "allocated_amount": 2500
+    },
+    {
+      "client_id": 103,
+      "product_id": 3,
+      "duration": "monthly",
+      "allocated_amount": 2500
+    }
+  ]
+}
+```
+
+#### Step 2 — Commit
+
+After reviewing the preview, commit the bundle to create the payment records and activate the subscriptions.
+
+<Steps>
+  <Step title="Submit the commit request">
+    Send the same payload used for the preview, adding the required `idempotency_key` field. The idempotency key prevents duplicate commits if the request is retried.
+
+    **API reference:** `POST /api/crm/manual-payment-bundles/commit`
+  </Step>
+  <Step title="Confirm the result">
+    The response returns the created bundle record, including the IDs of each payment and the status of each subscription. Each payment in the bundle displays a **Bundle** badge in the queue.
+  </Step>
+</Steps>
+
+Commit request body:
+
+```json
+{
+  "platform_id": 1,
+  "reference_root": "BANK-TXN-20260512",
+  "total_amount": 7500,
+  "currency": "KES",
+  "idempotency_key": "bundle-20260512-reseller-may",
+  "reason": "Reseller payment for May batch",
+  "items": [
+    {
+      "client_id": 101,
+      "product_id": 3,
+      "duration": "monthly",
+      "allocated_amount": 2500
+    },
+    {
+      "client_id": 102,
+      "product_id": 3,
+      "duration": "monthly",
+      "allocated_amount": 2500
+    },
+    {
+      "client_id": 103,
+      "product_id": 3,
+      "duration": "monthly",
+      "allocated_amount": 2500
+    }
+  ]
+}
+```
+
+<Note>
+If the reference root has already been used in the same market, the preview and commit endpoints return a `409 Conflict` response with details of the existing bundle.
+</Note>
+
+### Voiding a bundle
+
+Voiding a bundle deactivates all subscriptions created from it and marks the bundle as void. This action is restricted to administrators.
+
+<Warning>
+Voiding a bundle is irreversible and immediately deactivates all child subscriptions. Only void a bundle when there is a confirmed reason such as fraud or a bank reversal.
+</Warning>
+
+To void a bundle, open the bundle detail dialog from a payment row that belongs to the bundle, then click **Void bundle** and select a reason code. The following reason codes are accepted: `fraud_suspected`, `bank_reversal`, `duplicate`, and `data_entry_error`.
+
+**API reference:** `POST /api/crm/manual-payment-bundles/{bundle}/void` (admin only)
+
+## Retrying an STK push
+
+If a client's M-Pesa STK push timed out or was dismissed before they could complete it, you can resend the prompt directly from the payment queue.
+
+<Steps>
+  <Step title="Locate the payment">
+    Find the payment with status `initiated` or `pending` in the queue.
+  </Step>
+  <Step title="Open the action menu">
+    Click the three-dot action menu and select **Retry STK push**.
+  </Step>
+  <Step title="Confirm">
+    Optionally add a reason note, then click **Send**. The client receives a new M-Pesa payment prompt on their phone.
+  </Step>
+</Steps>
+
+**API reference:** `POST /api/crm/payments/{payment}/retry-stk`
+
+<Tip>
+After retrying, wait a few minutes before checking the payment status again. The provider callback can take up to several minutes to arrive depending on network conditions.
+</Tip>

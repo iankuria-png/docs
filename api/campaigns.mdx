@@ -1,0 +1,519 @@
+---
+title: "REST API endpoints for campaigns"
+sidebarTitle: "Campaigns API"
+description: "Create push campaigns, upload contact lists, execute or schedule sends, and manage renewal reminders via the Exotic CRM campaign endpoints."
+---
+
+The campaigns API covers two related areas: **push campaigns** for bulk notifications sent to contact lists, and **renewal reminders** for automated and manual subscription renewal outreach. Push campaigns are scoped to the `marketing`, `admin`, and `sub_admin` roles. Renewal endpoints require `admin`, `sub_admin`, or `sales`.
+
+<Note>
+Push campaign endpoints require the `marketing`, `admin`, or `sub_admin` role. Renewal endpoints require `admin`, `sub_admin`, or `sales`.
+</Note>
+
+---
+
+## List push campaigns
+
+Return a paginated list of push campaigns with item counts.
+
+```
+GET /api/crm/push-campaigns
+```
+
+### Query parameters
+
+<ParamField query="platform_id" type="integer">
+  Filter to a specific market.
+</ParamField>
+
+<ParamField query="status" type="string">
+  Campaign status: `processing`, `draft`, `scheduled`, `running`, `completed`, `partial`, or `failed`.
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search by campaign name or source filename.
+</ParamField>
+
+<ParamField query="per_page" type="integer" default="25">
+  Records per page.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl "https://your-crm.example.com/api/crm/push-campaigns?platform_id=1&status=draft" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "data": [
+    {
+      "id": 15,
+      "name": "May Premium Upsell",
+      "platform_id": 1,
+      "status": "draft",
+      "pending_items_count": 42,
+      "failed_items_count": 0,
+      "created_at": "2026-05-10T08:00:00.000000Z",
+      "platform": { "id": 1, "name": "ExoticKenya", "country": "KE" }
+    }
+  ],
+  "current_page": 1,
+  "total": 8
+}
+```
+
+</CodeGroup>
+
+---
+
+## Create a push campaign
+
+Create a new empty push campaign. After creation, upload contacts to it.
+
+```
+POST /api/crm/push-campaigns
+```
+
+### Request body
+
+<ParamField body="name" type="string" required>
+  Campaign name (displayed in the CRM and in reports).
+</ParamField>
+
+<ParamField body="platform_id" type="integer" required>
+  The market this campaign targets.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/push-campaigns \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "May Premium Upsell", "platform_id": 1}'
+```
+
+```json Response (201)
+{
+  "id": 16,
+  "name": "May Premium Upsell",
+  "platform_id": 1,
+  "status": "draft",
+  "created_at": "2026-05-12T09:00:00.000000Z"
+}
+```
+
+</CodeGroup>
+
+---
+
+## Upload a contact list
+
+Upload a CSV file of contacts to a campaign. The file is parsed asynchronously and each row becomes a campaign item.
+
+```
+POST /api/crm/push-campaigns/upload
+```
+
+Send this request as `multipart/form-data`.
+
+<ParamField body="file" type="file" required>
+  CSV file. Expected columns: `name`, `phone`, and optionally `email` and `platform_id`.
+</ParamField>
+
+<ParamField body="platform_id" type="integer">
+  Market to associate the uploaded contacts with.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/push-campaigns/upload \
+  -H "Authorization: Bearer {token}" \
+  -F "file=@contacts_may.csv" \
+  -F "platform_id=1"
+```
+
+```json Response
+{
+  "batch_id": "batch_94abc",
+  "status": "queued",
+  "rows": 250,
+  "message": "Upload queued for processing."
+}
+```
+
+</CodeGroup>
+
+<Note>
+Uploads are processed in the background. Poll `GET /api/crm/push-campaigns/upload/{batchId}/status` to check progress.
+</Note>
+
+---
+
+## Get a push campaign
+
+Return full detail for a single campaign.
+
+```
+GET /api/crm/push-campaigns/{id}
+```
+
+<ParamField path="id" type="integer" required>
+  Campaign ID.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl https://your-crm.example.com/api/crm/push-campaigns/15 \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "id": 15,
+  "name": "May Premium Upsell",
+  "platform_id": 1,
+  "status": "draft",
+  "items_count": 42,
+  "pending_items_count": 42,
+  "failed_items_count": 0,
+  "scheduled_at": null,
+  "created_at": "2026-05-10T08:00:00.000000Z",
+  "platform": { "id": 1, "name": "ExoticKenya" }
+}
+```
+
+</CodeGroup>
+
+---
+
+## Execute a campaign
+
+Immediately dispatch all pending notifications in a campaign.
+
+```
+POST /api/crm/push-campaigns/{id}/execute
+```
+
+<ParamField path="id" type="integer" required>
+  Campaign ID.
+</ParamField>
+
+<Warning>
+This sends notifications immediately. Make sure all campaign items are reviewed before executing.
+</Warning>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/push-campaigns/15/execute \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "campaign_id": 15,
+  "status": "running",
+  "dispatched": 42,
+  "message": "Campaign dispatched."
+}
+```
+
+</CodeGroup>
+
+---
+
+## Schedule a campaign
+
+Schedule a campaign to execute at a specific date and time.
+
+```
+POST /api/crm/push-campaigns/{id}/schedule
+```
+
+### Request body
+
+<ParamField body="scheduled_at" type="string" required>
+  ISO 8601 datetime when the campaign should be sent (e.g., `2026-05-15T08:00:00Z`).
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/push-campaigns/15/schedule \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{"scheduled_at": "2026-05-15T08:00:00Z"}'
+```
+
+```json Response
+{
+  "campaign_id": 15,
+  "status": "scheduled",
+  "scheduled_at": "2026-05-15T08:00:00.000000Z"
+}
+```
+
+</CodeGroup>
+
+---
+
+## Get campaign analytics
+
+Return delivery and engagement metrics for a completed or running campaign.
+
+```
+GET /api/crm/push-campaigns/{id}/analytics
+```
+
+<ParamField path="id" type="integer" required>
+  Campaign ID.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl https://your-crm.example.com/api/crm/push-campaigns/15/analytics \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "campaign_id": 15,
+  "sent": 42,
+  "delivered": 39,
+  "failed": 3,
+  "delivery_rate": 92.9,
+  "items_by_status": {
+    "sent": 39,
+    "failed": 3,
+    "pending": 0
+  }
+}
+```
+
+</CodeGroup>
+
+---
+
+## Renewal overview
+
+Return the full renewal dashboard — active subscriptions ranked by renewal urgency, grouped into expiry buckets.
+
+```
+GET /api/crm/renewals
+```
+
+### Query parameters
+
+<ParamField query="platform_id" type="integer">
+  Scope to a specific market.
+</ParamField>
+
+<ParamField query="bucket" type="string" default="all">
+  Expiry bucket: `all`, `active`, `risk`, `pending`, `workload`, `stable`, `expired`, `lapsed`, or `paused`.
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search by client name or phone.
+</ParamField>
+
+<ParamField query="per_page" type="integer" default="50">
+  Records per page.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl "https://your-crm.example.com/api/crm/renewals?platform_id=1&bucket=risk" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "targets": {
+    "data": [
+      {
+        "client_id": 501,
+        "client_name": "Amara",
+        "deal_id": 77,
+        "plan_type": "premium",
+        "expires_at": "2026-05-14T00:00:00.000000Z",
+        "days_until_expiry": 2,
+        "bucket": "risk"
+      }
+    ],
+    "total": 18
+  },
+  "buckets": {
+    "active": 210,
+    "risk": 18,
+    "pending": 5,
+    "expired": 31
+  }
+}
+```
+
+</CodeGroup>
+
+---
+
+## Run a renewal campaign
+
+Execute one or more renewal reminder campaigns for the current matching targets.
+
+```
+POST /api/crm/renewals/run
+```
+
+### Request body
+
+<ParamField body="platform_id" type="integer">
+  Limit execution to a single market.
+</ParamField>
+
+<ParamField body="bucket" type="string">
+  Restrict execution to a specific expiry bucket.
+</ParamField>
+
+<ParamField body="channel" type="string">
+  Delivery channel: `sms` or `email`.
+</ParamField>
+
+<ParamField body="dry_run" type="boolean" default="false">
+  When `true`, calculates targets but does not send any messages.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/renewals/run \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{"platform_id": 1, "bucket": "risk", "channel": "sms"}'
+```
+
+```json Response
+{
+  "totals": {
+    "targeted": 18,
+    "sent": 16,
+    "failed": 2,
+    "skipped": 0
+  },
+  "campaigns": [
+    { "campaign_id": 3, "name": "7-day expiry reminder", "sent": 16, "failed": 2 }
+  ]
+}
+```
+
+</CodeGroup>
+
+---
+
+## Send a single renewal reminder
+
+Send a renewal reminder to one client immediately.
+
+```
+POST /api/crm/renewals/remind
+```
+
+### Request body
+
+<ParamField body="deal_id" type="integer">
+  Deal ID to send the reminder for. Either `deal_id` or `client_id` is required.
+</ParamField>
+
+<ParamField body="client_id" type="integer">
+  Client ID. Used when no active deal exists.
+</ParamField>
+
+<ParamField body="template_id" type="integer">
+  Optional SMS/notification template to use instead of the campaign default.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/renewals/remind \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{"deal_id": 77}'
+```
+
+```json Response
+{
+  "success": true,
+  "message": "Renewal reminder sent.",
+  "channel": "sms",
+  "phone": "254712345678"
+}
+```
+
+</CodeGroup>
+
+---
+
+## Bulk-remind clients
+
+Send renewal reminders to multiple clients at once.
+
+```
+POST /api/crm/renewals/bulk-remind
+```
+
+### Request body
+
+<ParamField body="selection" type="array">
+  Array of `{ client_id, deal_id }` objects. Omit to use the `bucket`/`platform_id` filter instead.
+</ParamField>
+
+<ParamField body="select_all" type="boolean" default="false">
+  When `true`, sends to all clients matching the current filter.
+</ParamField>
+
+<ParamField body="platform_id" type="integer">
+  Scope bulk send to a market.
+</ParamField>
+
+<ParamField body="bucket" type="string">
+  Expiry bucket scope.
+</ParamField>
+
+<ParamField body="template_id" type="integer">
+  Template to use for the reminders.
+</ParamField>
+
+<ParamField body="dry_run" type="boolean" default="false">
+  Simulate without sending.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/renewals/bulk-remind \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "selection": [
+      {"client_id": 501, "deal_id": 77},
+      {"client_id": 502, "deal_id": 78}
+    ]
+  }'
+```
+
+```json Response
+{
+  "targeted": 2,
+  "sent": 2,
+  "failed": 0,
+  "dry_run": false
+}
+```
+
+</CodeGroup>

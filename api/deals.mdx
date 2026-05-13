@@ -1,0 +1,460 @@
+---
+title: "REST API endpoints for deals"
+sidebarTitle: "Deals API"
+description: "Create and manage subscription deals. Activate, deactivate, extend, and renew deals. Retrieve the deal list with filtering by status, market, and expiry bucket."
+---
+
+A deal represents a subscription between a client and a product package. The deals API lets you create new subscription records, activate them with a chosen payment method, deactivate or extend active subscriptions, and renew expired or cancelled ones. All deals endpoints require at minimum the `sales` role.
+
+<Note>
+All deals endpoints require `admin`, `sub_admin`, or `sales` role.
+</Note>
+
+---
+
+## List deals
+
+Return a paginated deal list with optional filtering. The response uses the same renewal overview format, so expiry buckets and risk indicators are included.
+
+```
+GET /api/crm/deals
+```
+
+### Query parameters
+
+<ParamField query="page" type="integer" default="1">
+  Page number.
+</ParamField>
+
+<ParamField query="per_page" type="integer" default="25">
+  Records per page.
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filter by deal status: `pending`, `awaiting_payment`, `paid`, `active`, `expired`, `cancelled`, or `renewed`.
+</ParamField>
+
+<ParamField query="platform_id" type="integer">
+  Filter to a specific market.
+</ParamField>
+
+<ParamField query="bucket" type="string" default="all">
+  Expiry bucket filter: `all`, `active`, `risk`, `pending`, `workload`, `stable`, `expired`, `lapsed`, or `paused`.
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search by client name or phone.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl "https://your-crm.example.com/api/crm/deals?platform_id=1&status=active&per_page=10" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "targets": {
+    "data": [
+      {
+        "id": 77,
+        "client_id": 501,
+        "product_id": 3,
+        "plan_type": "premium",
+        "amount": "3000.00",
+        "currency": "KES",
+        "duration": "monthly",
+        "status": "active",
+        "is_free_trial": false,
+        "activated_at": "2026-04-01T00:00:00.000000Z",
+        "expires_at": "2026-06-01T00:00:00.000000Z"
+      }
+    ],
+    "total": 210
+  }
+}
+```
+
+</CodeGroup>
+
+---
+
+## Create a deal
+
+Create a new pending subscription deal for a client. The deal starts in `pending` status and must be activated separately.
+
+```
+POST /api/crm/deals
+```
+
+### Request body
+
+<ParamField body="client_id" type="integer" required>
+  The CRM client the deal belongs to.
+</ParamField>
+
+<ParamField body="product_id" type="integer" required>
+  The product (subscription package) to use.
+</ParamField>
+
+<ParamField body="product_price_id" type="integer">
+  Optional specific pricing option for multi-currency or multi-duration packages.
+</ParamField>
+
+<ParamField body="duration" type="string">
+  Subscription duration: `weekly`, `biweekly`, `monthly`, or `manual`.
+</ParamField>
+
+<ParamField body="lead_id" type="integer">
+  If this deal originates from a lead, link it here for funnel tracking.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/deals \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "client_id": 501,
+    "product_id": 3,
+    "duration": "monthly"
+  }'
+```
+
+```json Response (201)
+{
+  "id": 78,
+  "client_id": 501,
+  "product_id": 3,
+  "plan_type": "premium",
+  "amount": "3000.00",
+  "currency": "KES",
+  "duration": "monthly",
+  "status": "pending",
+  "is_free_trial": false,
+  "activated_at": null,
+  "expires_at": null,
+  "created_at": "2026-05-12T09:00:00.000000Z"
+}
+```
+
+</CodeGroup>
+
+---
+
+## Get a deal
+
+Return full detail for a single deal, including the linked client, product, platform, and payment.
+
+```
+GET /api/crm/deals/{deal}
+```
+
+<ParamField path="deal" type="integer" required>
+  The numeric deal ID.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl https://your-crm.example.com/api/crm/deals/77 \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "id": 77,
+  "client_id": 501,
+  "product_id": 3,
+  "plan_type": "premium",
+  "amount": "3000.00",
+  "currency": "KES",
+  "duration": "monthly",
+  "duration_days": 30,
+  "status": "active",
+  "is_free_trial": false,
+  "discount_percentage": null,
+  "original_amount": null,
+  "payment_reference": "MPESA-ABC123",
+  "activated_at": "2026-04-01T00:00:00.000000Z",
+  "expires_at": "2026-06-01T00:00:00.000000Z",
+  "client": { "id": 501, "name": "Amara" },
+  "product": { "id": 3, "name": "Premium", "tier": "premium" },
+  "platform": { "id": 1, "name": "ExoticKenya" },
+  "payment": { "id": 204, "status": "completed", "amount": "3000.00" }
+}
+```
+
+</CodeGroup>
+
+---
+
+## Update a deal
+
+Update the product, pricing, duration, or status of a pending deal before activation.
+
+```
+PATCH /api/crm/deals/{deal}
+```
+
+### Request body
+
+<ParamField body="product_id" type="integer">
+  New product.
+</ParamField>
+
+<ParamField body="product_price_id" type="integer">
+  Specific price row if the product has multiple pricing options.
+</ParamField>
+
+<ParamField body="duration" type="string">
+  Duration: `weekly`, `biweekly`, `monthly`, or `manual`.
+</ParamField>
+
+<ParamField body="status" type="string">
+  Status: `pending`, `awaiting_payment`, `paid`, `active`, `expired`, `cancelled`, or `renewed`.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X PATCH https://your-crm.example.com/api/crm/deals/78 \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{"duration": "weekly"}'
+```
+
+</CodeGroup>
+
+---
+
+## Activate a deal
+
+Activate a pending deal and provision the client's WordPress subscription. You must supply the payment method used.
+
+```
+POST /api/crm/deals/{deal}/activate
+```
+
+### Request body
+
+<ParamField body="payment_method" type="string" required>
+  How the client is paying: `manual`, `free_trial`, `stk` (M-Pesa STK push), or `link` (payment link).
+</ParamField>
+
+<ParamField body="payment_reference" type="string">
+  Required when `payment_method` is `manual`. The transaction reference (e.g., M-Pesa confirmation code).
+</ParamField>
+
+<ParamField body="free_trial_pin" type="string">
+  Required when `payment_method` is `free_trial`. A 4–6 digit authorization PIN.
+</ParamField>
+
+<ParamField body="duration_days" type="integer">
+  Override the subscription length in days (1–365). If omitted, calculated from the product pricing.
+</ParamField>
+
+<ParamField body="discount_percentage" type="number">
+  Discount to apply (1–99%).
+</ParamField>
+
+<ParamField body="reason" type="string">
+  Audit note.
+</ParamField>
+
+<CodeGroup>
+
+```bash Manual activation
+curl -X POST https://your-crm.example.com/api/crm/deals/78/activate \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "payment_method": "manual",
+    "payment_reference": "QHT7P3KLMN",
+    "reason": "Client paid cash"
+  }'
+```
+
+```json Response (active deal)
+{
+  "id": 78,
+  "status": "active",
+  "activated_at": "2026-05-12T10:00:00.000000Z",
+  "expires_at": "2026-06-11T10:00:00.000000Z",
+  "payment_reference": "QHT7P3KLMN"
+}
+```
+
+</CodeGroup>
+
+<Note>
+For `stk` and `link` payment methods, the deal moves to `awaiting_payment` and the response carries HTTP `202`. The subscription is provisioned automatically once the payment succeeds.
+</Note>
+
+---
+
+## Deactivate a deal
+
+Cancel an active subscription. The client's WordPress profile is set to private.
+
+```
+POST /api/crm/deals/{deal}/deactivate
+```
+
+### Request body
+
+<ParamField body="reason_code" type="string">
+  Structured cancellation reason. Contact your admin for the list of configured codes.
+</ParamField>
+
+<ParamField body="reason" type="string">
+  Free-text audit reason. At least one of `reason_code` or `reason` is required.
+</ParamField>
+
+<ParamField body="reason_notes" type="string">
+  Additional notes on the cancellation.
+</ParamField>
+
+<ParamField body="notify_client" type="boolean" default="false">
+  When `true`, sends the client an SMS notification.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/deals/77/deactivate \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "reason_code": "client_request",
+    "reason": "Client requested cancellation",
+    "notify_client": true
+  }'
+```
+
+```json Response
+{
+  "id": 77,
+  "status": "cancelled",
+  "cancellation_reason_code": "client_request",
+  "cancellation_notes": "Client requested cancellation"
+}
+```
+
+</CodeGroup>
+
+---
+
+## Extend a deal
+
+Add days to an active subscription. Requires a payment method for the extension payment.
+
+```
+POST /api/crm/deals/{deal}/extend
+```
+
+### Request body
+
+<ParamField body="additional_days" type="integer" required>
+  Number of days to add (1–365).
+</ParamField>
+
+<ParamField body="payment_method" type="string" required>
+  `manual`, `free_trial`, `stk`, or `link`.
+</ParamField>
+
+<ParamField body="payment_reference" type="string">
+  Required when `payment_method` is `manual`.
+</ParamField>
+
+<ParamField body="reason" type="string" required>
+  Audit note (max 500 characters).
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/deals/77/extend \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "additional_days": 7,
+    "payment_method": "manual",
+    "payment_reference": "EXT-XYZ789",
+    "reason": "Extension for loyal client"
+  }'
+```
+
+```json Response
+{
+  "id": 77,
+  "status": "active",
+  "expires_at": "2026-06-08T00:00:00.000000Z"
+}
+```
+
+</CodeGroup>
+
+---
+
+## Renew a deal
+
+Create a new deal from an expired or cancelled one, resetting the subscription for another billing cycle.
+
+```
+POST /api/crm/deals/{deal}/renew
+```
+
+<Note>
+Only deals with status `expired` or `cancelled` can be renewed. A new deal record is created and linked to the original.
+</Note>
+
+### Request body
+
+<ParamField body="additional_days" type="integer" required>
+  Renewal duration in days (1–365).
+</ParamField>
+
+<ParamField body="payment_method" type="string" required>
+  `manual`, `free_trial`, `stk`, or `link`.
+</ParamField>
+
+<ParamField body="payment_reference" type="string">
+  Required when `payment_method` is `manual`.
+</ParamField>
+
+<ParamField body="reason" type="string" required>
+  Audit note.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/deals/77/renew \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "additional_days": 30,
+    "payment_method": "manual",
+    "payment_reference": "RENEWAL-ABC001",
+    "reason": "Client paid for renewal"
+  }'
+```
+
+```json Response
+{
+  "old_deal_id": 77,
+  "new_deal": {
+    "id": 79,
+    "status": "active",
+    "plan_type": "premium",
+    "amount": "3000.00",
+    "activated_at": "2026-05-12T10:00:00.000000Z",
+    "expires_at": "2026-06-11T10:00:00.000000Z"
+  }
+}
+```
+
+</CodeGroup>

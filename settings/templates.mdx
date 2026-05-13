@@ -1,0 +1,107 @@
+---
+title: "Message templates for client communications"
+sidebarTitle: "Templates"
+description: "Create reusable SMS and message templates for renewal reminders, credential delivery, and other client outreach in Exotic CRM's template editor."
+---
+
+Templates are reusable message bodies that your team selects when sending SMS renewal reminders, credential delivery messages, and other structured client outreach. Instead of typing the same message repeatedly, you save a template once and pick it from a list at send time. Variable placeholders in the body are substituted automatically with the relevant client or deal data before the message is dispatched.
+
+<Note>
+  **Admin** and **sub-admin** users can create, edit, and delete templates. Sales agents can view and use templates but cannot modify them.
+</Note>
+
+## What templates are used for
+
+Templates are used across two main workflows in Exotic CRM:
+
+<CardGroup cols={2}>
+  <Card title="Renewal reminders" icon="rotate">
+    When running a renewal campaign, agents select a template as the message body for SMS reminders sent to clients whose subscriptions are expiring. The CRM substitutes client name, market, and expiry details before sending.
+  </Card>
+  <Card title="Credential delivery" icon="key">
+    When resetting or dispatching login credentials to a client, agents can select a credential template. Templates in the `credential_setup_link` and `credential_temp_password` categories are designed for this purpose.
+  </Card>
+</CardGroup>
+
+Templates are also available when composing manual SMS messages from a client's conversation panel, giving agents a consistent starting point for common message types.
+
+## Viewing templates
+
+Navigate to **Settings → Templates** to see all templates your account has access to. The list is sorted by most recently updated and supports filtering by:
+
+- **Status** — `active` (available for use) or `draft` (not yet ready)
+- **Category** — e.g. `renewal`, `payment`, `welcome`
+- **Channel** — `sms` or `email`
+- **Search** — matches against title, subject, or body text
+
+<Tip>
+  Use **draft** status to work on a template before making it available to the team. Switch to **active** when it is ready.
+</Tip>
+
+## Creating a template
+
+<Steps>
+  <Step title="Open the template editor">
+    On the Templates page, click **New template**.
+  </Step>
+  <Step title="Enter the template details">
+    | Field | Required | Description |
+    |---|---|---|
+    | **Title** | Yes | Internal name for the template; shown in selection dropdowns |
+    | **Category** | Yes | The use case this template is designed for |
+    | **Channel** | Yes | `sms` or `email` |
+    | **Subject** | No | Email subject line (ignored for SMS templates) |
+    | **Body** | Yes | The message text; supports variable placeholders (see below) |
+    | **Status** | Yes | `active` or `draft` |
+    | **Market** | No | Restrict the template to a specific market; leave blank to make it available across all markets |
+  </Step>
+  <Step title="Add variable placeholders">
+    Insert placeholders in the body using double curly brace syntax. The placeholders are replaced at send time with the corresponding data. Declare the variables you use in the **Variables** field so the CRM can validate them before dispatch.
+  </Step>
+  <Step title="Save">
+    Click **Save**. The template is immediately available for use based on its status.
+  </Step>
+</Steps>
+
+### Template categories
+
+| Category | Description |
+|---|---|
+| `payment` | Payment confirmation or collection messages |
+| `renewal` | Subscription renewal reminders |
+| `follow_up` | General client follow-up messages |
+| `welcome` | Onboarding messages for new clients |
+| `win_back` | Re-engagement messages for inactive clients |
+| `credential_setup_link` | Messages containing a link for clients to set their own password |
+| `credential_temp_password` | Messages delivering a temporary password to a client |
+
+## Editing a template
+
+Select a template from the list and click **Edit**. You can update any field — title, category, channel, body, status, or market scope. Changes are saved immediately and apply to all future uses of the template.
+
+<Warning>
+  Editing a template's body does not retroactively change messages that have already been sent. Sent messages are stored as-is in the client's conversation history.
+</Warning>
+
+## Deleting a template
+
+Select a template and click **Delete**. Deletion is permanent — the template is removed from all selection dropdowns immediately. If you want to retire a template without losing it, set its status to **Draft** instead.
+
+<Note>
+  Templates scoped to a specific market can only be deleted by users who have access to that market.
+</Note>
+
+## Using templates in renewal campaigns
+
+When you run a renewal campaign under **Renewals → Run**, you select a template from the active SMS templates list. The renewal engine substitutes the following common placeholders before sending:
+
+- Client name
+- Market name
+- Subscription expiry date
+- Renewal package name and price
+
+The exact set of available placeholders depends on your template variables declaration and the renewal campaign configuration.
+
+## Using templates in conversations
+
+When composing an SMS from a client's profile page under the **Conversations** tab, click **Use template** to browse active templates filtered by channel and category. Selecting a template pre-fills the message body, which you can then edit before sending.

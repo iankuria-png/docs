@@ -1,0 +1,117 @@
+---
+title: "Manage team members and their roles"
+sidebarTitle: "Roles"
+description: "Admins can create new team members, assign roles (admin, sub-admin, sales, marketing), and generate impersonation links to troubleshoot agent accounts."
+---
+
+The Roles settings page is where you manage everyone who has access to Exotic CRM. You can invite new team members, assign them a role, restrict them to specific markets, and adjust their settings at any time. The impersonation feature lets you open an agent's session directly to investigate account-specific issues without knowing their password.
+
+<Note>
+  The Roles settings page is only accessible to **admin** users.
+</Note>
+
+## Viewing team members
+
+Navigate to **Settings → Roles** to see the full list of users. The page shows a summary of counts by role and status at the top, followed by the full team roster.
+
+Each user entry displays:
+
+- Name and email address
+- Role (`admin`, `sub_admin`, `sales`, or `marketing`)
+- Account status (`active` or `inactive`)
+- Assigned markets
+- Phone number and notification preferences
+
+## Available roles
+
+<CardGroup cols={2}>
+  <Card title="Admin" icon="shield-halved">
+    Full access to all settings, markets, billing configuration, and team management. Can create and impersonate other users. Cannot be impersonated.
+  </Card>
+  <Card title="Sub-admin" icon="user-shield">
+    Access to most settings and all client, deal, and payment workflows. Can update market configurations and notification providers. Cannot create new markets or manage roles.
+  </Card>
+  <Card title="Sales" icon="briefcase">
+    Access to clients, deals, leads, payments, renewals, and their assigned markets. Cannot access billing or team management settings.
+  </Card>
+  <Card title="Marketing" icon="bullhorn">
+    Read-only access to clients and leads. Full access to push campaigns and the campaign dashboard. Cannot modify client records or access billing.
+  </Card>
+</CardGroup>
+
+## Creating a new team member
+
+<Steps>
+  <Step title="Open the invite form">
+    On the Roles page, click **Add team member**.
+  </Step>
+  <Step title="Enter the user details">
+    | Field | Required | Description |
+    |---|---|---|
+    | **Name** | Yes | The user's display name |
+    | **Email** | Yes | Login email; must be unique |
+    | **Password** | No | If left blank, a random password is generated — the user must reset it on first login |
+    | **Role** | Yes | One of `admin`, `sub_admin`, `sales`, or `marketing` |
+    | **Status** | Yes | Set to `active` to allow login immediately, or `inactive` to create the account in a suspended state |
+    | **Phone** | No | Used for SMS notification preferences |
+    | **Assigned markets** | No | Leave blank to grant access to all markets; select specific markets to restrict access |
+  </Step>
+  <Step title="Set notification preferences (optional)">
+    Enable **Payment failure SMS** notifications if this user should receive an SMS when a payment fails. You can scope this to specific markets.
+  </Step>
+  <Step title="Save">
+    Click **Create**. The new account is created immediately. Share the login credentials with the user through a secure channel.
+  </Step>
+</Steps>
+
+## Changing a user's role or settings
+
+Select any user from the team list and click **Edit** to open their settings. You can update:
+
+- **Role** — changing a user's role takes effect on their next page load
+- **Status** — set to `inactive` to immediately block login without deleting the account
+- **Assigned markets** — add or remove market access
+- **Phone number**
+- **Notification preferences**
+- **Password** — enter a new password to reset it; leave blank to keep the existing one
+
+Click **Save** to apply changes. Role changes are recorded in the webhook audit log.
+
+<Warning>
+  Changing a user's role to a lower-permission role (e.g. from `sub_admin` to `sales`) takes effect on their next login but does not immediately invalidate their active session.
+</Warning>
+
+## Agent status
+
+| Status | Effect |
+|---|---|
+| **Active** | User can log in and use the CRM normally |
+| **Inactive** | Login is blocked. The account and its history are preserved. Reactivate at any time by setting status back to `active`. |
+
+<Tip>
+  Use `inactive` instead of deleting an account when a team member leaves. This preserves their assignment history, audit trail, and deal ownership records.
+</Tip>
+
+## Generating an impersonation link
+
+Impersonation lets an admin open a temporary CRM session as another user to troubleshoot account-specific issues such as missing market access or unexpected UI state.
+
+<Steps>
+  <Step title="Locate the user">
+    Find the user on the Roles page.
+  </Step>
+  <Step title="Generate the link">
+    Click **Impersonate** on the user's row. The CRM generates a time-limited, single-use URL.
+  </Step>
+  <Step title="Open the session">
+    Click the generated link or copy it and open it in a browser. The CRM logs you in as the target user with a clear impersonation banner displayed throughout the session.
+  </Step>
+</Steps>
+
+<Warning>
+  Impersonation links expire after **5 minutes** and are single-use. Generate a new link if the first one expires before you use it.
+
+  Admin accounts cannot be impersonated, and inactive users cannot be opened in impersonation mode.
+</Warning>
+
+All impersonation sessions are recorded in the audit log with the acting admin's identity, the target user's role, and a timestamp.

@@ -1,0 +1,206 @@
+---
+title: "Automate subscription renewal reminders"
+sidebarTitle: "Renewals"
+description: "Renewal campaigns in Exotic CRM automatically message clients whose subscriptions are expiring. Learn how to create, run, pause, and monitor renewal outreach."
+---
+
+Renewal campaigns are the backbone of subscription retention in Exotic CRM. Each campaign rule watches for deals that hit a configurable expiry threshold and dispatches an SMS or WhatsApp message to the matching clients. You can run campaigns on a schedule, send individual reminders on demand, pause outreach for specific clients, and review the full history of every campaign execution — all from the **Campaigns** workspace.
+
+<Note>
+  Access to renewal campaigns requires the `admin`, `sub_admin`, or `sales` role. Users without one of these roles cannot view or interact with the Campaigns page.
+</Note>
+
+## The Campaigns list view
+
+The Campaigns page (`GET /api/crm/renewals`) displays every active subscription deal and client record that falls within your campaign scope. Use the metric cards at the top of the page to understand your renewal pipeline at a glance.
+
+<CardGroup cols={3}>
+  <Card title="At Risk" icon="triangle-exclamation">
+    Clients expiring within the next 3 days. Highest urgency — act immediately.
+  </Card>
+  <Card title="Pending" icon="clock">
+    Clients expiring in 4–14 days. Scheduled for upcoming reminder runs.
+  </Card>
+  <Card title="Stable" icon="circle-check">
+    Active subscriptions with more than 14 days remaining.
+  </Card>
+  <Card title="Expired" icon="calendar-xmark">
+    Subscriptions that lapsed within the last 14 days.
+  </Card>
+  <Card title="Lapsed" icon="ban">
+    Subscriptions expired more than 14 days ago with no renewal.
+  </Card>
+  <Card title="Paused" icon="pause">
+    Clients whose reminders have been manually put on hold.
+  </Card>
+</CardGroup>
+
+Click any metric card to filter the table to that bucket. Click it again to clear the filter. You can also combine bucket filters with the **Market** and **Search** controls to narrow your view.
+
+## Campaign configuration
+
+Renewal campaigns are configured as rules in CRM settings. Each rule defines:
+
+- **Trigger days** — how many days before expiry the campaign fires
+- **Product** — which subscription product the rule applies to
+- **Template** — the SMS or WhatsApp message template to use
+- **Channel** — `sms` or `whatsapp`
+- **Enabled** — whether the rule participates in automated runs
+
+Create or edit campaign rules from the Settings workspace. Once configured, they appear in the **Campaign Run Configuration** dialog on the Campaigns page.
+
+## Running a renewal campaign
+
+Running a campaign sends reminder messages to all clients that match the campaign's trigger criteria. You can target a specific bucket, market, or client search before executing.
+
+<Steps>
+  <Step title="Open the run configuration">
+    Click **Run Campaigns** in the top-right of the Campaigns page. The dialog pre-fills with your current table filters (market, bucket, search).
+  </Step>
+  <Step title="Select campaigns">
+    Check one or more campaign rules to include in the run. Use **Select enabled** to automatically check all currently active rules.
+  </Step>
+  <Step title="Configure the scope">
+    Optionally restrict the run to a specific bucket (At Risk, Pending, etc.), market, or client search term. The dialog shows a live count of targets matching your scope.
+  </Step>
+  <Step title="Choose a channel">
+    Select **SMS** or **Email** as the delivery channel for this run.
+  </Step>
+  <Step title="Preview with a dry run">
+    Toggle **Dry run** on to see which clients would be targeted without actually sending messages. The preview shows up to 12 sample targets. Review the results, then turn off **Dry run** to execute for real.
+  </Step>
+  <Step title="Execute">
+    Click **Run** to trigger the campaign. The API call is `POST /api/crm/renewals/run`. The page refreshes with a summary: targets reached, messages sent, failures, and skips.
+  </Step>
+</Steps>
+
+<Warning>
+  Running a campaign without **Dry run** sends live SMS or WhatsApp messages to clients immediately. Always preview first when targeting a large bucket or an unfamiliar scope.
+</Warning>
+
+**Request body reference — `POST /api/crm/renewals/run`**
+
+| Field | Type | Description |
+|---|---|---|
+| `campaign_ids` | integer[] | IDs of campaign rules to run |
+| `platform_id` | integer | Restrict to a single market (optional) |
+| `bucket` | string | One of `all`, `risk`, `pending`, `stable`, `expired`, `lapsed`, `paused` |
+| `search` | string | Filter targets by client name or phone |
+| `channel` | string | `sms` or `email` |
+| `dry_run` | boolean | Preview only — no messages are sent |
+| `reason` | string | Audit note recorded against this run |
+
+## Sending individual reminders
+
+You can send a reminder to a single client without triggering a full campaign run. This is useful for ad-hoc outreach or when a client requests a follow-up.
+
+<Tabs>
+  <Tab title="From the table">
+    Click **Remind** in the row's action column. The reminder fires immediately using the client's default campaign template. If reminders are paused for that client, the button is disabled and shows **Paused**.
+  </Tab>
+  <Tab title="From the detail panel">
+    Click **Manage** on any row to open the Renewal Control Panel. Select **Send reminder** to dispatch a message for that specific deal or client.
+  </Tab>
+  <Tab title="Via API">
+    `POST /api/crm/renewals/remind`
+
+    | Field | Type | Description |
+    |---|---|---|
+    | `deal_id` | integer | ID of an active deal (preferred) |
+    | `client_id` | integer | ID of the client (for virtual/legacy records) |
+    | `template_id` | integer | Override the default template (optional) |
+
+    Either `deal_id` or `client_id` is required. If you provide `deal_id`, the API resolves the matching client and subscription automatically.
+  </Tab>
+</Tabs>
+
+## Bulk reminders
+
+To send reminders to a filtered set of clients in one action, select rows in the table and use the **Send reminder** bulk action.
+
+<Steps>
+  <Step title="Select targets">
+    Check individual rows, or select all visible records and then opt in to **Select all N records matching these filters** to include every match across all pages.
+  </Step>
+  <Step title="Preview the batch">
+    Click **Send reminder** in the bulk action bar. A preview dialog loads automatically, showing how many messages will be sent.
+  </Step>
+  <Step title="Confirm">
+    Review the preview summary, then confirm to dispatch. The API call is `POST /api/crm/renewals/bulk-remind`.
+  </Step>
+</Steps>
+
+**Request body reference — `POST /api/crm/renewals/bulk-remind`**
+
+| Field | Type | Description |
+|---|---|---|
+| `selection` | array | Array of `{ deal_id, client_id, expires_at }` objects |
+| `select_all` | boolean | When `true`, targets every record matching the current filters |
+| `platform_id` | integer | Restrict to a single market (optional) |
+| `bucket` | string | Bucket filter applied when `select_all` is `true` |
+| `search` | string | Search filter applied when `select_all` is `true` |
+| `template_id` | integer | Override the reminder template for all targets |
+| `dry_run` | boolean | Preview count without sending |
+
+<Tip>
+  Use `dry_run: true` in the API to get a count of targets before committing to a large bulk send.
+</Tip>
+
+## Pausing and resuming reminders
+
+When a client asks to pause renewal outreach — or when you need to hold reminders during a payment dispute — you can suspend the campaign for that subscription without affecting others.
+
+<Tabs>
+  <Tab title="Pause">
+    Open the Renewal Control Panel for a deal and click **Pause reminders**. Enter a reason (required) and optionally set a **Pause until** date. After that date, the system automatically makes the client eligible again.
+
+    API: `POST /api/crm/renewals/pause`
+
+    | Field | Type | Description |
+    |---|---|---|
+    | `deal_id` | integer | Active deal to pause (required) |
+    | `reason` | string | Required explanation recorded in the audit log |
+    | `pause_until` | date | Optional date after which reminders resume |
+  </Tab>
+  <Tab title="Resume">
+    Open the Renewal Control Panel for a paused deal. The **Pause reminders** button changes to **Resume reminders**. Click it, enter a reason, and confirm.
+
+    API: `POST /api/crm/renewals/resume`
+
+    | Field | Type | Description |
+    |---|---|---|
+    | `deal_id` | integer | Paused deal to resume |
+    | `reason` | string | Required explanation recorded in the audit log |
+  </Tab>
+</Tabs>
+
+<Note>
+  Pausing is only supported for active subscription deals. If a client does not have an active deal, create a subscription first.
+</Note>
+
+## Viewing run history
+
+Every campaign execution is recorded as a run log entry. View the history to audit what was sent, when, and by whom.
+
+**API: `GET /api/crm/renewals/runs`**
+
+| Parameter | Description |
+|---|---|
+| `campaign_id` | Filter runs to a specific campaign rule |
+| `per_page` | Results per page (10–100) |
+
+Each run record includes:
+
+- `run_at` — timestamp of execution
+- `run_by` — the CRM user who triggered the run
+- `total_targeted` — number of clients in scope
+- `sent_count` — messages successfully dispatched
+- `failed_count` — delivery failures
+- `skipped_count` — clients excluded (paused, already messaged, etc.)
+- `status` — final run outcome
+
+<Note>
+  Non-admin users can only view runs they personally triggered. Admins see all run history across all users.
+</Note>
+
+The most recent run is also shown as a summary banner at the top of the Campaigns page whenever run history is available.

@@ -1,0 +1,489 @@
+---
+title: "REST API endpoints for leads"
+sidebarTitle: "Leads API"
+description: "Create, list, and manage leads through the pipeline. Update statuses, assign agents, reconcile with existing clients, and convert leads to client records."
+---
+
+The leads API lets you manage the full prospect pipeline inside Exotic CRM. You can capture leads from manual entry, CSV upload, or web scraping, move them through pipeline stages, assign them to agents, reconcile them against existing client records, and promote them directly to client records when they convert. All endpoints require a valid bearer token and at minimum the `sales` role.
+
+<Note>
+All leads endpoints require `admin`, `sub_admin`, or `sales` role. There is no read-only access for the `marketing` role on leads.
+</Note>
+
+---
+
+## List leads
+
+Return a paginated list of leads with stage counts.
+
+```
+GET /api/crm/leads
+```
+
+### Query parameters
+
+<ParamField query="page" type="integer" default="1">
+  Page number.
+</ParamField>
+
+<ParamField query="per_page" type="integer" default="25">
+  Records per page.
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filter by pipeline stage: `new`, `contacted`, `qualified`, `converted`, or `lost`.
+</ParamField>
+
+<ParamField query="platform_id" type="integer">
+  Filter to a specific market.
+</ParamField>
+
+<ParamField query="assigned_to" type="integer">
+  Filter to leads assigned to a specific user ID.
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search across name, phone, and email.
+</ParamField>
+
+<ParamField query="include_archived" type="boolean" default="false">
+  Include archived leads in results.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl "https://your-crm.example.com/api/crm/leads?platform_id=1&status=new&per_page=10" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "data": [
+    {
+      "id": 88,
+      "platform_id": 1,
+      "name": "Bianca",
+      "phone_normalized": "254700111222",
+      "email": null,
+      "source": "outbound",
+      "status": "new",
+      "assigned_to": 12,
+      "archived_at": null,
+      "created_at": "2026-04-01T08:00:00.000000Z",
+      "matched_client": null,
+      "match_confidence": null
+    }
+  ],
+  "current_page": 1,
+  "total": 120,
+  "stats": {
+    "total": 120,
+    "new": 44,
+    "contacted": 31,
+    "qualified": 18,
+    "converted": 22,
+    "lost": 5,
+    "assigned": 95,
+    "unassigned": 25
+  }
+}
+```
+
+</CodeGroup>
+
+---
+
+## Create a lead
+
+Manually create a new lead record.
+
+```
+POST /api/crm/leads
+```
+
+### Request body
+
+<ParamField body="platform_id" type="integer" required>
+  Market (platform) the lead belongs to.
+</ParamField>
+
+<ParamField body="name" type="string" required>
+  Lead's display name.
+</ParamField>
+
+<ParamField body="phone_normalized" type="string">
+  Phone in normalized format (e.g., `254700111222`).
+</ParamField>
+
+<ParamField body="email" type="string">
+  Lead's email address.
+</ParamField>
+
+<ParamField body="source" type="string" default="outbound">
+  Lead acquisition source: `registration`, `referral`, `outbound`, or `import`.
+</ParamField>
+
+<ParamField body="status" type="string" default="new">
+  Initial pipeline stage: `new`, `contacted`, `qualified`, `converted`, or `lost`.
+</ParamField>
+
+<ParamField body="assigned_to" type="integer">
+  User ID to assign this lead to. If omitted, assignment is determined automatically.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/leads \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "platform_id": 1,
+    "name": "Bianca",
+    "phone_normalized": "254700111222",
+    "source": "outbound",
+    "status": "new"
+  }'
+```
+
+```json Response (201)
+{
+  "id": 89,
+  "platform_id": 1,
+  "name": "Bianca",
+  "phone_normalized": "254700111222",
+  "email": null,
+  "source": "outbound",
+  "status": "new",
+  "assigned_to": 12,
+  "archived_at": null,
+  "created_at": "2026-05-12T09:00:00.000000Z",
+  "updated_at": "2026-05-12T09:00:00.000000Z"
+}
+```
+
+</CodeGroup>
+
+---
+
+## Pipeline summary
+
+Return counts for each pipeline stage across accessible markets, excluding archived leads.
+
+```
+GET /api/crm/leads/pipeline
+```
+
+<ParamField query="platform_id" type="integer">
+  Scope the summary to a single market.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl "https://your-crm.example.com/api/crm/leads/pipeline?platform_id=1" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "new": 44,
+  "contacted": 31,
+  "qualified": 18,
+  "converted": 22,
+  "lost": 5
+}
+```
+
+</CodeGroup>
+
+---
+
+## Get a lead
+
+Return full detail for a single lead, including the matched client summary if a CRM client can be automatically resolved.
+
+```
+GET /api/crm/leads/{lead}
+```
+
+<ParamField path="lead" type="integer" required>
+  The numeric lead ID.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl https://your-crm.example.com/api/crm/leads/88 \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "id": 88,
+  "platform_id": 1,
+  "name": "Bianca",
+  "phone_normalized": "254700111222",
+  "status": "contacted",
+  "source": "outbound",
+  "assigned_to": 12,
+  "first_contact_at": "2026-04-02T10:00:00.000000Z",
+  "last_contact_at": "2026-04-10T14:30:00.000000Z",
+  "converted_client_id": null,
+  "archived_at": null,
+  "matched_client": {
+    "id": 501,
+    "name": "Amara",
+    "phone_normalized": "254712345678",
+    "profile_status": "publish",
+    "confidence": "medium"
+  },
+  "match_confidence": "medium"
+}
+```
+
+</CodeGroup>
+
+---
+
+## Update status
+
+Move a lead to a new pipeline stage.
+
+```
+PATCH /api/crm/leads/{lead}/status
+```
+
+### Request body
+
+<ParamField body="status" type="string" required>
+  New status: `new`, `contacted`, `qualified`, `converted`, or `lost`.
+</ParamField>
+
+<ParamField body="converted_client_id" type="integer">
+  Required when setting status to `converted`. The CRM client ID this lead is linked to.
+</ParamField>
+
+<ParamField body="reason" type="string">
+  Optional audit note.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X PATCH https://your-crm.example.com/api/crm/leads/88/status \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "qualified"}'
+```
+
+```json Response
+{
+  "id": 88,
+  "status": "qualified",
+  "last_contact_at": "2026-05-12T10:00:00.000000Z"
+}
+```
+
+</CodeGroup>
+
+---
+
+## Assign a lead
+
+Assign or reassign a lead to a team member.
+
+```
+PATCH /api/crm/leads/{lead}/assign
+```
+
+### Request body
+
+<ParamField body="assigned_to" type="integer">
+  User ID to assign the lead to. The user must be active and have access to this market. Pass `null` to unassign.
+</ParamField>
+
+<ParamField body="reason" type="string">
+  Optional audit note.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X PATCH https://your-crm.example.com/api/crm/leads/88/assign \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{"assigned_to": 15}'
+```
+
+```json Response
+{
+  "id": 88,
+  "assigned_to": 15,
+  "updated_at": "2026-05-12T10:05:00.000000Z"
+}
+```
+
+</CodeGroup>
+
+---
+
+## Reconcile a lead
+
+Link, convert, or archive a lead against an existing CRM client record. Use this when you identify that a lead already exists as a client.
+
+```
+POST /api/crm/leads/{lead}/reconcile
+```
+
+### Request body
+
+<ParamField body="action" type="string" required>
+  What to do when reconciling. One of:
+  - `link` — link the lead to the client without changing status
+  - `convert` — link and set status to `converted`
+  - `archive` — link and immediately archive the lead
+</ParamField>
+
+<ParamField body="client_id" type="integer">
+  CRM client ID to link to. If omitted, the system attempts to auto-resolve by phone, WordPress IDs, or email.
+</ParamField>
+
+<ParamField body="reason" type="string" required>
+  Audit reason explaining the reconciliation.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/leads/88/reconcile \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "action": "convert",
+    "client_id": 501,
+    "reason": "Phone match confirmed with client"
+  }'
+```
+
+```json Response
+{
+  "lead": {
+    "id": 88,
+    "status": "converted",
+    "converted_client_id": 501
+  },
+  "message": "Lead reconciliation applied."
+}
+```
+
+</CodeGroup>
+
+---
+
+## Convert to client
+
+Create a new CRM client record from this lead and mark the lead as converted.
+
+```
+POST /api/crm/leads/{lead}/convert-to-client
+```
+
+### Request body
+
+<ParamField body="name" type="string" required>
+  Client name (pre-filled from lead but can be adjusted).
+</ParamField>
+
+<ParamField body="phone_normalized" type="string">
+  Normalized phone number.
+</ParamField>
+
+<ParamField body="email" type="string">
+  Email address.
+</ParamField>
+
+<ParamField body="city" type="string">
+  City.
+</ParamField>
+
+<ParamField body="profile_status" type="string" default="private">
+  WordPress post status: `publish`, `private`, `draft`, or `pending`.
+</ParamField>
+
+<ParamField body="assigned_to" type="integer">
+  Owner user ID for the new client record.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/leads/88/convert-to-client \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Bianca",
+    "phone_normalized": "254700111222",
+    "city": "Nairobi",
+    "profile_status": "private"
+  }'
+```
+
+```json Response (200 — converted)
+{
+  "message": "Lead converted to client.",
+  "client": {
+    "id": 503,
+    "name": "Bianca",
+    "phone_normalized": "254700111222",
+    "city": "Nairobi",
+    "profile_status": "private",
+    "platform_id": 1
+  },
+  "lead": {
+    "id": 88,
+    "status": "converted",
+    "converted_client_id": 503
+  }
+}
+```
+
+</CodeGroup>
+
+<Note>
+If a likely duplicate client already exists (matched by phone or email), the API returns `409 Conflict` with a `duplicate: true` flag and the existing client record so you can decide whether to link or proceed.
+</Note>
+
+---
+
+## Delete a lead
+
+Permanently remove a lead. This action is recorded in the audit log.
+
+```
+DELETE /api/crm/leads/{lead}
+```
+
+### Request body
+
+<ParamField body="reason" type="string" required>
+  Reason for deletion (max 500 characters).
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X DELETE https://your-crm.example.com/api/crm/leads/88 \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{"reason": "Test lead, not a real prospect"}'
+```
+
+```json Response
+{
+  "message": "Lead deleted."
+}
+```
+
+</CodeGroup>

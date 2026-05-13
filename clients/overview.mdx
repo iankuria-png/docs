@@ -1,0 +1,90 @@
+---
+title: "Managing clients in Exotic CRM"
+sidebarTitle: "Overview"
+description: "Browse, filter, and manage advertising market client profiles synced from WordPress. View retention bands, subscription status, and online activity at a glance."
+---
+
+The Clients section is the central hub for every advertising market profile you manage. Each client record is a CRM-side snapshot of a WordPress profile — WordPress remains the authoritative source of truth, and the CRM caches that data locally to power filtering, retention scoring, and deal management. Changes you make in the CRM can be pushed back to WordPress, but the profile ultimately lives there.
+
+## What is a client record?
+
+A client record represents one advertising profile registered on a WordPress-powered market. It stores the profile's name, phone number, city, subscription status, assigned sales agent, and a link back to the WordPress post that owns the data. When the CRM syncs, it pulls the latest values from WordPress and updates the local cache — it does not replace WordPress as the source of truth.
+
+Each client record also carries computed fields that do not exist in WordPress: the retention band, the profile completeness score, and the wallet balance used for automated billing.
+
+## The clients list view
+
+Navigate to **Clients** in the sidebar to open the main list. The list loads the most recently updated profiles first and paginates at 50 rows per page by default.
+
+At the top of the list, four metric cards summarise the current filtered result set:
+
+| Card | What it counts |
+|------|----------------|
+| **Active** | Profiles with `publish` status and no payment block |
+| **New (7d)** | Profiles created in the last seven days |
+| **Verified** | Profiles carrying the verified badge |
+| **Retention watch** | Profiles in the Critical, Needs Attention, or Watchlist retention bands |
+
+Click any metric card to instantly apply the matching filter. Click it again to clear the filter.
+
+## Filtering the list
+
+Use the filter bar above the table to narrow the list. Filters can be combined freely.
+
+<Tabs>
+  <Tab title="By market">
+    Select a market (platform) from the **Market** dropdown. The CRM remembers your last selected market across sessions. Agents assigned to a single market will only ever see their own market's clients.
+  </Tab>
+  <Tab title="By status">
+    The **Status** filter accepts four values:
+
+    | Value | Meaning |
+    |-------|---------|
+    | Active | Profile is publicly visible (`publish` with no payment block) |
+    | Private | Profile is hidden from the public site |
+    | Draft | Profile exists in WordPress but has not been published |
+    | Pending | Profile is awaiting review before publication |
+  </Tab>
+  <Tab title="By plan">
+    Filter by subscription plan tier. Available options reflect the packages configured for the selected market. Common tiers include VVIP, VIP, Premium, Featured, and Basic.
+  </Tab>
+  <Tab title="By retention band">
+    The **Retention** filter shows clients grouped by their computed retention band. Select **Watch** to see all at-risk bands at once, or choose a specific band: Critical, Needs Attention, Watchlist, or Stable. See [Subscriptions](/clients/subscriptions) for a full explanation of bands.
+  </Tab>
+  <Tab title="By city">
+    The **City** dropdown is populated from cities already present in the selected market's client records. It resets automatically when you switch markets.
+  </Tab>
+</Tabs>
+
+## Searching by name or phone
+
+The search bar accepts a client name, phone number, email address, CRM client ID, WordPress post ID, or a full profile URL pasted directly from the public site.
+
+When you paste a WordPress profile URL, the CRM resolves it against the live site and returns the matching client directly. If the URL resolves to a profile that is not yet in the CRM scope, a warning banner appears to let you know the profile exists on WordPress but has not been synced.
+
+## Online status indicator
+
+Each row in the list displays an **Online** or **Offline** badge. A client is considered online if their `last_online_at` timestamp (recorded by WordPress when the client logs into the site) falls within the last 30 minutes. The exact time of last activity appears beneath the badge.
+
+You can filter the list to show only clients active within a specific window using the **Online within** filter (options: 5 min, 15 min, 30 min, 1 h, 6 h, 24 h, 7 d).
+
+## Profile health indicator
+
+Profiles with missing or broken data show a health warning in the detail view. From the list, you can spot clients flagged as **High Risk** by the red badge next to their name. Full health details, including specific issues and resolution steps, are available on the [Profile Health tab](/clients/subscriptions#profile-health).
+
+## Go deeper
+
+<CardGroup cols={2}>
+  <Card title="Profiles" icon="user-pen" href="/clients/managing-profiles">
+    Edit contact details, upload media, sync from WordPress, repair broken links, and send login credentials.
+  </Card>
+  <Card title="Subscriptions" icon="calendar-check" href="/clients/subscriptions">
+    Understand subscription status badges, deactivate a subscription, and work with retention bands.
+  </Card>
+  <Card title="Wallet" icon="wallet" href="/clients/wallet">
+    View wallet balance and transaction history, top up manually, and apply credit or debit adjustments.
+  </Card>
+  <Card title="Dashboard" icon="chart-line" href="/reports/dashboard">
+    See market-wide KPIs, renewal queue, and agent performance at a glance.
+  </Card>
+</CardGroup>

@@ -1,0 +1,110 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "almond",
+  "name": "Exotic CRM",
+  "logo": {
+    "light": "/images/exo-dark.png",
+    "dark": "/images/logo-light.png"
+  },
+  "favicon": "/favicon.jpg",
+  "colors": {
+    "primary": "#fc2c24",
+    "light": "#040404",
+    "dark": "#e29d78"
+  },
+  "navbar": {
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/iankuria-png/exotic-crm"
+    }
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "User Guide",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "index",
+              "quickstart",
+              "roles-permissions"
+            ]
+          },
+          {
+            "group": "Clients",
+            "pages": [
+              "clients/overview",
+              "clients/managing-profiles",
+              "clients/subscriptions",
+              "clients/wallet"
+            ]
+          },
+          {
+            "group": "Leads & Deals",
+            "pages": [
+              "leads/overview",
+              "leads/pipeline",
+              "deals/overview",
+              "deals/renewals"
+            ]
+          },
+          {
+            "group": "Payments",
+            "pages": [
+              "payments/overview",
+              "payments/matching",
+              "payments/manual-payments"
+            ]
+          },
+          {
+            "group": "Campaigns",
+            "pages": [
+              "campaigns/renewal-campaigns",
+              "campaigns/push-campaigns"
+            ]
+          },
+          {
+            "group": "Reporting & Team",
+            "pages": [
+              "reports/dashboard",
+              "reports/reports",
+              "reports/team-performance"
+            ]
+          },
+          {
+            "group": "Settings",
+            "pages": [
+              "settings/integrations",
+              "settings/billing",
+              "settings/roles",
+              "settings/templates"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Authentication",
+            "pages": [
+              "api/authentication"
+            ]
+          },
+          {
+            "group": "Endpoints",
+            "pages": [
+              "api/clients",
+              "api/leads",
+              "api/deals",
+              "api/payments",
+              "api/campaigns",
+              "api/reports"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

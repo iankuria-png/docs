@@ -1,0 +1,517 @@
+---
+title: "REST API endpoints for reports"
+sidebarTitle: "Reports API"
+description: "Retrieve dashboard KPIs, revenue summaries, profile engagement stats, team leaderboards, and agent activity feeds from the Exotic CRM reporting endpoints."
+---
+
+The reports API gives you programmatic access to all analytics surfaces in Exotic CRM: the sales dashboard, revenue summaries, profile engagement rankings pulled from WordPress, weekly scorecards, team leaderboards, and per-agent activity feeds. All endpoints require a valid bearer token. The dashboard and engagement endpoints are available to the `marketing` role; scorecard, team, and summary endpoints require `admin`, `sub_admin`, or `sales`.
+
+---
+
+## Dashboard summary
+
+Return top-level KPIs, revenue trend, lead funnel, package revenue breakdown, owner performance, and renewal health — all in one response.
+
+```
+GET /api/crm/dashboard
+```
+
+### Query parameters
+
+<ParamField query="platform_id" type="integer">
+  Scope to a specific market. If omitted, data covers all accessible markets.
+</ParamField>
+
+<ParamField query="from" type="string">
+  Report start date (ISO 8601, e.g., `2026-01-01`). Defaults to 5 months ago.
+</ParamField>
+
+<ParamField query="to" type="string">
+  Report end date. Defaults to today.
+</ParamField>
+
+<ParamField query="reporting_currency" type="string">
+  3-letter currency code for normalized totals (e.g., `USD`). Defaults to native currency.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl "https://your-crm.example.com/api/crm/dashboard?platform_id=1&from=2026-01-01&to=2026-05-12" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "range": { "from": "2026-01-01", "to": "2026-05-12" },
+  "kpis": {
+    "total_revenue": 1250000,
+    "total_revenue_breakdown": { "KES": 1250000 },
+    "revenue_mtd": 280000,
+    "active_clients": 210,
+    "total_clients": 348,
+    "conversion_rate": 63,
+    "renewal_rate": 87,
+    "active_deals": 210,
+    "expiring_soon": 18
+  },
+  "revenue_trend": [
+    { "month_key": "2026-01", "label": "Jan 2026", "value": 195000 },
+    { "month_key": "2026-02", "label": "Feb 2026", "value": 220000 }
+  ],
+  "lead_funnel": {
+    "new": 44, "contacted": 31, "qualified": 18, "converted": 22, "lost": 5
+  },
+  "lead_funnel_stages": [...],
+  "package_revenue": [...],
+  "owner_performance": [...],
+  "renewal_health": {
+    "run_count": 12,
+    "sent": 340,
+    "failed": 8,
+    "active_deals": 210,
+    "expiring_soon": 18,
+    "expired_last_30_days": 24
+  }
+}
+```
+
+</CodeGroup>
+
+---
+
+## Country revenue breakdown
+
+Return a country-by-country revenue breakdown for the selected period.
+
+```
+GET /api/crm/dashboard/country-revenue
+```
+
+### Query parameters
+
+<ParamField query="platform_id" type="integer">
+  Scope to a single market.
+</ParamField>
+
+<ParamField query="from" type="string">
+  Start date.
+</ParamField>
+
+<ParamField query="to" type="string">
+  End date.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl "https://your-crm.example.com/api/crm/dashboard/country-revenue?from=2026-05-01&to=2026-05-12" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "rows": [
+    { "country": "KE", "platform_name": "ExoticKenya", "revenue": 280000, "currency": "KES", "payments_count": 93 },
+    { "country": "UG", "platform_name": "ExoticUganda", "revenue": 95000, "currency": "UGX", "payments_count": 31 }
+  ]
+}
+```
+
+</CodeGroup>
+
+---
+
+## Revenue report summary
+
+Return a detailed revenue report with lead funnel, package revenue, and owner performance for the selected range.
+
+```
+GET /api/crm/reports/summary
+```
+
+<Note>
+Requires `admin`, `sub_admin`, or `sales` role.
+</Note>
+
+### Query parameters
+
+<ParamField query="platform_id" type="integer">
+  Scope to a market.
+</ParamField>
+
+<ParamField query="from" type="string">
+  Report start date.
+</ParamField>
+
+<ParamField query="to" type="string">
+  Report end date.
+</ParamField>
+
+<ParamField query="reporting_currency" type="string">
+  Currency code for normalized totals.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl "https://your-crm.example.com/api/crm/reports/summary?platform_id=1&from=2026-05-01&to=2026-05-12" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "filters": { "platform_id": 1, "currency_mode": "native", "reporting_currency": null },
+  "range": { "from": "2026-05-01", "to": "2026-05-12" },
+  "kpis": {
+    "total_revenue": 280000,
+    "total_revenue_breakdown": { "KES": 280000 },
+    "active_clients": 210,
+    "conversion_rate": 63
+  },
+  "lead_funnel": { "new": 12, "contacted": 8, "qualified": 5, "converted": 7, "lost": 1 },
+  "revenue_trend": [...],
+  "package_revenue": [
+    { "package": "Premium", "revenue": 210000, "count": 70 },
+    { "package": "Featured", "revenue": 70000, "count": 35 }
+  ],
+  "owner_performance": [
+    { "owner": "Jane Ochieng", "payments_count": 28, "revenue": 84000 }
+  ]
+}
+```
+
+</CodeGroup>
+
+---
+
+## Profile engagement stats
+
+Return per-profile engagement rankings (views, contact rate, engagement score) pulled from WordPress analytics. Requires selecting a single market.
+
+```
+GET /api/crm/reports/profile-engagement
+```
+
+### Query parameters
+
+<ParamField query="platform_id" type="integer" required>
+  Market to fetch analytics for. Required — engagement data is fetched from WordPress per-market.
+</ParamField>
+
+<ParamField query="from" type="string">
+  Period start date.
+</ParamField>
+
+<ParamField query="to" type="string">
+  Period end date.
+</ParamField>
+
+<ParamField query="sort_by" type="string" default="engagement_score">
+  Sort field: `engagement_score`, `profile_view`, `contact_rate`, or `contact_total`.
+</ParamField>
+
+<ParamField query="order" type="string" default="desc">
+  `asc` or `desc`.
+</ParamField>
+
+<ParamField query="per_page" type="integer" default="25">
+  Profiles per page.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl "https://your-crm.example.com/api/crm/reports/profile-engagement?platform_id=1&sort_by=profile_view" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "filters": { "platform_id": 1 },
+  "profiles": [
+    {
+      "post_id": 1042,
+      "name": "Amara",
+      "profile_view": 540,
+      "contact_total": 62,
+      "contact_rate": 11.5,
+      "engagement_score": 87,
+      "crm_client_id": 501,
+      "assigned_agent": { "id": 12, "name": "Jane Ochieng" },
+      "subscription_tier": "Premium",
+      "subscription_status": "active",
+      "wp_profile_url": "https://exotickenya.com/escort/amara/"
+    }
+  ],
+  "total": 210
+}
+```
+
+</CodeGroup>
+
+---
+
+## Scorecard preview
+
+Return the weekly sales scorecard for the current week.
+
+```
+GET /api/crm/reports/scorecard/preview
+```
+
+<Note>
+Requires `admin`, `sub_admin`, or `sales` role.
+</Note>
+
+### Query parameters
+
+<ParamField query="platform_id" type="integer">
+  Scope to a market.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl "https://your-crm.example.com/api/crm/reports/scorecard/preview?platform_id=1" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "week": "2026-W19",
+  "agents": [
+    {
+      "name": "Jane Ochieng",
+      "new_clients": 4,
+      "activations": 12,
+      "renewals": 8,
+      "revenue": 36000,
+      "rank": 1
+    }
+  ]
+}
+```
+
+</CodeGroup>
+
+---
+
+## Export scorecard
+
+Export the weekly scorecard to a file.
+
+```
+POST /api/crm/reports/scorecard/export
+```
+
+<Note>
+Requires `admin`, `sub_admin`, or `sales` role.
+</Note>
+
+### Request body
+
+<ParamField body="format" type="string" required>
+  Export format: `csv` or `xlsx`.
+</ParamField>
+
+<ParamField body="week" type="string">
+  ISO week string (e.g., `2026-W19`). Defaults to the current week.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/reports/scorecard/export \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{"format": "xlsx", "week": "2026-W19"}' \
+  -o scorecard_w19.xlsx
+```
+
+</CodeGroup>
+
+---
+
+## Team leaderboard
+
+Return a ranked list of agents by revenue or activations for the selected period.
+
+```
+GET /api/crm/team/leaderboard
+```
+
+<Note>
+Requires `admin` or `sub_admin` role.
+</Note>
+
+### Query parameters
+
+<ParamField query="period" type="string" default="month">
+  Time window: `week`, `month`, or `quarter`.
+</ParamField>
+
+<ParamField query="role" type="string">
+  Filter to a specific role: `sales`, `marketing`, `admin`, or `sub_admin`.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl "https://your-crm.example.com/api/crm/team/leaderboard?period=month" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "period": "month",
+  "leaderboard": [
+    { "rank": 1, "user_id": 12, "name": "Jane Ochieng", "role": "sales", "activations": 12, "renewals": 8, "revenue": 36000 },
+    { "rank": 2, "user_id": 15, "name": "Brian Kamau", "role": "sales", "activations": 9, "renewals": 11, "revenue": 30000 }
+  ]
+}
+```
+
+</CodeGroup>
+
+---
+
+## Team goals
+
+Return the team's current active goals and progress.
+
+```
+GET /api/crm/team/goals
+```
+
+<Note>
+Requires `admin` or `sub_admin` role.
+</Note>
+
+<CodeGroup>
+
+```bash Request
+curl https://your-crm.example.com/api/crm/team/goals \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "goals": [
+    {
+      "id": 4,
+      "metric": "activations",
+      "target": 50,
+      "current": 38,
+      "progress_pct": 76,
+      "period": "month",
+      "role": "sales"
+    }
+  ]
+}
+```
+
+</CodeGroup>
+
+---
+
+## Agent stats
+
+Return performance statistics for a specific agent.
+
+```
+GET /api/crm/team/{user}/stats
+```
+
+<Note>
+Requires `admin` or `sub_admin` role.
+</Note>
+
+<ParamField path="user" type="integer" required>
+  The agent's user ID.
+</ParamField>
+
+<ParamField query="period" type="string" default="month">
+  Time window: `week`, `month`, or `quarter`.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl "https://your-crm.example.com/api/crm/team/12/stats?period=month" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "user_id": 12,
+  "name": "Jane Ochieng",
+  "period": "month",
+  "stats": {
+    "new_leads": 8,
+    "contacts_made": 24,
+    "activations": 12,
+    "renewals": 8,
+    "revenue": 36000,
+    "avg_response_time_minutes": 22
+  }
+}
+```
+
+</CodeGroup>
+
+---
+
+## Agent activity feed
+
+Return a paginated chronological feed of actions taken by a specific agent.
+
+```
+GET /api/crm/team/{user}/activity
+```
+
+<Note>
+Requires `admin` or `sub_admin` role.
+</Note>
+
+<ParamField path="user" type="integer" required>
+  The agent's user ID.
+</ParamField>
+
+<ParamField query="entity_type" type="string">
+  Filter by entity: `client`, `lead`, `deal`, or `payment`.
+</ParamField>
+
+<ParamField query="page" type="integer" default="1">
+  Page number.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl "https://your-crm.example.com/api/crm/team/12/activity?entity_type=deal" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "data": [
+    {
+      "id": 9105,
+      "event_type": "deal_activated",
+      "entity_type": "deal",
+      "entity_id": 78,
+      "actor_id": 12,
+      "content": {
+        "payment_method": "manual",
+        "payment_reference": "QHT7P3KLMN"
+      },
+      "created_at": "2026-05-12T10:00:00.000000Z"
+    }
+  ],
+  "current_page": 1,
+  "total": 142
+}
+```
+
+</CodeGroup>

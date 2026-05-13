@@ -1,0 +1,125 @@
+---
+title: "Revenue dashboard and KPI overview"
+sidebarTitle: "Dashboard"
+description: "The Exotic CRM dashboard shows live revenue, active clients, payment recovery queue, renewal workload, and retention signals. Filter by market and date range."
+---
+
+The dashboard is your operational command center. It pulls live data from `GET /api/crm/dashboard` and refreshes automatically every 30 seconds, so the numbers you see reflect the current state of your markets without a manual reload. Use the market filter and date controls at the top to narrow the scope before acting on any metric.
+
+## Filters and date controls
+
+Every widget on the dashboard respects the same market and date scope. You set it once at the top of the page and all KPI cards, lists, and charts update together.
+
+<Steps>
+  <Step title="Select a market">
+    Open the **Market** dropdown to scope the dashboard to a single advertising platform. Leaving it on **All accessible markets** aggregates data across every market your role can see. The selection persists in your browser so you return to the same scope on your next visit.
+  </Step>
+  <Step title="Choose a date range">
+    Use the **From** and **To** date inputs to set a custom window. Three shortcut buttons are available:
+
+    - **Week** — the last 7 days
+    - **Month** — the last 30 days
+    - **All-time** — from the earliest recorded payment to today
+
+    The applied range is always shown below the filter bar so there is no ambiguity about what the cards reflect.
+  </Step>
+  <Step title="Set the reporting currency">
+    Use the **Reporting Currency** control in the top-right corner of the filter bar. Toggle between **Native** (each market's own currency) and **Flat** (all revenue normalized to a single target currency using your configured FX rates).
+  </Step>
+</Steps>
+
+<Note>
+  When you select **All accessible markets** without a Flat currency override, the revenue card shows **Mixed currencies** because it cannot sum across different currencies. Select a single market or enable Flat mode to see a single combined total.
+</Note>
+
+## Headline metric cards
+
+Five KPI cards sit at the top of the dashboard. Each card is clickable and opens the relevant action queue for the metric it describes.
+
+<CardGroup cols={3}>
+  <Card title="Collected Revenue" icon="circle-dollar-sign">
+    Total successful payments in the selected date window, excluding wallet top-ups. Shows a percentage delta vs. the equivalent prior window. In Flat mode, revenue is normalized to your target currency and the raw per-currency breakdown appears beneath it.
+  </Card>
+  <Card title="Active Clients" icon="users">
+    Count of clients with an active subscription status. The hint line shows coverage as a percentage of all client records synced from the advertising platform.
+  </Card>
+  <Card title="Payment Recovery Queue" icon="triangle-alert">
+    Total payments that require attention: pending initiations, failed charges, and successful payments not yet matched to a client. Clicking the card opens the payment queue filtered to recovery items.
+  </Card>
+  <Card title="Renewal Workload (14d)" icon="calendar-clock">
+    Combined count of deals expiring within 0–3 days (risk tier) and 4–14 days (pipeline tier). Clicking the card opens the deals queue filtered to the workload bucket.
+  </Card>
+  <Card title="Retention Watch" icon="eye">
+    Number of clients currently flagged for retention follow-up based on payment history, renewal signals, and engagement drop-off. Also shows trailing 30-day logo churn.
+  </Card>
+</CardGroup>
+
+<Tip>
+  Click any metric card to jump directly to the relevant action queue — payments, clients, or deals — with the filter pre-applied.
+</Tip>
+
+## FX normalization
+
+When you enable Flat mode and revenue spans multiple currencies, the CRM applies your configured exchange rates to produce a single normalized total. A notice appears beneath the revenue card when normalization is partial — meaning one or more currencies could not be converted because a rate is missing.
+
+<Warning>
+  Normalized totals are estimates based on the FX rates you have configured in Settings. They are not live exchange rates. Configure accurate rates in **Settings → Reporting Currency** to keep the Flat view meaningful.
+</Warning>
+
+## Widgets
+
+### Top performing countries
+
+The **Top Performing Countries** widget calls `GET /api/crm/dashboard/country-revenue` independently of the main summary, so it can load and refresh without blocking the rest of the page. It ranks advertising markets by revenue in the selected window and compares each against the equivalent prior period. Use the **Week** / **Month** / **Custom** toggles on the widget itself to change only the country ranking window.
+
+### Revenue by package
+
+The **Revenue by Package** widget breaks down collected revenue by product tier for the selected market and date window. It reads from the same package revenue data used by the Reports page scorecard. Use it to quickly identify which packages are driving the most income in the current period.
+
+### Performance Pulse
+
+Performance Pulse shows three health indicators computed from the current dashboard summary:
+
+| Indicator | What it measures |
+|---|---|
+| Payment match quality | Percentage of successful payments in the window that are linked to a client |
+| Lead backlog pressure | Proportion of leads still at new or contacted stage vs. total leads |
+| Active coverage | Active clients as a share of all client records |
+
+### Expiring subscriptions
+
+A preview list of deals expiring soonest. Entries are sorted by expiry date ascending and show days remaining. Click any entry to open the client record. The full list is available via **View all → Deals**.
+
+### Upcoming follow-ups
+
+A list of client notes that have a pending follow-up date. Notes are created by agents on client records. Click any entry to open the client. If there are more than six entries, a link to the full clients list appears at the bottom.
+
+### Retention Watch
+
+The Retention Watch panel shows the distribution of clients across four risk bands and the trailing 30-day logo churn rate.
+
+<Tabs>
+  <Tab title="Band distribution">
+    Clients are scored by the retention engine and placed into one of four bands:
+
+    | Band | Meaning |
+    |---|---|
+    | Critical | Immediate churn risk; no recent payment, renewal failing, or engagement absent |
+    | Needs Attention | One or more warning signals; follow-up recommended within the week |
+    | Watchlist | Early drift indicators; monitor but not urgent |
+    | Stable | Healthy payment history, active subscription, good engagement signals |
+
+    The bar chart shows how many clients fall into each band and what share of the total they represent.
+  </Tab>
+  <Tab title="Logo churn 30d">
+    Logo churn is the percentage of clients who became inactive in the trailing 30-day window, computed from daily retention snapshots rather than live on page load. It is a lagging indicator — it reflects what happened over the past month, not today's state.
+  </Tab>
+</Tabs>
+
+## Auto-refresh
+
+The dashboard refreshes every 30 seconds while the page is open and there are no errors. If a request fails, auto-refresh pauses and a banner appears with a **Retry** button. Refresh resumes automatically once the next successful request completes.
+
+<Note>
+  Auto-refresh stops on error to avoid flooding the server with repeated failing requests. Use the **Retry** button in the error banner to resume manually.
+</Note>

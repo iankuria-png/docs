@@ -1,0 +1,170 @@
+---
+title: "Revenue reports and scorecard exports"
+sidebarTitle: "Reports"
+description: "View revenue by package, lead source breakdowns, and profile engagement stats. Export weekly scorecards as a spreadsheet directly from the Reports page."
+---
+
+The Reports page gives you a deeper view into your revenue and pipeline than the dashboard. Where the dashboard shows you what is happening right now, Reports shows you trends over time — monthly revenue movement, lead source quality, package performance, and how individual team members contributed to collected revenue. You can also preview and export a weekly scorecard directly from this page.
+
+## Filters
+
+The report filter bar sits at the top of the page. All report sections except profile engagement respond to the same scope.
+
+| Filter | Description |
+|---|---|
+| Market | Scope all reports to a single advertising platform |
+| From / To | Custom date range for the reporting window |
+| Reporting Currency | Native (per-currency) or Flat (normalized to a target currency) |
+
+<Note>
+  The **from** date auto-initializes to your data baseline cutoff date when one is configured in Settings. This prevents misleading totals from partial data before your CRM go-live date.
+</Note>
+
+## Revenue summary (`GET /api/crm/reports/summary`)
+
+The summary endpoint powers the four headline metric cards and all chart panels on the Reports page.
+
+<CardGroup cols={2}>
+  <Card title="Collected Revenue" icon="circle-dollar-sign">
+    Total successful payments in the selected window, broken down per currency. In Flat mode the normalized total appears with the raw currency breakdown beneath it.
+  </Card>
+  <Card title="Active Clients" icon="users">
+    Clients with an active status as of the reporting window. The hint shows the total client count in your CRM for context.
+  </Card>
+  <Card title="Conversion Rate" icon="percent">
+    Percentage of leads that moved to **Converted** status out of all leads created in the window.
+  </Card>
+  <Card title="Renewal Rate" icon="rotate-ccw">
+    Active deals as a share of active plus at-risk deals. A higher rate means fewer deals are approaching expiry without a renewal.
+  </Card>
+</CardGroup>
+
+### Revenue trend
+
+Monthly revenue for the last six months, shown as a bar chart. Each bar represents total collected payments for that calendar month. When the scope covers multiple currencies, the chart switches to a breakdown list showing each currency's total per month rather than a combined bar you cannot meaningfully compare.
+
+### Revenue by package
+
+Collected revenue grouped by subscription package for the selected window. The bar lengths are proportional to revenue within the window. In Flat mode, bars reflect the normalized total and the raw currency breakdown appears beneath each label.
+
+### Lead sources
+
+The lead source chart shows how many leads entered your pipeline from each origin channel. The canonical sources tracked by Exotic CRM are:
+
+- Website
+- WhatsApp
+- Referral
+- Facebook
+- Import
+- Outbound
+- Manual
+- Scraper
+
+Any sources outside this list appear at the bottom of the chart under their raw label.
+
+### Sales funnel
+
+The funnel shows lead progression through the five pipeline stages: **New → Contacted → Qualified → Converted → Lost**. Each stage shows:
+
+- Total lead count
+- Share of the full pipeline
+- Conversion rate from the previous stage
+
+The summary row at the bottom shows total leads, workable leads (new, contacted, or qualified), and converted leads for the window.
+
+### Owner performance
+
+The owner performance table ranks team members by their collected revenue and payment count in the selected window. Revenue share is shown as a progress bar so you can see relative contribution at a glance.
+
+<Note>
+  The owner performance section is only visible to users with the **admin**, **sub_admin**, or **sales** roles. Marketing users see only the profile engagement section.
+</Note>
+
+## Profile engagement (`GET /api/crm/reports/profile-engagement`)
+
+Profile engagement data comes from the advertising platform's WordPress analytics plugin. You must select a specific market to load this section — engagement data is per-market and cannot be aggregated across markets.
+
+<Steps>
+  <Step title="Select a market">
+    Choose a market from the filter bar. The engagement section will show a prompt until a market is selected.
+  </Step>
+  <Step title="Review the platform totals">
+    Four metric cards show platform-wide totals for the selected window:
+
+    - **Total Views** — profile page views across all active listings
+    - **Unique Visitors** — deduplicated visitor count
+    - **Contact Actions** — total clicks across all contact channels (phone, WhatsApp, Viber)
+    - **Contact Rate** — contact actions as a percentage of views
+  </Step>
+  <Step title="Read the contact method mix">
+    The contact mix bar chart shows which channels visitors use most often to contact advertisers on the platform. The three tracked channels are **Phone**, **WhatsApp**, and **Viber**.
+  </Step>
+  <Step title="Browse the profile ranking table">
+    The ranking table shows individual profile performance. Columns include views, unique visitors, contact actions, and contact rate. Click a column header to sort by that metric. Rows linked to a CRM client record are clickable and open the client's analytics tab.
+  </Step>
+</Steps>
+
+<Tip>
+  Sort by **Contact Rate** to find profiles that are generating buyer interest efficiently, regardless of their raw view count. High contact rate with low views often indicates a strong profile that needs more visibility — a good candidate for a push campaign or package upgrade conversation.
+</Tip>
+
+## Weekly scorecard
+
+The scorecard is a structured summary of your CRM's performance for a given period. It is designed for weekly review meetings and external reporting.
+
+### Previewing the scorecard (`GET /api/crm/reports/scorecard/preview`)
+
+Click **Export Scorecard** in the filter bar to open the scorecard modal. Before exporting, the modal loads a live preview from the scorecard preview endpoint so you can confirm the data looks correct. The scorecard is assembled from up to five sections:
+
+| Section | What it contains |
+|---|---|
+| `revenue` | Total collected revenue with per-currency breakdown |
+| `client_snapshot` | Active client count and new clients in the window |
+| `daily_peak` | The single highest-revenue day in the window |
+| `best_package` | Top-performing package by collected revenue |
+| `conversion` | Lead-to-client conversion rate |
+
+You can include or exclude individual sections before exporting.
+
+### Exporting the scorecard (`POST /api/crm/reports/scorecard/export`)
+
+Once you are satisfied with the preview, click **Export** to download the file. The export is delivered as an Excel spreadsheet (`.xlsx`). The filename follows the pattern `crm-scorecard-{from}-to-{to}.xlsx`.
+
+<Tabs>
+  <Tab title="Export parameters">
+    The export request accepts the following parameters:
+
+    | Parameter | Type | Description |
+    |---|---|---|
+    | `platform_id` | integer | Scope to a single market. Omit for all accessible markets. |
+    | `from` | date | Start of the reporting window |
+    | `to` | date | End of the reporting window |
+    | `currency_mode` | `native` \| `flat` | Revenue display mode |
+    | `reporting_currency` | string | Target currency for Flat mode (e.g. `USD`) |
+    | `sections` | array | Which sections to include (defaults to all five) |
+    | `date_format` | `Y-m-d` \| `d/m/Y` \| `m/d/Y` | Date format in the spreadsheet |
+  </Tab>
+  <Tab title="Available sections">
+    Pass section keys as an array to include only what you need:
+
+    ```json
+    {
+      "sections": ["revenue", "client_snapshot", "best_package"]
+    }
+    ```
+
+    Omitting `sections` entirely includes all five: `revenue`, `client_snapshot`, `daily_peak`, `best_package`, `conversion`.
+  </Tab>
+</Tabs>
+
+<Warning>
+  The scorecard export is only available to users with the **admin**, **sub_admin**, or **sales** roles. Marketing users cannot trigger an export.
+</Warning>
+
+## Reporting currency
+
+Revenue figures throughout the Reports page follow the reporting currency setting you choose in the filter bar. When you switch to **Flat** mode, all revenue is converted to the target currency using the FX rates configured in **Settings → Reporting Currency**.
+
+<Note>
+  When normalization is partial — meaning some payments could not be converted because a rate is missing — a notice appears beneath the affected figure. Configure missing rates in Settings to resolve partial normalization.
+</Note>

@@ -1,0 +1,155 @@
+---
+title: "Match payments to clients and deals"
+sidebarTitle: "Matching"
+description: "Exotic CRM auto-matches incoming payments to client deals by phone and amount. Review suggestions, confirm or override matches, and run batch matching from the queue."
+---
+
+When a payment arrives in Exotic CRM, the system immediately tries to identify which client it belongs to. This process is called matching. A successful match links the payment to a client record and, when confirmed with high confidence, enables the system to create or renew that client's subscription automatically. Payments that the system cannot match confidently appear in the queue for you to review manually.
+
+## How auto-matching works
+
+Auto-matching runs when a payment is received or when you trigger it manually. The matching service looks for a client in the same market whose normalized phone number matches the phone number on the payment. If a match is found, it assigns a confidence score to the result.
+
+**Match confidence levels:**
+
+| Confidence | Meaning |
+|---|---|
+| `high` | Phone number matched exactly. The system can activate the subscription without additional review. |
+| `medium` | Partial or approximate match. A human should review and confirm before activation. |
+| `low` | Weak signal only. Manual confirmation is required before any action is taken. |
+
+<Note>
+Phone numbers are normalized before matching. For example, a Kenyan number entered as `0712 345 678` is stored as `254712345678`. This normalization happens per-market using the market's configured phone prefix.
+</Note>
+
+## Running auto-match for a single payment
+
+If a payment shows as unmatched, you can trigger auto-matching on it directly from the queue.
+
+<Steps>
+  <Step title="Locate the payment">
+    Use the **Match state: Unmatched** filter to narrow the queue to payments that have not yet been linked to a client.
+  </Step>
+  <Step title="Open the action menu">
+    Click the three-dot action menu on the payment row.
+  </Step>
+  <Step title="Run auto-match">
+    Select **Auto-match**. Exotic CRM runs the matching algorithm and updates the row with the result and confidence score. If a match is found, the client name appears on the row immediately.
+  </Step>
+</Steps>
+
+**API reference:** `POST /api/crm/payments/{payment}/auto-match`
+
+## Viewing match candidates
+
+When auto-match does not find a result or you want to verify the suggestion, you can view all candidate clients for a payment.
+
+<Steps>
+  <Step title="Open the matching panel">
+    Click the payment row to expand it, or open the match dialog from the action menu. The candidates panel loads automatically.
+  </Step>
+  <Step title="Search for a client">
+    The candidates list starts with clients whose phone number matches the payment's phone number. Type in the search field to find a client by name, phone, email, or ID if the phone match returns no results.
+  </Step>
+  <Step title="Review the candidates">
+    Each candidate shows the client name, phone, city, and profile status. Use this information to confirm you are selecting the correct client.
+  </Step>
+</Steps>
+
+**API reference:** `GET /api/crm/payments/{payment}/candidates`
+
+The candidates endpoint accepts an optional `search` query parameter (up to 120 characters) to filter results by name, phone, email, or numeric ID.
+
+## Confirming a match
+
+Once you have identified the correct client, confirm the match to link the payment to that client's record.
+
+<Steps>
+  <Step title="Select the client">
+    In the candidates panel, click the client you want to link to this payment.
+  </Step>
+  <Step title="Enter a reason">
+    Type a brief reason for the manual match (for example, "Client confirmed via phone call"). This is recorded in the audit log.
+  </Step>
+  <Step title="Confirm">
+    Click **Confirm match**. The payment is now linked to the client. If the payment status is `completed` and no subscription exists yet, the **Create subscription** option becomes available.
+  </Step>
+</Steps>
+
+**API reference:** `POST /api/crm/payments/{payment}/confirm-match`
+
+Request body:
+
+```json
+{
+  "client_id": 1234,
+  "reason": "Client confirmed via phone call"
+}
+```
+
+<Warning>
+You can only confirm a match to a client that belongs to the same market as the payment. Selecting a client from a different market returns a validation error.
+</Warning>
+
+## What happens after a match is confirmed
+
+After confirmation, the CRM evaluates whether a subscription can be created automatically.
+
+- If the payment `status` is `completed`, the payment has no existing subscription, and the reconciliation confidence is `high`, the **Create subscription** button becomes active.
+- Clicking **Create subscription** provisions a deal record, activates the client's subscription, and logs the lifecycle event on the client timeline.
+- You can specify whether this is a `new` subscription or a `renewal`. The system pre-fills this based on the client's existing subscription history in the market.
+
+<Tip>
+If the system pre-fills the lifecycle as **Renewal** but the client is a new sign-up, override it before confirming. This affects the client's subscription history and reporting.
+</Tip>
+
+## Batch matching
+
+Instead of matching payments one at a time, you can run a batch match that processes all unmatched payments across your accessible markets at once.
+
+<Steps>
+  <Step title="Open the batch match dialog">
+    Click the **Auto-match queue** button in the payment queue toolbar.
+  </Step>
+  <Step title="Enter a reason">
+    Type a reason for the batch operation. This is stored in the audit log for every payment touched.
+  </Step>
+  <Step title="Run a dry run (optional)">
+    Click **Preview** to see how many payments would be matched without writing any changes. Review the counts before committing.
+  </Step>
+  <Step title="Run the batch match">
+    Click **Confirm** to run the match across all accessible markets. The queue refreshes when the operation completes.
+  </Step>
+</Steps>
+
+**API reference:** `POST /api/crm/payments/batch-match`
+
+Request body:
+
+```json
+{
+  "reason": "Daily batch match from payment queue",
+  "dry_run": false
+}
+```
+
+Pass `"dry_run": true` to preview results without making changes. You can optionally scope the batch to a single market by including `"platform_id"`.
+
+<Note>
+Batch matching only attempts matches for payments that do not already have a confirmed client. It does not override existing confirmed matches.
+</Note>
+
+## Reference check
+
+Before you manually enter a payment reference for a bundle or import, you can verify whether that reference already exists in the system to avoid duplicates.
+
+**API reference:** `GET /api/crm/payments/reference-check`
+
+Query parameters:
+
+| Parameter | Description |
+|---|---|
+| `platform_id` | The market to check against (required). |
+| `reference_root` | The reference string to look up (required). |
+
+The response indicates whether the reference is available and, if a conflict exists, returns the details of the existing record.

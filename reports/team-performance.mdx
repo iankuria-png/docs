@@ -1,0 +1,180 @@
+---
+title: "Team leaderboard, goals, and activity feed"
+sidebarTitle: "Team"
+description: "The Team page shows agent performance on the leaderboard, lets admins set revenue and deal goals, and provides a filterable activity feed per agent."
+---
+
+The Team page gives managers a live view of how their agents are performing — who is online, how each agent ranks against the rest of the team, what goals are in place, and what each individual has done during a given period. Agents can also see their own stats and goals without accessing anyone else's data.
+
+<Note>
+  Most of the Team page is restricted to **admin** and **sub_admin** roles. Agents with the **sales** or **marketing** role see only their own stats, goals, and recent activity via the **My Stats** tab.
+</Note>
+
+## Period and filters
+
+The period selector at the top of the page controls the time window for all leaderboard, stats, and activity data.
+
+| Period | Window |
+|---|---|
+| Today | Current calendar day |
+| This Week | Monday to today |
+| This Month | First of the month to today |
+| Custom Range | Any from/to date pair you specify |
+
+Managers can also filter by market using the **Market** dropdown, which scopes leaderboard and presence data to a single advertising platform.
+
+## Presence panel
+
+The Presence panel is the default view for managers. It shows which agents are currently online and which are offline, based on the heartbeat each browser session sends to `POST /api/crm/heartbeat` while the CRM is open.
+
+<CardGroup cols={2}>
+  <Card title="Online now" icon="circle-check">
+    Agents with an active CRM session in the last few minutes. Each entry shows the agent's name, role, and how long ago their last heartbeat was received.
+  </Card>
+  <Card title="Offline" icon="circle">
+    Agents who are not currently active, with the time of their last seen session.
+  </Card>
+</CardGroup>
+
+The four summary cards above the tabs show team-wide totals for the current scope:
+
+- **Online Now** — agents with an active session right now
+- **Active Today** — agents who have performed at least one tracked action today
+- **Total Actions Today** — combined action count across all visible team members
+- **Goal Completion** — average completion percentage across all active team goals
+
+<Note>
+  The presence panel polls `GET /api/crm/team/presence` every 30 seconds while it is the active tab. Agent presence indicators in the leaderboard also update in real time when the **Today** period is selected.
+</Note>
+
+## Leaderboard (`GET /api/crm/team/leaderboard`)
+
+The leaderboard ranks agents by their performance in the selected period. Each row shows:
+
+| Column | Description |
+|---|---|
+| Rank | Position by total actions in the period |
+| Agent | Name, role, and live presence status (Today view only) |
+| Revenue | Collected payment value attributed to the agent |
+| Subs Activated | New subscriptions activated |
+| Subs Renewed | Subscriptions renewed |
+| Payments Matched | Payments linked to a client record |
+| Leads Contacted | Leads moved to contacted status |
+| Chats | Chat replies sent |
+| SMS | SMS messages sent |
+| Total Actions | Sum of all tracked activity |
+
+### Filtering by role
+
+Use the **Role** filter above the leaderboard table to narrow the ranking to a specific group:
+
+| Filter | Who it shows |
+|---|---|
+| All roles | Every visible team member |
+| Sales | Agents with the sales role |
+| Marketing | Agents with the marketing role |
+| Admin | Admins only (admin role only, not sub_admin) |
+| Sub-admin | Sub-admins only (admin role only) |
+
+<Note>
+  Sub-admin users can only filter between **All roles**, **Sales**, and **Marketing**. The Admin and Sub-admin filter options are only available to full admins.
+</Note>
+
+### Exporting the leaderboard
+
+Click **Export CSV** above the leaderboard to download the current view as a spreadsheet. The file includes all visible columns and is scoped to the active period, market, and role filter.
+
+## Goals (`GET /api/crm/team/goals` · `POST /api/crm/team/goals`)
+
+The Goals tab is where managers define performance targets for the team. Goals appear on each agent's **My Stats** view and on the agent detail page so everyone can see how they are tracking.
+
+### Setting a team goal
+
+<Steps>
+  <Step title="Choose a period">
+    Select **Weekly** or **Monthly** from the goal period selector. This controls whether the target resets each week or each month.
+  </Step>
+  <Step title="Select a metric">
+    Pick the metric you want to track. Available metrics vary by role scope:
+
+    - **Subs Activated** — new subscriptions created
+    - **Subs Renewed** — subscription renewals completed
+    - **Payments Matched** — payments linked to a client
+    - **Leads Contacted** — leads advanced to contacted status
+    - **Total Actions** — all tracked CRM activity
+  </Step>
+  <Step title="Set a role scope">
+    Choose whether the goal applies to **Sales only**, **Marketing only**, or **Everyone**. Only metrics that make sense for the selected role scope are shown in the metric dropdown.
+  </Step>
+  <Step title="Enter a target">
+    Type the numeric target value. The goal is saved when you click **Save Goal**.
+  </Step>
+</Steps>
+
+<Tip>
+  If you want different targets for different markets, select a market from the filter bar before saving a goal. Goals are scoped per market when a market is selected.
+</Tip>
+
+### Goal overrides per agent
+
+To set a different target for a specific agent rather than the whole team, use the **Individual Goal** form below the team goals list.
+
+<Steps>
+  <Step title="Select a team member">
+    Choose the agent from the **Team member** dropdown. The available metric options update based on the agent's role.
+  </Step>
+  <Step title="Select a market">
+    Individual goal overrides require a specific market. Choose one from the filter bar before saving.
+  </Step>
+  <Step title="Set the metric, target, and period">
+    Fill in the metric, target value, and period (weekly or monthly), then click **Save Individual Goal**.
+  </Step>
+</Steps>
+
+When an individual goal override exists for an agent, it takes precedence over the team default for that metric. The agent's goals view shows a **Manager override** label next to overridden metrics.
+
+<Warning>
+  Deleting a team goal removes it for all agents in its role scope. Deleting an individual override reverts the agent to the team default for that metric (if one exists).
+</Warning>
+
+## Agent detail (`GET /api/crm/team/{user}/stats`)
+
+Click any row in the leaderboard or presence panel to open the **Member Detail** tab for that agent. The agent detail view shows the same metric cards as the leaderboard — revenue, total actions, subs activated, payments matched, leads contacted, and active time — but scoped to the selected agent and period.
+
+<Tabs>
+  <Tab title="Stats">
+    The stats panel shows six metric cards for the agent's performance in the current period, each with a trend badge comparing against the equivalent prior period (e.g. last week when the **This Week** period is active). Agent goals and progress bars also appear here, showing how close the agent is to each target.
+  </Tab>
+  <Tab title="Activity feed">
+    The activity feed lists every tracked action the agent performed in the selected period, grouped by day. Each entry shows the action label, the entity it affected (client, lead, payment, or deal), and the timestamp. Click **Open record** on any entry to navigate to the relevant record.
+  </Tab>
+</Tabs>
+
+## Activity feed (`GET /api/crm/team/{user}/activity`)
+
+The activity feed in the agent detail panel is paginated and can be filtered by entity type and keyword.
+
+<Steps>
+  <Step title="Filter by entity type">
+    Use the **Type** dropdown to narrow activity to a specific record kind:
+
+    - **Client** — actions on client records
+    - **Lead** — lead status changes and notes
+    - **Payment** — payment matching and processing events
+    - **Deal** — deal activations, renewals, and expirations
+  </Step>
+  <Step title="Search by keyword">
+    Type in the search box to filter activity entries by their label or associated record details.
+  </Step>
+  <Step title="Load more">
+    Click **Load more** at the bottom of the feed to append the next page of results. The feed uses append-on-scroll pagination — earlier pages stay visible.
+  </Step>
+</Steps>
+
+## My Stats (agent self-view)
+
+Agents with the **sales** or **marketing** role land on the **My Stats** tab and cannot access the presence panel, leaderboard, or goals editor. My Stats calls `GET /api/crm/team/me` and shows the same six metric cards as the agent detail view, but always scoped to the current user. Goals set by a manager appear here with progress bars so agents can track their own targets.
+
+<Note>
+  The period selector and reporting currency control on the Team page affect the My Stats view in the same way they affect manager views. Agents can review their own performance for any period without manager access.
+</Note>

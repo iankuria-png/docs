@@ -1,0 +1,428 @@
+---
+title: "REST API endpoints for payments"
+sidebarTitle: "Payments API"
+description: "Query the payment queue, run auto-matching, confirm matches, import payment batches, and manage manual payment submissions via the /api/crm/payments endpoints."
+---
+
+The payments API exposes the CRM's payment queue — every transaction received from M-Pesa, card processors, and other billing providers. You can query unmatched payments, run the auto-matcher, confirm a match to a deal and client, import payments from external sources, and handle manual payment submissions. All endpoints require at minimum the `sales` role.
+
+<Note>
+All payments endpoints require `admin`, `sub_admin`, or `sales` role.
+</Note>
+
+---
+
+## List payments
+
+Return a paginated payment queue with per-status counts and currency breakdowns.
+
+```
+GET /api/crm/payments
+```
+
+### Query parameters
+
+<ParamField query="page" type="integer" default="1">
+  Page number.
+</ParamField>
+
+<ParamField query="per_page" type="integer" default="25">
+  Records per page.
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filter by payment status: `initiated`, `pending`, `completed`, `failed`, `expired`, or `reversed`.
+</ParamField>
+
+<ParamField query="platform_id" type="integer">
+  Filter to a specific market.
+</ParamField>
+
+<ParamField query="from" type="string">
+  Start date (ISO 8601, e.g., `2026-05-01`).
+</ParamField>
+
+<ParamField query="to" type="string">
+  End date (ISO 8601).
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl "https://your-crm.example.com/api/crm/payments?platform_id=1&status=completed&from=2026-05-01&to=2026-05-12" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "data": [
+    {
+      "id": 204,
+      "platform_id": 1,
+      "deal_id": 77,
+      "client_id": 501,
+      "phone": "254712345678",
+      "amount": "3000.00",
+      "currency": "KES",
+      "status": "completed",
+      "match_confidence": "manual",
+      "transaction_reference": "MPESA-QHT7P3KLMN",
+      "confirmed_by": 12,
+      "confirmed_at": "2026-05-01T10:30:00.000000Z",
+      "created_at": "2026-05-01T10:00:00.000000Z"
+    }
+  ],
+  "current_page": 1,
+  "total": 312,
+  "stats": {
+    "total": 312,
+    "pending": 14,
+    "pending_amount": 42000,
+    "confirmed": 280,
+    "failed": 18,
+    "unmatched": 9
+  }
+}
+```
+
+</CodeGroup>
+
+---
+
+## Get match candidates
+
+For an unmatched payment, return a ranked list of potential client-deal pairs ordered by match confidence.
+
+```
+GET /api/crm/payments/{payment}/candidates
+```
+
+<ParamField path="payment" type="integer" required>
+  The numeric payment ID.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl https://your-crm.example.com/api/crm/payments/310/candidates \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "payment_id": 310,
+  "candidates": [
+    {
+      "client_id": 501,
+      "client_name": "Amara",
+      "deal_id": 78,
+      "deal_status": "pending",
+      "amount": "3000.00",
+      "phone_match": true,
+      "confidence": "high"
+    }
+  ]
+}
+```
+
+</CodeGroup>
+
+---
+
+## Auto-match a payment
+
+Run the automated payment matcher for a single payment. The matcher compares phone number, amount, platform, and deal status to find the best client-deal pair.
+
+```
+POST /api/crm/payments/{payment}/auto-match
+```
+
+<ParamField path="payment" type="integer" required>
+  The numeric payment ID.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/payments/310/auto-match \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "payment_id": 310,
+  "matched": true,
+  "client_id": 501,
+  "deal_id": 78,
+  "confidence": "high",
+  "message": "Payment auto-matched and subscription activated."
+}
+```
+
+</CodeGroup>
+
+---
+
+## Confirm a match
+
+Manually confirm a specific client and deal for a payment. This triggers subscription provisioning.
+
+```
+POST /api/crm/payments/{payment}/confirm-match
+```
+
+### Request body
+
+<ParamField body="deal_id" type="integer" required>
+  The deal to link this payment to.
+</ParamField>
+
+<ParamField body="client_id" type="integer" required>
+  The client the payment belongs to.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/payments/310/confirm-match \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{"deal_id": 78, "client_id": 501}'
+```
+
+```json Response
+{
+  "payment_id": 310,
+  "deal_id": 78,
+  "client_id": 501,
+  "status": "completed",
+  "message": "Match confirmed and subscription activated."
+}
+```
+
+</CodeGroup>
+
+---
+
+## Batch match payments
+
+Run the auto-matcher across all eligible unmatched payments in a single request.
+
+```
+POST /api/crm/payments/batch-match
+```
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/payments/batch-match \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+```json Response
+{
+  "processed": 14,
+  "matched": 11,
+  "unmatched": 3,
+  "errors": []
+}
+```
+
+</CodeGroup>
+
+---
+
+## Preview a payment import
+
+Upload a CSV or spreadsheet of payment records for preview before committing. Returns candidate rows with match information but makes no changes.
+
+```
+POST /api/crm/payments/import/preview
+```
+
+Send this request as `multipart/form-data` with the file attached.
+
+<ParamField body="file" type="file" required>
+  CSV or Excel file containing payment records. Download the import template from `GET /api/crm/payments/import/template`.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/payments/import/preview \
+  -H "Authorization: Bearer {token}" \
+  -F "file=@payments_may.csv"
+```
+
+```json Response
+{
+  "batch_id": "import_abc123",
+  "rows": 45,
+  "valid": 43,
+  "invalid": 2,
+  "preview": [
+    {
+      "row": 2,
+      "phone": "254712345678",
+      "amount": 3000,
+      "currency": "KES",
+      "reference": "MPESA-123",
+      "matched_client": { "id": 501, "name": "Amara" },
+      "confidence": "high"
+    }
+  ]
+}
+```
+
+</CodeGroup>
+
+---
+
+## Commit a payment import
+
+Persist a previewed import batch, creating payment records and triggering subscription provisioning for matched rows.
+
+```
+POST /api/crm/payments/import/commit
+```
+
+### Request body
+
+<ParamField body="batch_id" type="string" required>
+  The `batch_id` returned from the preview step.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/payments/import/commit \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{"batch_id": "import_abc123"}'
+```
+
+```json Response
+{
+  "batch_id": "import_abc123",
+  "created": 43,
+  "activated": 38,
+  "failed": 2,
+  "errors": [
+    { "row": 7, "message": "No matching client found." }
+  ]
+}
+```
+
+</CodeGroup>
+
+---
+
+## Approve a manual payment
+
+Approve a manual payment submission (e.g., bank transfer proof submitted by a client).
+
+```
+POST /api/crm/payments/{payment}/manual-approve
+```
+
+<ParamField path="payment" type="integer" required>
+  Payment ID.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/payments/310/manual-approve \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "payment_id": 310,
+  "status": "completed",
+  "message": "Manual payment approved."
+}
+```
+
+</CodeGroup>
+
+---
+
+## Reject a manual payment
+
+Reject a manual payment submission with a stated reason.
+
+```
+POST /api/crm/payments/{payment}/manual-reject
+```
+
+### Request body
+
+<ParamField body="reason" type="string" required>
+  Reason for rejection (shown to internal team, max 500 characters).
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/payments/310/manual-reject \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{"reason": "Screenshot did not match the stated reference"}'
+```
+
+```json Response
+{
+  "payment_id": 310,
+  "status": "failed",
+  "message": "Manual payment rejected."
+}
+```
+
+</CodeGroup>
+
+---
+
+## Export payments to CSV
+
+Export the payment queue matching the current filters as a downloadable CSV file.
+
+```
+POST /api/crm/payments/export
+```
+
+### Request body
+
+<ParamField body="platform_id" type="integer">
+  Limit export to a specific market.
+</ParamField>
+
+<ParamField body="from" type="string">
+  Start date for the export range.
+</ParamField>
+
+<ParamField body="to" type="string">
+  End date for the export range.
+</ParamField>
+
+<ParamField body="status" type="string">
+  Filter by payment status.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/payments/export \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{"platform_id": 1, "from": "2026-05-01", "to": "2026-05-12"}' \
+  -o payments_export.csv
+```
+
+</CodeGroup>
+
+<Tip>
+The response is a CSV file stream. Use `-o` in curl or handle the response body as a binary download in your client.
+</Tip>

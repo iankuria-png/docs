@@ -1,0 +1,574 @@
+---
+title: "REST API endpoints for clients"
+sidebarTitle: "Clients API"
+description: "List, create, update, and delete client records. Access timeline events, notes, wallet, media, and WordPress profile sync via the /api/crm/clients endpoints."
+---
+
+The clients API gives you full lifecycle management over advertiser profiles in Exotic CRM. Clients are the CRM-side cache of WordPress profiles — WordPress remains the source of truth, and you can trigger a sync at any time. All endpoints under `/api/crm/clients` require a valid bearer token.
+
+<Note>
+The `marketing` role has read-only access to client endpoints. Write operations (create, update, delete, notes, sync, wallet top-up) require the `admin`, `sub_admin`, or `sales` role. The `DELETE` endpoint requires `admin` or `sub_admin`.
+</Note>
+
+---
+
+## List clients
+
+Return a paginated list of clients, optionally filtered and searched.
+
+```
+GET /api/crm/clients
+```
+
+### Query parameters
+
+<ParamField query="page" type="integer" default="1">
+  Page number.
+</ParamField>
+
+<ParamField query="per_page" type="integer" default="25">
+  Records per page.
+</ParamField>
+
+<ParamField query="search" type="string">
+  Free-text search against name, phone, email, CRM ID, WordPress post ID, or WordPress user ID. Also accepts a WordPress profile URL.
+</ParamField>
+
+<ParamField query="platform_id" type="integer">
+  Filter to a specific market (platform).
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filter by `profile_status`. One of `publish`, `private`, `draft`, or `pending`.
+</ParamField>
+
+<ParamField query="city" type="string">
+  Filter by city name.
+</ParamField>
+
+<ParamField query="sort_by" type="string" default="updated_at">
+  Sort field. One of `updated_at`, `created_at`, or `name`.
+</ParamField>
+
+<ParamField query="sort_direction" type="string" default="desc">
+  `asc` or `desc`.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl "https://your-crm.example.com/api/crm/clients?platform_id=1&status=publish&per_page=10" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "data": [
+    {
+      "id": 501,
+      "platform_id": 1,
+      "name": "Amara",
+      "phone_normalized": "254712345678",
+      "email": "amara@example.com",
+      "city": "Nairobi",
+      "profile_status": "publish",
+      "verified": true,
+      "premium": true,
+      "wp_post_id": 1042,
+      "wp_user_id": 88,
+      "assigned_to": 12,
+      "created_at": "2025-03-10T08:22:11.000000Z",
+      "updated_at": "2025-04-28T14:05:33.000000Z"
+    }
+  ],
+  "current_page": 1,
+  "per_page": 10,
+  "total": 348,
+  "stats": {
+    "total": 348,
+    "active": 210,
+    "premium": 87,
+    "verified": 134,
+    "high_risk": 5,
+    "inactive": 138,
+    "with_chat": 62,
+    "online_now": 14,
+    "new_users": 22,
+    "retention_watch": 31
+  }
+}
+```
+
+</CodeGroup>
+
+---
+
+## Create a client
+
+Create a new client record manually or provision a WordPress profile at the same time.
+
+```
+POST /api/crm/clients
+```
+
+<Note>
+Requires `admin`, `sub_admin`, or `sales` role.
+</Note>
+
+### Request body
+
+<ParamField body="platform_id" type="integer" required>
+  The market (platform) to create the client in. Must be a market your account has access to.
+</ParamField>
+
+<ParamField body="name" type="string" required>
+  The client's display name.
+</ParamField>
+
+<ParamField body="phone_normalized" type="string">
+  Phone in normalized format (e.g., `254712345678`, no leading `+`).
+</ParamField>
+
+<ParamField body="email" type="string">
+  Client email address.
+</ParamField>
+
+<ParamField body="city" type="string">
+  City or location string.
+</ParamField>
+
+<ParamField body="profile_status" type="string" default="private">
+  WordPress post status: `publish`, `private`, `draft`, or `pending`.
+</ParamField>
+
+<ParamField body="onboarding_mode" type="string" default="manual">
+  `manual` creates a CRM-only record. `wp_provision` also creates a WordPress user and post.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/clients \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "platform_id": 1,
+    "name": "Amara",
+    "phone_normalized": "254712345678",
+    "email": "amara@example.com",
+    "city": "Nairobi",
+    "profile_status": "private"
+  }'
+```
+
+```json Response (201)
+{
+  "id": 502,
+  "platform_id": 1,
+  "name": "Amara",
+  "phone_normalized": "254712345678",
+  "email": "amara@example.com",
+  "city": "Nairobi",
+  "profile_status": "private",
+  "verified": false,
+  "premium": false,
+  "wp_post_id": null,
+  "created_at": "2026-05-12T09:00:00.000000Z",
+  "updated_at": "2026-05-12T09:00:00.000000Z"
+}
+```
+
+</CodeGroup>
+
+---
+
+## Get a client
+
+Return full detail for a single client, including their deals, notes, payments, and active deal.
+
+```
+GET /api/crm/clients/{client}
+```
+
+<ParamField path="client" type="integer" required>
+  The numeric CRM client ID.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl https://your-crm.example.com/api/crm/clients/501 \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "id": 501,
+  "platform_id": 1,
+  "name": "Amara",
+  "phone_normalized": "254712345678",
+  "email": "amara@example.com",
+  "city": "Nairobi",
+  "profile_status": "publish",
+  "verified": true,
+  "premium": true,
+  "wp_post_id": 1042,
+  "wp_user_id": 88,
+  "assigned_to": 12,
+  "wallet_balance": "1500.00",
+  "wallet_currency": "KES",
+  "deals": [...],
+  "notes": [...],
+  "payments": [...],
+  "active_deal": {
+    "id": 77,
+    "status": "active",
+    "plan_type": "premium",
+    "amount": "3000.00",
+    "expires_at": "2026-06-01T00:00:00.000000Z"
+  },
+  "platform": {
+    "id": 1,
+    "name": "ExoticKenya"
+  }
+}
+```
+
+</CodeGroup>
+
+---
+
+## Update a client
+
+Update the client's assigned agent, city, email, or phone.
+
+```
+PATCH /api/crm/clients/{client}
+```
+
+<Note>
+Requires `admin`, `sub_admin`, or `sales` role.
+</Note>
+
+### Request body
+
+<ParamField body="assigned_to" type="integer">
+  User ID to assign as the account owner. Must be an active user with access to this market.
+</ParamField>
+
+<ParamField body="city" type="string">
+  Updated city.
+</ParamField>
+
+<ParamField body="email" type="string">
+  Updated email address.
+</ParamField>
+
+<ParamField body="phone_normalized" type="string">
+  Updated phone in normalized format.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X PATCH https://your-crm.example.com/api/crm/clients/501 \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{"city": "Mombasa", "assigned_to": 15}'
+```
+
+```json Response
+{
+  "id": 501,
+  "city": "Mombasa",
+  "assigned_to": 15,
+  "updated_at": "2026-05-12T10:30:00.000000Z"
+}
+```
+
+</CodeGroup>
+
+---
+
+## Delete a client
+
+Permanently delete a client record and its associated data.
+
+```
+DELETE /api/crm/clients/{client}
+```
+
+<Warning>
+Requires `admin` or `sub_admin` role. This action is irreversible. You must pass the client's exact name in the `confirm` field as a safety check.
+</Warning>
+
+### Request body
+
+<ParamField body="confirm" type="string" required>
+  Must match the client's name exactly (case-sensitive).
+</ParamField>
+
+<ParamField body="reason" type="string">
+  Optional audit note.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X DELETE https://your-crm.example.com/api/crm/clients/501 \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{"confirm": "Amara", "reason": "Duplicate profile"}'
+```
+
+```json Response
+{
+  "message": "Client deleted",
+  "client_id": 501
+}
+```
+
+</CodeGroup>
+
+---
+
+## Get timeline events
+
+Return a paginated audit timeline of all events on this client.
+
+```
+GET /api/crm/clients/{client}/timeline
+```
+
+<ParamField path="client" type="integer" required>
+  Client ID.
+</ParamField>
+
+<ParamField query="per_page" type="integer" default="50">
+  Events per page.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl "https://your-crm.example.com/api/crm/clients/501/timeline?per_page=20" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "data": [
+    {
+      "id": 9021,
+      "entity_type": "client",
+      "entity_id": 501,
+      "event_type": "note_added",
+      "actor_id": 12,
+      "content": {
+        "note_id": 314,
+        "note_type": "call",
+        "has_follow_up": true
+      },
+      "created_at": "2026-05-10T11:14:00.000000Z",
+      "actor": { "id": 12, "name": "Jane Ochieng" }
+    }
+  ],
+  "current_page": 1,
+  "total": 47
+}
+```
+
+</CodeGroup>
+
+---
+
+## Add a note
+
+Attach a note to a client record with an optional follow-up date.
+
+```
+POST /api/crm/clients/{client}/notes
+```
+
+<Note>
+Requires `admin`, `sub_admin`, or `sales` role.
+</Note>
+
+### Request body
+
+<ParamField body="note_type" type="string" required>
+  One of `call`, `email`, `sms`, `internal`, `system`, or `support_chat`.
+</ParamField>
+
+<ParamField body="content" type="string" required>
+  Note body text (max 5000 characters).
+</ParamField>
+
+<ParamField body="follow_up_at" type="string">
+  ISO 8601 datetime for a follow-up reminder. Must be in the future.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/clients/501/notes \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "note_type": "call",
+    "content": "Client confirmed interest in the premium package.",
+    "follow_up_at": "2026-05-20T10:00:00Z"
+  }'
+```
+
+```json Response (201)
+{
+  "id": 315,
+  "client_id": 501,
+  "author_id": 12,
+  "note_type": "call",
+  "content": "Client confirmed interest in the premium package.",
+  "follow_up_at": "2026-05-20T10:00:00.000000Z",
+  "created_at": "2026-05-12T09:45:00.000000Z",
+  "author": { "id": 12, "name": "Jane Ochieng" }
+}
+```
+
+</CodeGroup>
+
+---
+
+## Sync from WordPress
+
+Pull the latest profile data from WordPress and refresh the CRM record. Only works for clients that have a linked `wp_post_id`.
+
+```
+POST /api/crm/clients/{client}/sync
+```
+
+<Note>
+Requires `admin`, `sub_admin`, or `sales` role.
+</Note>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/clients/501/sync \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "id": 501,
+  "name": "Amara",
+  "profile_status": "publish",
+  "last_synced_at": "2026-05-12T09:50:00.000000Z"
+}
+```
+
+</CodeGroup>
+
+---
+
+## Get wallet balance
+
+Return the client's wallet balance and currency.
+
+```
+GET /api/crm/clients/{client}/wallet
+```
+
+<CodeGroup>
+
+```bash Request
+curl https://your-crm.example.com/api/crm/clients/501/wallet \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "client_id": 501,
+  "balance": "1500.00",
+  "currency": "KES",
+  "last_synced_at": "2026-05-11T18:00:00.000000Z"
+}
+```
+
+</CodeGroup>
+
+---
+
+## Top up wallet
+
+Credit the client's CRM wallet. This is used when you want to record that a client has deposited funds to be applied against future subscriptions.
+
+```
+POST /api/crm/clients/{client}/wallet/topup
+```
+
+<Note>
+Requires `admin`, `sub_admin`, or `sales` role.
+</Note>
+
+### Request body
+
+<ParamField body="amount" type="number" required>
+  Amount to credit in the platform's local currency.
+</ParamField>
+
+<ParamField body="note" type="string">
+  Optional description for the transaction.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/clients/501/wallet/topup \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{"amount": 3000, "note": "Cash deposit via office"}'
+```
+
+```json Response
+{
+  "client_id": 501,
+  "balance": "4500.00",
+  "currency": "KES",
+  "transaction": {
+    "id": 88,
+    "amount": "3000.00",
+    "note": "Cash deposit via office",
+    "created_at": "2026-05-12T10:00:00.000000Z"
+  }
+}
+```
+
+</CodeGroup>
+
+---
+
+## Get profile health
+
+Return a structured health report for the client profile, including any issues that need resolution (e.g., broken WordPress link, missing credentials).
+
+```
+GET /api/crm/clients/{client}/health
+```
+
+<CodeGroup>
+
+```bash Request
+curl https://your-crm.example.com/api/crm/clients/501/health \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "client_id": 501,
+  "issues": [],
+  "score": 100,
+  "status": "healthy"
+}
+```
+
+</CodeGroup>

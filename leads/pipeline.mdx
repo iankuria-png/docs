@@ -1,0 +1,124 @@
+---
+title: "Lead pipeline and converting leads to clients"
+sidebarTitle: "Pipeline"
+description: "Move leads through stages from new to converted, reconcile existing clients against leads, and convert qualified leads into full client records with one action."
+---
+
+The pipeline gives you a live count of how many leads sit at each stage of the sales funnel for a given market. From here you can advance individual leads, match them against clients who are already in the system, and trigger conversion — turning a qualified prospect into a subscribed client and automatically setting up their first deal.
+
+## The pipeline view
+
+The pipeline view (`GET /api/crm/leads/pipeline`) returns stage counts across all five statuses — **new**, **contacted**, **qualified**, **converted**, and **lost** — for every lead that is not archived. Counts are scoped to the markets you have access to, so each agent only sees their own markets.
+
+Use the market filter on the Leads page to narrow the pipeline to a single platform. The counts update in real time as you advance leads through the stages.
+
+## Moving a lead between stages
+
+You advance a lead by updating its status. Each status change is recorded in the lead's timeline, including the before and after values and who made the change.
+
+<Steps>
+  <Step title="Open the lead action menu">
+    On the Leads page, find the lead you want to advance and click the action menu in its row.
+  </Step>
+  <Step title="Choose the next stage">
+    Select **Move to [next stage]** from the menu. Exotic CRM prevents you from jumping straight to **Converted** from here — use the dedicated convert action for that.
+  </Step>
+  <Step title="Confirm">
+    The lead's status updates immediately and the `last_contact_at` timestamp is refreshed when moving to **Contacted** or **Qualified**.
+  </Step>
+</Steps>
+
+<Note>
+  Moving a lead to **Converted** requires a linked client record. If you use the status update action and provide `converted_client_id`, Exotic CRM validates that the client belongs to the same market as the lead before accepting the change.
+</Note>
+
+## Lead reconciliation
+
+Reconciliation is the process of matching a lead to an existing client record that is already in Exotic CRM. This happens when a prospect registered directly on the platform before your sales team added them as a lead, or when a CSV import creates leads that overlap with known clients.
+
+Exotic CRM checks for matches automatically using these signals, in priority order:
+
+1. A previously confirmed link on the lead
+2. Matching WordPress profile ID
+3. Matching WordPress user account
+4. Matching phone number — only when exactly one client in the market matches
+
+The match confidence is shown on each lead:
+
+| Confidence | Meaning |
+|---|---|
+| `confirmed` | Manually verified — the lead is directly linked to the client |
+| `high` | WordPress post or user ID matched |
+| `medium` | Phone number matched a single client |
+| `low` | Indirect or ambiguous match |
+
+### Reconciling a single lead
+
+<Steps>
+  <Step title="Open the reconcile dialog">
+    On the lead's row action menu, choose **Reconcile**. The dialog shows any automatically detected client match and its confidence level.
+  </Step>
+  <Step title="Choose a reconciliation action">
+    | Action | What it does |
+    |---|---|
+    | `link` | Links the lead to the client without changing the lead's status |
+    | `convert` | Links the lead and sets its status to **Converted** |
+    | `archive` | Links the lead and archives it (use when the lead is a duplicate) |
+  </Step>
+  <Step title="Provide a reason and confirm">
+    Enter a reason for the reconciliation — this is required and recorded in the audit log.
+  </Step>
+</Steps>
+
+### Batch reconciliation
+
+Batch reconciliation processes multiple leads at once, automatically finding their matching client records and applying the same action to all of them.
+
+<Steps>
+  <Step title="Select leads for batch reconciliation">
+    Use the checkboxes on the Leads page to select specific leads, or leave the selection empty to let Exotic CRM auto-select all unarchived leads that have a matching phone number in the clients table.
+  </Step>
+  <Step title="Open batch reconcile">
+    Click **Batch Reconcile** from the bulk actions toolbar. Choose **link**, **convert**, or **archive** as the action.
+  </Step>
+  <Step title="Review results">
+    Exotic CRM reports how many leads were processed, linked, converted, archived, and failed. Failures occur when no matching client can be resolved for a lead.
+  </Step>
+</Steps>
+
+<Warning>
+  Batch reconciliation is limited to **500 leads per request**. If your selection is larger, narrow it down by filtering on a specific market or status first.
+</Warning>
+
+## Converting a lead to a client
+
+Conversion creates a brand-new client record from the lead's data and permanently links the two together. Use this when the prospect has not previously registered on the platform and does not yet have a client record in Exotic CRM.
+
+<Steps>
+  <Step title="Open the convert dialog">
+    On the lead's row action menu, choose **Convert to Client**. The dialog pre-fills from the lead's stored contact details.
+  </Step>
+  <Step title="Review and complete the client profile">
+    Confirm or edit the name, phone number, email address, city, and initial profile status. You can also assign the new client to a specific agent at this point.
+  </Step>
+  <Step title="Submit the conversion">
+    Click **Convert**. Exotic CRM checks for existing clients with the same phone number or email. If a likely duplicate is found, you will see a conflict response — review the suggested existing client before proceeding.
+  </Step>
+</Steps>
+
+<Note>
+  If an existing client is found with the same phone or email, the conversion returns a `409 Conflict` response with details of the matched client. You should use **Reconcile** to link the lead to that existing client instead of creating a duplicate.
+</Note>
+
+## What happens after conversion
+
+When a lead is successfully converted:
+
+1. A new client record is created and synced to the platform.
+2. The lead's status is set to **Converted** and its `converted_client_id` is stored.
+3. A timeline event is recorded on both the lead and the new client.
+4. You can immediately create a deal for the new client from the client detail page or the Deals page.
+
+<Tip>
+  After converting a lead, navigate to the new client's profile to review their subscription options and create their first deal. The client profile inherits the lead's assigned agent by default.
+</Tip>

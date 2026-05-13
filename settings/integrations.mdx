@@ -1,0 +1,225 @@
+---
+title: "Connect markets and third-party integrations"
+sidebarTitle: "Integrations"
+description: "Link your WordPress advertising markets, configure SMS and push providers, set up scraper sources, and test platform connections from the Integrations settings."
+---
+
+The Integrations settings page is the central hub for connecting Exotic CRM to your advertising markets and the third-party services they rely on. From here you can add and configure WordPress-backed markets, set up SMS and push notification routing, manage lead scraper sources, and review webhook activity logs. Admins have full write access; sub-admins can update existing market settings and notification providers but cannot create new markets.
+
+## Markets
+
+Each market in Exotic CRM maps to a WordPress site running the Exotic CRM Sync plugin. The platform record stores the credentials the CRM uses to read and write client profiles on that site.
+
+### Adding a market
+
+<Note>
+  Only **admin** users can create a new market. You must have the WordPress Sync plugin installed and activated on the target site before the connection can be tested.
+</Note>
+
+<Steps>
+  <Step title="Open the Integrations settings">
+    Navigate to **Settings → Integrations** and click **Add Market**.
+  </Step>
+  <Step title="Fill in the market details">
+    Complete the required fields:
+
+    | Field | Description |
+    |---|---|
+    | **Name** | Display name for the market (e.g. "Kenya — ExoticKenya") |
+    | **Domain** | The site domain; must be unique across all markets |
+    | **Country** | Country the market serves |
+    | **Timezone** | Market's local timezone, used for reporting and renewal scheduling |
+    | **Currency** | Three-letter ISO code (e.g. `KES`, `NGN`, `GHS`) |
+    | **Phone prefix** | Country dialling prefix without the leading `+` (e.g. `254`) |
+  </Step>
+  <Step title="Enter WordPress API credentials">
+    Scroll to the **WordPress connection** section and provide:
+
+    - **WP API URL** — the base URL of the WordPress REST API (e.g. `https://example.com/wp-json`)
+    - **WP API user** — a WordPress username with the Application Password set
+    - **WP API password** — the Application Password generated in WordPress
+
+    These credentials are stored encrypted and never returned in full after saving.
+  </Step>
+  <Step title="Save and test">
+    Click **Save**. The market is created immediately. Use the **Test connection** action to confirm the CRM can reach your WordPress site.
+  </Step>
+</Steps>
+
+<Warning>
+  If you enable the market before at least one active pricing package is configured, activation is deferred automatically. Complete the package setup under the market's Packages tab to bring the market live.
+</Warning>
+
+### Editing market settings
+
+Select any market from the list and click **Edit** to update its details. You can change the name, currency, timezone, phone prefix, and WordPress API credentials at any time.
+
+<Tip>
+  Leave the **WP API password** field blank when saving an update if you do not want to rotate the stored credential — the existing password is preserved.
+</Tip>
+
+Fields available for update (`PATCH /api/crm/settings/integrations/platforms/{platform}`):
+
+- Name, domain, country
+- Timezone and currency code
+- Phone prefix
+- WordPress API URL, user, and password
+- Support chat URL and Support Board connection details
+
+### Testing a platform connection
+
+To verify that the CRM can reach a market's WordPress site, open the market and click **Test connection**. The CRM sends a lightweight probe to the WordPress REST API and reports back whether authentication succeeded and the sync plugin is reachable.
+
+A **connected** status means credentials are valid. A **degraded** status means credentials exist but the last sync returned an error — check the error message displayed in the market panel and verify the Application Password in WordPress.
+
+### Running a client sync
+
+A client sync pulls the latest profile data from WordPress into the CRM's local `clients` table. You can trigger a sync per market from the Integrations page or from within a specific client record.
+
+<Steps>
+  <Step title="Locate the market">
+    Find the market in the markets list on the Integrations page.
+  </Step>
+  <Step title="Trigger the sync">
+    Click **Sync clients** on the market card. The sync is dispatched to a background queue and the status updates in real time.
+  </Step>
+  <Step title="Monitor progress">
+    The latest sync run status (queued, running, completed, or error) and a summary of records processed are shown below the **Sync clients** button.
+  </Step>
+</Steps>
+
+<Note>
+  Syncs are also triggered automatically on a schedule. A manual sync is useful after you make bulk changes in WordPress or after resolving a sync error.
+</Note>
+
+## SMS provider
+
+The SMS provider setting controls how outbound SMS messages — renewal reminders, credential delivery, and manual conversation messages — are dispatched.
+
+<Note>
+  Only **admin** users can update SMS provider settings.
+</Note>
+
+<AccordionGroup>
+  <Accordion title="Choosing a provider">
+    Exotic CRM supports two SMS backends:
+
+    - **Legacy gateway** — your existing self-hosted gateway identified by a gateway URL and organisation code
+    - **Africa's Talking** — cloud SMS via the Africa's Talking API with a username, API key, and optional sender ID
+
+    You can configure a fallback provider that activates automatically if the primary provider fails.
+  </Accordion>
+  <Accordion title="Configuring the legacy gateway">
+    Under **Settings → Integrations → SMS**, select **Legacy gateway** as the active provider and enter:
+
+    - **Gateway URL** — the full endpoint URL of your SMS gateway
+    - **Organisation code** — the `org_code` required by your gateway
+  </Accordion>
+  <Accordion title="Configuring Africa's Talking">
+    Select **Africa's Talking** as the active provider and enter:
+
+    - **Endpoint** — leave blank to use the Africa's Talking default API URL
+    - **Username** — your Africa's Talking account username
+    - **API key** — your production API key
+    - **Sender ID** — optional; leave blank to use your registered shortcode
+  </Accordion>
+  <Accordion title="Per-market SMS overrides">
+    You can configure a different active or fallback provider for individual markets. Expand the **Per-market overrides** section and set the provider and credentials for each market that requires a different routing configuration.
+  </Accordion>
+</AccordionGroup>
+
+After saving, use the **Send test SMS** button to dispatch a test message and verify the configuration end-to-end before enabling it in production.
+
+## Push notification provider
+
+Push notification settings control which service is used to deliver push campaigns to subscribers on your WordPress markets.
+
+<Note>
+  **Admin** and **sub-admin** users can update push provider settings.
+</Note>
+
+Exotic CRM supports three push providers: **Webpushr**, **WonderPush**, and **iZooto**. The default provider applies globally; you can override it per platform with a fallback provider.
+
+<Steps>
+  <Step title="Select a default provider">
+    Navigate to **Settings → Integrations → Push notifications** and choose the default provider from the dropdown.
+  </Step>
+  <Step title="Enter provider credentials">
+    Each provider requires different credentials:
+
+    <Tabs>
+      <Tab title="Webpushr">
+        - **API key**
+        - **Auth token**
+      </Tab>
+      <Tab title="WonderPush">
+        - **Access token**
+        - **Project ID**
+      </Tab>
+      <Tab title="iZooto">
+        - **API token**
+      </Tab>
+    </Tabs>
+  </Step>
+  <Step title="Configure per-platform overrides (optional)">
+    Expand the **Per-platform settings** section. For each market, you can specify a different active provider, a fallback provider, and provider-specific credentials scoped to that market.
+  </Step>
+  <Step title="Test the configuration">
+    Click **Send test push** for a specific platform, providing a title, message, and target URL. The result shows which provider handled the delivery and whether it succeeded.
+  </Step>
+</Steps>
+
+## Scraper sources
+
+Scraper sources let you pull leads from competitor listing sites into Exotic CRM's lead pipeline.
+
+<Note>
+  **Admin** and **sub-admin** users can create and manage scraper sources.
+</Note>
+
+### Adding a scraper source
+
+<Steps>
+  <Step title="Open the Scraper section">
+    On the Integrations page, scroll to **Scraper sources** and click **Add source**.
+  </Step>
+  <Step title="Configure the source">
+    | Field | Description |
+    |---|---|
+    | **Name** | A descriptive label for the source |
+    | **Source URL** | The listing URL to scrape |
+    | **Market** | The market this source feeds leads into |
+    | **Parser profile** | The parsing strategy to use for the source site |
+    | **Fetch schedule** | How often the scraper runs automatically |
+    | **Dedupe mode** | How duplicate leads are handled on import |
+  </Step>
+  <Step title="Acknowledge compliance">
+    Confirm that you have reviewed the source site's robots.txt and terms of service by checking the compliance acknowledgement boxes. The source cannot be saved without these confirmations.
+  </Step>
+  <Step title="Save and run">
+    Click **Save**. To immediately test the source, use **Run now** on the source card. Recent run history and any errors appear below the source details.
+  </Step>
+</Steps>
+
+## Webhook logs
+
+The **Webhook Logs** tab (`GET /api/crm/settings/webhook-logs`) displays a paginated audit trail of platform events including deal activations, payment matches, sync runs, SMS dispatches, scraper runs, and role changes. Each log entry shows the action type, the entity it affected, the acting user, and a suggested action if the event indicates a problem.
+
+Use the search box to filter by action name, entity type, or the reason recorded with the event.
+
+## Sales dashboard widgets
+
+Admins and sub-admins can control which metric widgets appear on the sales team's dashboard. Navigate to **Settings → Integrations → Dashboard widgets** and toggle any of the following widgets on or off:
+
+| Widget | Description |
+|---|---|
+| **To-do tasks** | Open agent to-do items |
+| **Goals** | Agent and team goal progress |
+| **Expiring subscriptions** | Clients with subscriptions expiring soon |
+| **Payment recovery** | Unmatched or failed payments requiring action |
+| **Top countries** | Revenue breakdown by country |
+| **Top packages** | Revenue breakdown by package tier |
+| **Profile engagement** | Client profile interaction metrics |
+| **Missed chats** | Conversations awaiting a response |
+
+Changes take effect immediately for all users on the team.

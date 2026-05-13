@@ -1,0 +1,145 @@
+{
+  "projectType": "saas",
+  "projectName": "Exotic CRM",
+  "projectDescription": "A sales CRM for managing client profiles, subscriptions, payments, leads, and renewal campaigns for advertising platforms.",
+  "theme": "almond",
+  "primaryColor": "#fc2c24",
+  "lightColor": "#040404",
+  "darkColor": "#e29d78",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "User Guide",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "roles-permissions"
+            ]
+          },
+          {
+            "group": "Clients",
+            "pages": [
+              "clients/overview",
+              "clients/managing-profiles",
+              "clients/subscriptions",
+              "clients/wallet"
+            ]
+          },
+          {
+            "group": "Leads & Deals",
+            "pages": [
+              "leads/overview",
+              "leads/pipeline",
+              "deals/overview",
+              "deals/renewals"
+            ]
+          },
+          {
+            "group": "Payments",
+            "pages": [
+              "payments/overview",
+              "payments/matching",
+              "payments/manual-payments"
+            ]
+          },
+          {
+            "group": "Campaigns",
+            "pages": [
+              "campaigns/renewal-campaigns",
+              "campaigns/push-campaigns"
+            ]
+          },
+          {
+            "group": "Reporting & Team",
+            "pages": [
+              "reports/dashboard",
+              "reports/reports",
+              "reports/team-performance"
+            ]
+          },
+          {
+            "group": "Settings",
+            "pages": [
+              "settings/integrations",
+              "settings/billing",
+              "settings/roles",
+              "settings/templates"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Authentication",
+            "pages": [
+              "api/authentication"
+            ]
+          },
+          {
+            "group": "Endpoints",
+            "pages": [
+              "api/clients",
+              "api/leads",
+              "api/deals",
+              "api/payments",
+              "api/campaigns",
+              "api/reports"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Client profile management with WordPress sync",
+    "Lead pipeline with scraper import and CSV upload",
+    "Deal and subscription lifecycle management",
+    "Automated and manual payment matching",
+    "Renewal campaign automation with reminders",
+    "Push notification campaign builder",
+    "Multi-market revenue dashboard with FX normalization",
+    "Team leaderboard and performance goals",
+    "Role-based access control (admin, sub-admin, sales, marketing)",
+    "Billing provider routing rules per market",
+    "FAQ and internal knowledge base",
+    "Audit log and timeline events per client"
+  ],
+  "publicApiSurface": [
+    "POST /api/crm/login",
+    "GET /api/crm/me",
+    "GET /api/crm/dashboard",
+    "GET /api/crm/clients",
+    "POST /api/crm/clients",
+    "GET /api/crm/clients/{client}",
+    "PATCH /api/crm/clients/{client}",
+    "GET /api/crm/clients/{client}/timeline",
+    "POST /api/crm/clients/{client}/notes",
+    "GET /api/crm/clients/{client}/wallet",
+    "POST /api/crm/clients/{client}/wallet/topup",
+    "GET /api/crm/leads",
+    "POST /api/crm/leads",
+    "GET /api/crm/leads/pipeline",
+    "PATCH /api/crm/leads/{lead}/status",
+    "POST /api/crm/leads/{lead}/convert-to-client",
+    "GET /api/crm/deals",
+    "POST /api/crm/deals",
+    "POST /api/crm/deals/{deal}/activate",
+    "POST /api/crm/deals/{deal}/renew",
+    "GET /api/crm/payments",
+    "POST /api/crm/payments/{payment}/confirm-match",
+    "POST /api/crm/payments/{payment}/auto-match",
+    "GET /api/crm/renewals",
+    "POST /api/crm/renewals/run",
+    "GET /api/crm/push-campaigns",
+    "POST /api/crm/push-campaigns",
+    "POST /api/crm/push-campaigns/{pushCampaign}/execute",
+    "GET /api/crm/reports/summary",
+    "GET /api/crm/team/leaderboard",
+    "GET /api/crm/settings/integrations"
+  ]
+}

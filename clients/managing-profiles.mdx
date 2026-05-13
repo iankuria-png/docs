@@ -1,0 +1,190 @@
+---
+title: "Edit and sync client profiles"
+sidebarTitle: "Profiles"
+description: "Update client details, upload media, sync profiles from WordPress, repair broken WP links, and send login credentials directly from the client detail page."
+---
+
+Every client record in Exotic CRM is a local cache of a WordPress profile. The **Edit Profile** tab on the client detail page lets you make changes that are written directly back to WordPress — keeping both systems in sync without requiring you to log into the WordPress admin. This page covers all profile management tasks available from the client detail view.
+
+## Editing contact details
+
+You can update a client's name, phone number, city, and assigned sales agent directly from the CRM. These fields sync back to WordPress when saved.
+
+<Steps>
+  <Step title="Open the client record">
+    Navigate to **Clients**, find the client, and click their name to open the detail page.
+  </Step>
+  <Step title="Go to the Edit Profile tab">
+    Click the **Edit Profile** tab, then select the **Contact** section from the sub-navigation.
+  </Step>
+  <Step title="Make your changes">
+    Edit any of the following fields:
+
+    - **Name** — the display name shown on the public listing
+    - **Phone** — stored in normalised international format (e.g. `254712345678`)
+    - **City** — choose from cities already registered in this market
+    - **Assigned agent** — reassign to any active agent who has access to this market
+  </Step>
+  <Step title="Save">
+    Click **Save changes**. The CRM updates its local record and writes the changes to WordPress. A timeline event is created to record what changed and who made the change.
+  </Step>
+</Steps>
+
+<Note>
+  Reassigning an agent is only allowed if the selected user is active and has access to the client's market. You cannot assign a client to an agent from a different market.
+</Note>
+
+## Profile images
+
+Profile images are stored on WordPress. The CRM lets you upload new images, set a main image, and delete images — all without leaving the CRM.
+
+### Uploading images
+
+<Steps>
+  <Step title="Go to the Media section">
+    Open the **Edit Profile** tab and select **Media** from the sub-navigation.
+  </Step>
+  <Step title="Select files">
+    Click **Upload images** and choose one or more files. Accepted formats are JPG, PNG, WEBP, and MP4 (video). Maximum file sizes are 5 MB per image and 50 MB per video. You can upload up to 20 images and 5 videos per profile.
+  </Step>
+  <Step title="Set as main image (optional)">
+    If you are uploading a single image and want it to become the main profile thumbnail, enable the **Set as main image** toggle before uploading.
+  </Step>
+  <Step title="Confirm the upload">
+    Click **Upload**. The files are sent to WordPress and immediately reflected in the media gallery. The client list thumbnail updates automatically.
+  </Step>
+</Steps>
+
+### Setting the main image
+
+The main image appears as the profile thumbnail in the CRM list and on the public site. To change it:
+
+1. In the **Media** section, hover over any image in the gallery.
+2. Click **Set as main**.
+3. The CRM patches the WordPress profile and refreshes the display image cache.
+
+### Deleting an image
+
+Hover over an image in the gallery and click the **Delete** button. The image is removed from WordPress and from the CRM cache immediately.
+
+<Warning>
+  Image deletion is permanent. There is no recycle bin. Make sure you are removing the correct file before confirming.
+</Warning>
+
+## WordPress profile sync
+
+The "Sync from WP" button pulls the latest data from WordPress and overwrites the CRM's local cache. Use this whenever you suspect the CRM is showing stale information — for example, if a client updated their own profile directly on the WordPress site.
+
+<Steps>
+  <Step title="Open the client detail page">
+    Navigate to the client you want to sync.
+  </Step>
+  <Step title="Click Sync from WP">
+    The button is in the header area of the client detail page. A confirmation dialog appears.
+  </Step>
+  <Step title="Confirm the sync">
+    Click **Confirm**. The CRM fetches the latest profile from WordPress, updates all cached fields, and refreshes the display image. The page reloads with the updated data.
+  </Step>
+</Steps>
+
+<Note>
+  Sync is only available for clients who have a WordPress post ID. CRM-only profiles (created manually without a WP link) display a message explaining that sync is not yet possible.
+</Note>
+
+## Updating the WordPress profile from the CRM
+
+In addition to syncing data *from* WordPress, you can push edits *to* WordPress directly from the **Edit Profile** tab. This lets you update bio text, physical attributes, and other profile fields without logging into the WordPress admin.
+
+<Steps>
+  <Step title="Open the Edit Profile tab">
+    Navigate to the client and click **Edit Profile**.
+  </Step>
+  <Step title="Select a profile section">
+    Choose **Personal**, **Appearance**, **Services**, or another available section. The CRM loads the current values from WordPress for that section.
+  </Step>
+  <Step title="Edit the fields">
+    Make your changes. The editor validates field types (e.g. numeric codes for dropdowns, date formats for birthdays) before submission.
+  </Step>
+  <Step title="Save to WordPress">
+    Click **Save to WordPress**. If WordPress has been modified more recently than the CRM's last sync, a conflict warning appears showing the difference between the current WordPress values and your intended changes.
+  </Step>
+  <Step title="Resolve conflicts if needed">
+    Review the conflict panel. If you want to overwrite the current WordPress values with your changes, enable **Force save** and resubmit. If not, cancel and re-sync first to bring the CRM up to date.
+  </Step>
+</Steps>
+
+<Warning>
+  Subscription and billing fields — such as expiry dates, premium status, and activation flags — cannot be edited from the profile editor. Those fields are managed through the Deals and Subscriptions workflows only.
+</Warning>
+
+## Repairing a broken WordPress link
+
+A client's WordPress link can break if the WordPress post was deleted, the post ID changed, or the market was reconfigured. When the link is broken, syncing fails and the Edit Profile tab shows an error.
+
+<Steps>
+  <Step title="Open the client detail page">
+    Navigate to the affected client.
+  </Step>
+  <Step title="Click Repair WP link">
+    This button appears in the Edit Profile tab when the WordPress link is missing or invalid.
+  </Step>
+  <Step title="Wait for the repair">
+    The CRM searches WordPress for a matching profile by name or phone and attempts to reattach the link. If a match is found, the WordPress association is restored and a fresh sync runs automatically.
+  </Step>
+</Steps>
+
+<Note>
+  If the repair cannot find a match automatically, you may need to manually set the WordPress post ID by editing the client record or contacting an administrator.
+</Note>
+
+## Sending login credentials
+
+You can dispatch a client's WordPress login credentials (username and password) directly from the CRM without exposing the password in the interface.
+
+<Steps>
+  <Step title="Open the Credentials drawer">
+    On the client detail page, click **Send credentials** in the header actions. The credential dispatch drawer slides in from the right.
+  </Step>
+  <Step title="Choose the delivery channel">
+    Select how to send the credentials — typically via SMS to the client's registered phone number.
+  </Step>
+  <Step title="Dispatch">
+    Click **Send**. The system delivers the credentials and logs the dispatch in the client's credential history. You can view all past dispatches, their delivery status, and retry any failed attempt directly from the drawer.
+  </Step>
+</Steps>
+
+<Tip>
+  The credential dispatch drawer also opens automatically after you provision a new client through the WordPress provisioning flow, so you can send credentials immediately after creation.
+</Tip>
+
+## Adding client notes
+
+Notes let you log calls, emails, SMS interactions, or internal observations against a client record. Each note can optionally include a follow-up date to remind the team to revisit the client.
+
+<Steps>
+  <Step title="Go to the Notes tab">
+    Open the client detail page and click **Notes**.
+  </Step>
+  <Step title="Write your note">
+    Select a note type (Call, Email, SMS, Internal, or Support chat), type your content, and optionally set a **Follow-up date**.
+  </Step>
+  <Step title="Save the note">
+    Click **Add note**. The note is saved and a corresponding event is added to the client timeline.
+  </Step>
+</Steps>
+
+Note types available:
+
+| Type | Use for |
+|------|---------|
+| Call | Logging a phone conversation |
+| Email | Recording an email exchange |
+| SMS | Recording a text message sent or received |
+| Internal | Team-only observations not sent to the client |
+| Support chat | Notes related to a support board conversation |
+
+## Viewing the client timeline
+
+The **Timeline** tab shows a chronological feed of every significant event on the client record: syncs, profile edits, notes, deal activations, deactivations, credential dispatches, and more. Each event shows the actor, timestamp, and a summary of what changed.
+
+Use the timeline to audit a client's history, understand why their status changed, or verify that a credential dispatch was sent.

@@ -1,0 +1,195 @@
+---
+title: "Authenticate with the Exotic CRM API"
+sidebarTitle: "Authentication"
+description: "Obtain a bearer token by posting your credentials to /api/crm/login, then pass it in the Authorization header on every subsequent API request."
+---
+
+The Exotic CRM API uses bearer token authentication. You exchange your email and password for a token, then include that token in the `Authorization` header on every protected request. All CRM endpoints — except `/api/crm/login` and `/api/crm/auth/config` — require a valid token.
+
+## Base URL
+
+All API requests are made to your CRM installation's domain:
+
+```
+https://your-crm-domain.com
+```
+
+Replace `your-crm-domain.com` with the hostname where the Exotic CRM backend is deployed. Every endpoint in this reference is prefixed with `/api`.
+
+---
+
+## Login
+
+Exchange your email address and password for a bearer token. A successful response includes the token and the authenticated user's profile.
+
+```
+POST /api/crm/login
+```
+
+### Request body
+
+<ParamField body="email" type="string" required>
+  The email address associated with your CRM account.
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  The account password.
+</ParamField>
+
+### Response
+
+<ResponseField name="token" type="string" required>
+  The plain-text bearer token. Store this securely and include it in subsequent requests.
+</ResponseField>
+
+<ResponseField name="user" type="object" required>
+  <Expandable title="properties">
+    <ResponseField name="id" type="integer">
+      The user's numeric ID.
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      The user's display name.
+    </ResponseField>
+    <ResponseField name="email" type="string">
+      The user's email address.
+    </ResponseField>
+    <ResponseField name="role" type="string">
+      The user's role. One of `admin`, `sub_admin`, `sales`, or `marketing`.
+    </ResponseField>
+    <ResponseField name="status" type="string">
+      Account status. Will be `active` for any successful login.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"agent@example.com","password":"secret"}'
+```
+
+```json Response
+{
+  "token": "1|xA3kR7mPqL9nZ2fYvBdTwUsXjGhEoCiNlV8eQ5tW",
+  "user": {
+    "id": 12,
+    "name": "Jane Ochieng",
+    "email": "agent@example.com",
+    "role": "sales",
+    "status": "active"
+  }
+}
+```
+
+</CodeGroup>
+
+<Note>
+If password login is disabled for your role (e.g., Google SSO is enforced), the server returns `403` with the message `Password login is not enabled for this account. Use Google SSO.`
+</Note>
+
+---
+
+## Passing the token
+
+Include the token in the `Authorization` header on every protected request:
+
+```
+Authorization: Bearer {token}
+```
+
+<CodeGroup>
+
+```bash Authenticated request
+curl https://your-crm.example.com/api/crm/clients \
+  -H "Authorization: Bearer 1|xA3kR7mPqL9nZ2fYvBdTwUsXjGhEoCiNlV8eQ5tW"
+```
+
+```json 401 response (missing or invalid token)
+{
+  "message": "Unauthenticated."
+}
+```
+
+</CodeGroup>
+
+<Warning>
+Tokens have no built-in expiry. If you need token rotation, invalidate the token by calling the logout endpoint and issue a new one by logging in again.
+</Warning>
+
+---
+
+## Get the current user
+
+Return the profile of the user who owns the current token.
+
+```
+GET /api/crm/me
+```
+
+<CodeGroup>
+
+```bash Request
+curl https://your-crm.example.com/api/crm/me \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "user": {
+    "id": 12,
+    "name": "Jane Ochieng",
+    "email": "agent@example.com",
+    "role": "sales",
+    "status": "active"
+  }
+}
+```
+
+</CodeGroup>
+
+---
+
+## Logout
+
+Invalidate the current token. After calling this endpoint, the token is deleted and any further requests using it will return `401`.
+
+```
+POST /api/crm/logout
+```
+
+<ParamField body="session_token" type="string">
+  Optional. If your frontend tracks a session UUID for presence purposes, pass it here so the server can close the session cleanly.
+</ParamField>
+
+<CodeGroup>
+
+```bash Request
+curl -X POST https://your-crm.example.com/api/crm/logout \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+```json Response
+{
+  "message": "Logged out"
+}
+```
+
+</CodeGroup>
+
+---
+
+## Error reference
+
+| Status | When it occurs |
+|--------|---------------|
+| `401 Unauthenticated` | Token is missing, malformed, or has been revoked |
+| `403 Forbidden` | Account is inactive, or password login is disabled for this role |
+| `422 Unprocessable Entity` | Validation failed (e.g., missing `email` or `password`) |
+
+<Tip>
+Store the token in your application's secure storage (e.g., an HTTP-only cookie or a server-side session) rather than in `localStorage` to reduce XSS exposure.
+</Tip>

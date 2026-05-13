@@ -1,0 +1,163 @@
+---
+title: "Deals and subscription management"
+sidebarTitle: "Deals"
+description: "Deals represent a client's paid subscription. Create deals, activate them after payment, extend durations, and manage free trials from the Deals page."
+---
+
+A deal is the core subscription record in Exotic CRM. It links a client to a product (advertising package) and tracks the full financial and lifecycle details of their subscription — from the initial pending state through activation, expiry, and renewal. Every time a client pays for a listing, a deal captures that transaction and drives the client's profile status on the platform.
+
+## What is a deal?
+
+Each deal belongs to one client, one product, and one market. It stores the agreed price, currency, subscription duration, and current status. When a deal is activated, Exotic CRM provisions the client's subscription on the platform and sets the expiry date. When a deal expires or is cancelled, the client's profile is deactivated.
+
+Deals can also carry an optional link to the originating lead — useful for tracking which pipeline prospects turned into paying clients.
+
+## Deal statuses
+
+| Status | Meaning |
+|---|---|
+| `pending` | Deal created but not yet activated or awaiting payment collection |
+| `active` | Subscription is live on the platform; client's profile is published |
+| `expired` | Subscription period has ended; client's profile is deactivated |
+| `cancelled` | Deal was manually deactivated before expiry |
+| `renewed` | The original deal has been superseded by a renewal deal |
+
+<Note>
+  A deal in `awaiting_payment` status means an STK Push or payment link has been sent to the client but the payment has not yet been confirmed. The deal activates automatically once payment succeeds.
+</Note>
+
+## Creating a deal
+
+You create a deal by selecting a client and choosing a product from your market's catalogue.
+
+<Steps>
+  <Step title="Open the create deal dialog">
+    On the Deals page, click **New Deal**. You can also create a deal from a client's profile page.
+  </Step>
+  <Step title="Select the client">
+    Search for the client by name or phone number. Only clients in your accessible markets appear.
+  </Step>
+  <Step title="Choose a product and pricing">
+    Select the advertising package (product) the client is subscribing to. If the product has multiple pricing tiers or currencies, choose the specific price option from the **Pricing** dropdown.
+  </Step>
+  <Step title="Set the duration">
+    Choose weekly, bi-weekly, monthly, or manual billing frequency. The amount updates automatically based on the selected product price.
+  </Step>
+  <Step title="Link a lead (optional)">
+    If this deal originated from a lead, select the lead from the **Originating lead** field to maintain the sales attribution trail.
+  </Step>
+  <Step title="Save">
+    Click **Create Deal**. The deal is created in `pending` status and appears in the Deals list.
+  </Step>
+</Steps>
+
+## Activating a deal
+
+Activating a deal provisions the client's subscription on the platform and sets the expiry date. You must choose a payment method during activation.
+
+<Steps>
+  <Step title="Open the activate dialog">
+    Find the deal in the Deals list and choose **Activate** from its action menu.
+  </Step>
+  <Step title="Choose a payment method">
+    | Payment method | When to use |
+    |---|---|
+    | `manual` | Client paid via bank transfer or cash — enter the payment reference |
+    | `stk` | Send an M-Pesa STK Push request to the client's phone |
+    | `link` | Send a payment link via SMS; deal activates when payment is confirmed |
+    | `free_trial` | Grant a no-charge trial period; requires a supervisor PIN |
+  </Step>
+  <Step title="Apply a discount (optional)">
+    Enter a discount percentage or a specific payable amount to override the standard price. Discounts above the configured threshold require a discount PIN.
+  </Step>
+  <Step title="Confirm">
+    Click **Activate**. For manual payment, the deal activates immediately. For STK Push and payment links, the deal moves to `awaiting_payment` and activates once Exotic CRM receives the payment confirmation.
+  </Step>
+</Steps>
+
+<Warning>
+  Free trial activations require a supervisor PIN. Contact your administrator if you need to grant a trial and do not have PIN access.
+</Warning>
+
+## Deactivating a deal
+
+Deactivating a deal cancels the client's subscription and deactivates their profile on the platform. You must provide a structured reason code so that cancellation data can be used in reports.
+
+<Steps>
+  <Step title="Open the deactivate dialog">
+    From the Deals list, choose **Deactivate** on an active deal.
+  </Step>
+  <Step title="Select a reason code">
+    Choose from the available cancellation reason codes (for example, non-payment, client request, or duplicate). You can add supplementary notes in the **Reason notes** field.
+  </Step>
+  <Step title="Handle the linked payment">
+    Choose what to do with any associated payment record — void it, keep it, or mark it for review.
+  </Step>
+  <Step title="Notify the client (optional)">
+    Toggle **Notify client** to send an SMS to the client. You can type a custom message or choose an SMS template.
+  </Step>
+</Steps>
+
+<Note>
+  Active deals cannot be deleted — you must deactivate or cancel them first. Only `pending`, `expired`, and `cancelled` deals can be permanently removed.
+</Note>
+
+## Extending a deal
+
+Extending an active deal pushes the expiry date forward without creating a new deal record. Use this for partial-period top-ups or goodwill extensions.
+
+<Steps>
+  <Step title="Open the extend dialog">
+    From the action menu of an active deal, choose **Extend**.
+  </Step>
+  <Step title="Enter the number of additional days">
+    You can extend by 1 to 365 days. The new expiry date is shown as a preview before you confirm.
+  </Step>
+  <Step title="Choose a payment method and confirm">
+    Extension follows the same payment method options as activation. Enter the payment reference or initiate an STK Push as appropriate, then confirm.
+  </Step>
+</Steps>
+
+<Tip>
+  Extending a deal also syncs the new expiry date to WordPress immediately, so the client's profile reflects the correct subscription end date without delay.
+</Tip>
+
+## Free trial flag and approval flow
+
+A deal flagged as a free trial (`is_free_trial = true`) was activated at zero cost. This flag is visible in the Deals list and in the client's timeline so that administrators can audit trial usage.
+
+Free trials require a 4–6 digit supervisor PIN at the point of activation or extension. The PIN is configured by your administrator under **Settings → Free Trial PIN**.
+
+<CardGroup cols={2}>
+  <Card title="Activate as free trial" icon="gift">
+    Choose **free_trial** as the payment method during deal activation and enter the supervisor PIN when prompted.
+  </Card>
+  <Card title="Extend as free trial" icon="clock">
+    Choose **free_trial** as the payment method during deal extension. The same PIN is required.
+  </Card>
+</CardGroup>
+
+## Filtering the Deals list
+
+The Deals page supports several filters to help you quickly find the right records.
+
+| Filter | Description |
+|---|---|
+| **Status** | Filter by deal status: pending, active, expired, cancelled, or renewed |
+| **Market** | Narrow to a single platform |
+| **Workload bucket** | Segment deals by renewal urgency (see below) |
+| **Search** | Search by client name or phone number |
+
+### Renewal workload bucket
+
+The **bucket** filter groups deals by how urgently they need attention:
+
+| Bucket | Deals included |
+|---|---|
+| `all` | Every deal matching other active filters |
+| `expiring_soon` | Active deals expiring within the next 14 days |
+| `high_risk` | Clients flagged as high-risk for churn |
+
+<Tip>
+  Use the **Expiring soon** bucket at the start of each week to build your renewal call list. All clients in this view have active deals expiring within 14 days and may need a reminder or renewal offer.
+</Tip>

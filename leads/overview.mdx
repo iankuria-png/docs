@@ -1,0 +1,160 @@
+---
+title: "Lead management in Exotic CRM"
+sidebarTitle: "Overview"
+description: "Exotic CRM tracks prospective clients as leads. Learn how to create, assign, and import leads from CSV files or the built-in web scraper."
+---
+
+Leads represent prospective advertising clients before they become paying subscribers. Every lead lives in a specific market (platform) and moves through a defined status lifecycle as your sales team qualifies and contacts them. Once a lead is ready to subscribe, you convert it into a full client record — at which point Exotic CRM links the lead to the new client and can automatically create a deal.
+
+## What is a lead?
+
+A lead is a prospect record that belongs to one market. It stores contact details (name, phone, email), tracks which agent owns it, records the source of the enquiry, and carries a status that reflects how far through the sales process the lead has progressed.
+
+Each lead has a **source** that tells you where it came from:
+
+| Source | Meaning |
+|---|---|
+| `registration` | Self-registered via the platform |
+| `referral` | Referred by an existing client |
+| `outbound` | Added manually by the sales team |
+| `import` | Imported via CSV or the web scraper |
+
+## Lead status lifecycle
+
+Leads move through five statuses from first contact to outcome.
+
+<Steps>
+  <Step title="New">
+    The lead has been added but no one has reached out yet. All freshly created or imported leads start here.
+  </Step>
+  <Step title="Contacted">
+    An agent has made first contact with the prospect. The `first_contact_at` and `last_contact_at` timestamps are recorded automatically when you move a lead to this stage.
+  </Step>
+  <Step title="Qualified">
+    The prospect has expressed genuine interest and meets your criteria for a paid subscription. `last_contact_at` is updated again at this stage.
+  </Step>
+  <Step title="Converted">
+    The lead has signed up and is now a client. Exotic CRM links the lead to its corresponding client record. You cannot mark a lead as converted without a linked client.
+  </Step>
+  <Step title="Lost">
+    The prospect declined or went cold. The lead record is kept for reporting but removed from active pipeline views.
+  </Step>
+</Steps>
+
+<Note>
+  Archiving a lead is separate from marking it **Lost**. An archived lead is hidden from all default list views but is never deleted. Use archive when a lead is a duplicate or otherwise irrelevant, rather than a genuine sales outcome.
+</Note>
+
+## Creating a lead manually
+
+Use the **New Lead** button on the Leads page to add a single prospect. You need to provide at minimum a market (platform) and the prospect's name.
+
+<Steps>
+  <Step title="Open the create dialog">
+    Click **New Lead** at the top of the Leads page.
+  </Step>
+  <Step title="Fill in the prospect details">
+    Enter the lead name, phone number (in international format), email address, and the market the lead belongs to.
+  </Step>
+  <Step title="Assign an agent (optional)">
+    Pick a sales agent from the **Assign to** dropdown. If you leave this blank, Exotic CRM attempts to auto-assign based on the agent's market workload.
+  </Step>
+  <Step title="Save the lead">
+    Click **Create Lead**. The lead appears in the list with status **New**.
+  </Step>
+</Steps>
+
+<Tip>
+  Phone numbers are normalised automatically using the market's country prefix. You can enter a local number (e.g. `0712 345 678`) and Exotic CRM will store the correct international format.
+</Tip>
+
+## Importing leads from a CSV file
+
+You can import up to 500 leads at a time by uploading a CSV file. This is useful when migrating prospects from a spreadsheet or another system.
+
+**CSV column format:**
+
+| Column | Required | Notes |
+|---|---|---|
+| `name` | Yes | The lead's display name |
+| `phone` | No | Local or international format |
+| `email` | No | Valid email address |
+| `source` | No | `registration`, `referral`, `outbound`, or `import` (defaults to `outbound`) |
+| `status` | No | One of the five statuses (defaults to `new`) |
+| `assigned_to` | No | Agent user ID |
+
+<Steps>
+  <Step title="Open the CSV import dialog">
+    Click **Import CSV** on the Leads page.
+  </Step>
+  <Step title="Select your market">
+    All imported leads are assigned to the market you choose here.
+  </Step>
+  <Step title="Upload the file">
+    Select a `.csv` file from your computer. If your file has a header row, leave the **Has header** toggle on.
+  </Step>
+  <Step title="Review the results">
+    After upload, Exotic CRM reports how many leads were created and lists any rows that failed validation so you can correct and re-upload them.
+  </Step>
+</Steps>
+
+<Warning>
+  The CSV import limit is **500 rows per upload**. If your file exceeds this, split it into smaller batches before uploading.
+</Warning>
+
+## Scraping leads from external sites
+
+The built-in web scraper lets you pull prospect contact details directly from a competitor directory or listing page without leaving Exotic CRM.
+
+<Tabs>
+  <Tab title="Scrape a single entry">
+    Use **Scrape Entry** when you have a specific profile URL you want to capture as a lead.
+
+    1. Click **Scrape Entry** on the Leads page.
+    2. Paste the profile URL into the **Source URL** field.
+    3. Optionally provide a name, phone, and email to supplement what the scraper extracts.
+    4. Click **Create**. Exotic CRM derives a lead name from the URL path if you leave the name blank.
+  </Tab>
+  <Tab title="Bulk scrape preview">
+    Use **Scrape Preview** to pull a batch of prospects from a listing page before committing them to the database.
+
+    1. Click **Scrape** on the Leads page to open the scrape modal.
+    2. Choose a preset website or enter a custom listing URL.
+    3. Set the maximum number of candidates to fetch (up to 250).
+    4. Click **Preview** to see the results before they are saved.
+    5. Review the candidate list and quality indicators, then click **Import** to commit the leads. The preview session expires after 30 minutes.
+  </Tab>
+</Tabs>
+
+<Note>
+  The scraper respects each site's `robots.txt` rules. If a site blocks automated access, the preview will return a blocked status and no leads will be imported.
+</Note>
+
+## Assigning a lead to an agent
+
+Every lead can be assigned to one sales agent at a time. Exotic CRM uses the agent's market access and workload to select the best fit automatically, but you can override this manually.
+
+To reassign a lead, open the row action menu on the Leads page and choose **Assign**. Select the agent and confirm. The previous and new assignees are recorded in the lead's timeline.
+
+<Tip>
+  If no eligible active agent is found for the market, the reassignment will fail with an error. Make sure at least one agent has access to that market before assigning.
+</Tip>
+
+## Archiving and deleting leads
+
+<CardGroup cols={2}>
+  <Card title="Archive a lead" icon="archive">
+    Archiving hides the lead from default list views without permanently deleting it. Use this for duplicates or leads that are no longer relevant. Archived leads are recoverable by enabling **Include archived** in the list filters.
+
+    To archive: open the row action menu and choose **Archive**. You must provide a reason.
+  </Card>
+  <Card title="Delete a lead" icon="trash">
+    Deletion is permanent. The lead record and its timeline events are removed. Only delete a lead when you are certain the data is not needed for reporting.
+
+    To delete: open the row action menu and choose **Delete**. You must provide a reason, which is recorded in the audit log before deletion.
+  </Card>
+</CardGroup>
+
+<Warning>
+  You cannot recover a deleted lead. If you are unsure, archive the lead instead.
+</Warning>

@@ -1,0 +1,132 @@
+---
+title: "Client subscription status and deactivation"
+sidebarTitle: "Subscriptions"
+description: "Understand subscription status badges, deactivate a client subscription, check profile completeness, and review retention bands from the client detail page."
+---
+
+A client's subscription controls whether their advertising profile is publicly visible and actively running on the WordPress site. Exotic CRM surfaces subscription state through a set of badges on the client detail page and provides tools to deactivate subscriptions, assess profile completeness, and track retention risk — all without switching to WordPress.
+
+## Subscription status badges
+
+The **Overview** tab of each client detail page shows a subscription status badge in the profile summary header. The badge reflects the client's current billing and visibility state.
+
+| Badge | Meaning |
+|-------|---------|
+| **Active** | The client has a live deal and their profile is publicly visible (`publish` status, no payment block). |
+| **Expired** | The client's subscription period has ended. Their profile may still be visible on WordPress, but the deal is no longer active in the CRM. |
+| **No subscription** | The client has no deal history in this market. They may have been created manually or synced from WordPress without a corresponding deal. |
+| **Private** | The profile exists on WordPress but is set to private — not publicly visible regardless of billing state. |
+| **Needs payment** | The WordPress site has flagged this profile as requiring payment before it will be shown again. |
+
+<Note>
+  Subscription status is derived from both the client's CRM deal history and the current state of their WordPress profile. If a change is made directly on the WordPress site, run a sync from the client detail page to bring the CRM up to date.
+</Note>
+
+## How to deactivate a client subscription
+
+Deactivation sets the client's WordPress profile to private and clears the active subscription in the CRM. Use this when a client has not renewed, requests removal, or violates platform terms.
+
+<Steps>
+  <Step title="Open the client detail page">
+    Navigate to **Clients**, find the client, and click their name.
+  </Step>
+  <Step title="Click Deactivate subscription">
+    The **Deactivate subscription** button appears in the **Overview** tab when the client has an active subscription. Click it to open the deactivation dialog.
+  </Step>
+  <Step title="Select a reason code">
+    Choose the reason that best describes why you are deactivating:
+
+    - **Non-renewal** — the subscription period ended without payment
+    - **Client request** — the client asked to be removed
+    - **Duplicate** — this profile duplicates another active profile
+    - **Policy violation** — the profile violates platform rules
+    - **Other** — any other reason (add a note in the reason field)
+  </Step>
+  <Step title="Add reason notes (optional)">
+    Type any additional context in the reason notes field. This is stored in the audit log and timeline.
+  </Step>
+  <Step title="Notify the client (optional)">
+    Enable **Notify client** to send an SMS to the client's registered phone number informing them of the deactivation.
+  </Step>
+  <Step title="Confirm deactivation">
+    Click **Deactivate**. The CRM calls the WordPress sync plugin to update the profile status, clears the active deal flags, and records the action in the audit log and client timeline.
+  </Step>
+</Steps>
+
+<Warning>
+  Deactivation is applied to WordPress immediately. The client's profile will no longer appear on the public advertising site once the change propagates. This action cannot be undone from the CRM — to reactivate the profile, you must create a new deal and activate it.
+</Warning>
+
+## Profile completeness score
+
+The completeness score gives you a quick read on how fully populated a client's WordPress profile is. A low score typically means missing images, an incomplete bio, or absent contact details — all factors that reduce a profile's effectiveness on the public site.
+
+The score is shown on the **Overview** tab below the subscription summary. It is computed from a set of weighted profile fields pulled from WordPress. The score is fetched separately from the main client record, so it loads slightly after the page renders.
+
+Common completeness gaps and how to fix them:
+
+| Gap | Resolution |
+|-----|-----------|
+| No profile images | Upload images from the **Media** section of the Edit Profile tab |
+| Bio is empty | Fill in the bio from the **Personal** section of Edit Profile |
+| Phone not set | Update the phone number in the **Contact** section |
+| City not set | Set the city in the **Contact** section |
+
+## Profile health issues
+
+The **Profile Health** tab on the client detail page surfaces issues that cannot be resolved automatically — such as broken WordPress links, duplicate profiles, or mismatched phone numbers.
+
+Each health issue includes:
+
+- A **description** of what is wrong
+- A **severity** indicator (warning or critical)
+- An **action** you can take to resolve it
+
+### Resolving health issues
+
+<Steps>
+  <Step title="Open the Profile Health tab">
+    Navigate to the client detail page and click **Profile Health**.
+  </Step>
+  <Step title="Review the issues list">
+    Each issue is listed with a description and recommended action. Critical issues (shown in red) should be resolved before attempting a renewal or reactivation.
+  </Step>
+  <Step title="Take the recommended action">
+    Depending on the issue type, resolution may involve:
+    - Clicking a **Resolve** or **Fix** button that applies an automated correction
+    - Navigating to Edit Profile to update a specific field
+    - Using **Repair WP link** to reconnect a broken WordPress association
+    - Merging or deleting a duplicate record
+  </Step>
+  <Step title="Confirm resolution">
+    After acting, click **Mark resolved** (if available) to dismiss the issue from the panel. The health endpoint is re-queried automatically.
+  </Step>
+</Steps>
+
+## Retention bands
+
+Exotic CRM assigns every client a **retention band** based on a computed risk score. The score takes into account subscription age, payment history, online activity, and profile completeness. Bands update automatically as the underlying data changes.
+
+| Band | Description | Recommended action |
+|------|-------------|-------------------|
+| **Stable** | Low churn risk. Client is active and engaged. | Routine check-ins only. |
+| **Watchlist** | Moderate risk. Early warning signs present. | Review subscription expiry and confirm next renewal. |
+| **Needs Attention** | Elevated risk. Client is overdue for contact or showing declining activity. | Proactive outreach — call or send a renewal reminder. |
+| **Critical** | High churn risk or already inactive. Immediate attention required. | Escalate to a senior agent; attempt immediate contact. |
+
+The band is displayed in both the clients list (Retention column) and the client detail Overview tab.
+
+<Tip>
+  Use the **Retention watch** metric card on the Clients list page to instantly filter all clients in the Watchlist, Needs Attention, and Critical bands at once.
+</Tip>
+
+## Retention insight panel
+
+The **Overview** tab includes a retention insight panel that shows:
+
+- The client's current **retention score** (lower is better — the score represents churn risk)
+- The computed **band** with a colour-coded indicator
+- A **primary behaviour tag** describing the dominant risk pattern (e.g. "low activity", "near expiry", "payment gap")
+- A **score history chart** showing how the score has moved over the past 90 days
+
+The insight panel is refreshed each time you open the Overview tab, with a short cache window to avoid redundant computation.

@@ -1,0 +1,170 @@
+---
+title: "Payment queue and tracking in Exotic CRM"
+sidebarTitle: "Overview"
+description: "The Payments page shows all incoming transactions across your markets. Filter by status, review the recovery queue, export records, and send payment links to clients."
+---
+
+The Payments page is the central hub for tracking every payment that flows into your advertising markets. From here you can monitor live status updates, identify payments that need action, send clients a payment link, import payments from external sources, and export records for reporting. Everything you see is scoped to the markets your account can access.
+
+## Payment statuses
+
+Each payment in the queue carries one of the following statuses. Understanding them helps you prioritize work quickly.
+
+| Status | Meaning |
+|---|---|
+| `initiated` | A payment request has been sent to the provider (for example, an M-Pesa STK push) and is waiting for the customer to act. |
+| `pending` | The provider has acknowledged the request and is processing it. |
+| `completed` | The provider confirmed the payment was received. |
+| `expired` | The payment window closed without the customer completing the transaction. |
+| `failed` | The provider rejected the payment or an error occurred during processing. |
+| `reversed` | A completed payment was subsequently reversed by the provider. |
+
+Payments with the reconciliation state `manual_review` appear with a **Pending review** badge in the queue regardless of their underlying status.
+
+<Note>
+The queue hides sandbox and test payments by default. If you need to view or manage test records, ask your administrator to adjust the test visibility filter.
+</Note>
+
+## Recovery queue
+
+The recovery queue is a subset of the payment list that surfaces payments requiring your attention — specifically, confirmed payments that are not yet matched to a client. Use the **Status** filter and select **Recovery queue** to focus on these records. From there you can run auto-matching, confirm a match manually, or send the client a new payment link.
+
+The queue also shows aging buckets for awaiting payments so you can spot stale requests before they become a problem:
+
+- **Under 1 hour** — wait for the provider callback to arrive.
+- **1–24 hours** — send a payment link now.
+- **1–3 days** — retry the STK push, then follow up.
+- **Over 72 hours** — escalate and follow up manually.
+
+## Filtering the queue
+
+Use the filter bar at the top of the Payments page to narrow the list.
+
+<Tabs>
+  <Tab title="Basic filters">
+    | Filter | Options |
+    |---|---|
+    | **Market** | Limit results to a specific advertising market (platform). |
+    | **Status** | Any individual status, or **Recovery queue** for unmatched confirmed payments. |
+    | **Date range** | Today, last 7 days, last 30 days, or a custom date window. |
+    | **Match state** | Matched or unmatched. |
+  </Tab>
+  <Tab title="Advanced filters">
+    Expand **Advanced filters** to access additional options:
+
+    | Filter | Options |
+    |---|---|
+    | **Source** | Gateway (live provider flow) or Excel import. |
+    | **Match confidence** | High, medium, or low confidence auto-match results. |
+    | **Review state** | Open, manual review, or resolved. |
+    | **Resolution code** | Reversed or invalid reference. |
+    | **Has discount** | Show only discounted payments. |
+  </Tab>
+</Tabs>
+
+<Tip>
+The market filter persists from the dashboard. If you last viewed a specific market on the dashboard, the Payments page opens to the same market automatically.
+</Tip>
+
+## Sending a payment link to a client
+
+If a client never completed their payment, you can send them a fresh payment link directly from the CRM.
+
+<Steps>
+  <Step title="Open the row action menu">
+    Find the payment in the queue and click the action menu (three-dot icon) on the right side of the row.
+  </Step>
+  <Step title="Choose Send payment link">
+    Select **Send payment link** from the menu. A dialog opens where you choose the delivery channel (SMS is the default) and the payment provider.
+  </Step>
+  <Step title="Confirm the phone number">
+    Verify or update the phone number the link will be sent to, then click **Send**.
+  </Step>
+</Steps>
+
+**API reference:** `POST /api/crm/payments/{payment}/send-payment-link`
+
+You can also send a payment link from the client profile page without needing to locate the specific payment first: `POST /api/crm/clients/{client}/payment-link`
+
+## Exporting payments to CSV
+
+Export the current filtered view to a spreadsheet for offline analysis or reporting.
+
+<Steps>
+  <Step title="Apply filters">
+    Set the market, date range, and any status filters you need before exporting. The export reflects exactly what the current filter returns.
+  </Step>
+  <Step title="Open the export modal">
+    Click the **Export** button in the page toolbar. The export modal opens and lets you choose which columns to include and the date format.
+  </Step>
+  <Step title="Download the file">
+    Click **Export**. Exotic CRM generates an XLSX file and downloads it to your browser immediately.
+  </Step>
+</Steps>
+
+**API reference:** `POST /api/crm/payments/export`
+
+<Note>
+The export respects the same market access rules as the payment list. You can only export data for markets your account is authorized to view.
+</Note>
+
+## Importing payments from an external CSV
+
+If a market processes payments through an external system, you can import those transaction records into Exotic CRM. The import runs as a two-step preview-then-commit flow so you can review the data before it is written.
+
+### Download the import template
+
+Before preparing your file, download the official template so your columns match what the importer expects.
+
+**API reference:** `GET /api/crm/payments/import/template`
+
+The template contains these columns:
+
+| Column | Description |
+|---|---|
+| `payment_date` | Date and time of the transaction (e.g. `2026-01-31 09:15:00`). |
+| `amount` | Numeric payment amount. |
+| `currency` | ISO currency code (e.g. `KES`). |
+| `phone` | Customer phone number. |
+| `transaction_reference` | Provider transaction ID or reference string. |
+| `status` | Payment status (e.g. `completed`). |
+| `profile_url` | URL of the client profile (optional). |
+| `subscription_type` | `new` or `renewal` (optional). |
+| `notes` | Free-form note (optional). |
+
+### Run an import
+
+<Steps>
+  <Step title="Upload and preview">
+    Click **Import** in the toolbar, select your market, and upload the CSV or XLSX file. The importer validates every row and shows a summary of valid, duplicate, and invalid rows before writing anything.
+
+    **API reference:** `POST /api/crm/payments/import/preview`
+  </Step>
+  <Step title="Review the preview">
+    Check the row-level validation results. Duplicate rows (payments that already exist in the system) are flagged so you can decide whether to proceed. You can also adjust the match for individual rows at this stage.
+  </Step>
+  <Step title="Commit the import">
+    Once you are satisfied with the preview, click **Commit** to write the valid rows into the payment queue.
+
+    **API reference:** `POST /api/crm/payments/import/commit`
+  </Step>
+</Steps>
+
+<Warning>
+Committed imports cannot be undone automatically. Review the preview carefully, especially the duplicate count, before clicking Commit.
+</Warning>
+
+## M-Pesa STK push review
+
+For markets using M-Pesa, Exotic CRM captures STK push payments and surfaces them for review in a dedicated M-Pesa review panel. This panel shows payments that arrived via M-Pesa but have not yet been fully reconciled with a client subscription.
+
+From the review panel you can:
+
+- Confirm subscriptions for a batch of STK push payments in one action.
+- Identify payments where the STK push completed but the subscription was not created.
+
+**API reference:** `GET /api/crm/payments/mpesa-review` and `POST /api/crm/payments/mpesa-confirm-subscriptions`
+
+<Tip>
+Run the M-Pesa review panel at the start of each working day to catch any overnight payments that need to be activated.
+</Tip>

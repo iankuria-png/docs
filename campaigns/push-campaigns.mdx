@@ -1,0 +1,243 @@
+---
+title: "Create and send push notification campaigns"
+sidebarTitle: "Push"
+description: "Push campaigns let you upload contact lists, match profiles, attach media, and send push notifications to subscribers across your advertising markets."
+---
+
+Push campaigns give your marketing team a direct channel to subscribers on each of your advertising market platforms. You upload a contact workbook (or paste rows manually), the system extracts and matches each profile to a CRM record, and then you review, enrich, and dispatch push notifications — either immediately or on a schedule. The Push Campaigns page tracks every campaign from upload through analytics.
+
+<Note>
+  Access to push campaigns requires the `marketing`, `admin`, or `sub_admin` role.
+</Note>
+
+## Dashboard metrics
+
+The top of the Push Campaigns page shows a real-time snapshot of your campaign activity:
+
+| Metric | Description |
+|---|---|
+| **Total Campaigns** | All push campaigns visible to you across your markets |
+| **Pending** | Campaigns in `processing`, `draft`, `scheduled`, or `running` state |
+| **Sent Today** | Individual notification items delivered today |
+| **Avg CTR** | Average click-through rate from refreshed analytics across all campaigns |
+
+## Campaign statuses
+
+| Status | Meaning |
+|---|---|
+| `processing` | The uploaded workbook is being parsed and profiles extracted |
+| `draft` | Campaign created, items ready for review before sending |
+| `scheduled` | Execution is queued for a future date and time |
+| `running` | Notifications are actively being dispatched |
+| `completed` | All items were processed |
+| `partial` | Some items sent, some failed or skipped |
+| `failed` | Campaign execution failed |
+
+## Creating a campaign from a workbook upload
+
+The primary way to create push campaigns is by uploading a market workbook — an Excel file where each sheet corresponds to an advertising market and each row defines a profile, message, and scheduled time.
+
+<Steps>
+  <Step title="Open the upload modal">
+    Click **Upload workbook** on the Push Campaigns page. The modal accepts `.xlsx` or `.xls` files up to 50 MB.
+  </Step>
+  <Step title="Choose dry-run or create mode">
+    Enable **Dry run** to parse the file and preview how many rows and campaigns would be created, without writing any data. This is the safest way to validate a new workbook format.
+
+    API: `POST /api/crm/push-campaigns/upload`
+
+    | Field | Type | Description |
+    |---|---|---|
+    | `file` | file | Excel workbook (`.xlsx` or `.xls`, max 50 MB) |
+    | `dry_run` | boolean | When `true`, parses without persisting campaigns |
+
+    The response includes a `batch_id` you can use to poll progress.
+  </Step>
+  <Step title="Monitor extraction in the Upload Queue">
+    After uploading, the workbook appears in the **Upload Queue** panel with a live status. The queue auto-refreshes every 5 seconds. Statuses include `queued`, `processing`, `ready`, `failed`, and `cancelled`.
+  </Step>
+  <Step title="Convert a dry-run batch into campaigns">
+    If you uploaded with **Dry run**, the queue row shows a **Create campaigns** button once parsing is complete. Click it to re-process the same file and persist the campaign records.
+
+    API: `POST /api/crm/push-campaigns/upload/{batchId}/create-from-dry-run`
+  </Step>
+  <Step title="Confirm the batch">
+    After creation, campaigns in a batch start in an unconfirmed state. Click **Confirm** in the queue row to mark them as reviewed and ready for dispatch.
+
+    API: `POST /api/crm/push-campaigns/upload/{batchId}/confirm`
+  </Step>
+</Steps>
+
+<Tip>
+  If a queued upload is taking too long, click **Process now** in the queue row to run the job synchronously in the current request instead of waiting for a background worker.
+</Tip>
+
+<Warning>
+  If the queue worker appears offline, a warning banner displays above the Upload Queue. Contact your system administrator to restore the background processing service before uploading large workbooks.
+</Warning>
+
+## Pasting contacts directly
+
+For small batches (up to 20 rows), you can paste contact data directly instead of uploading a file. The paste input expects tab-separated columns in this order: **Date**, **Profile URL**, **Message**, **Time**.
+
+**API: `POST /api/crm/push-campaigns/upload/paste`**
+
+| Field | Type | Description |
+|---|---|---|
+| `platform_id` | integer | Market the contacts belong to (required) |
+| `content` | string | Tab-separated rows |
+| `dry_run` | boolean | Preview without persisting (defaults to `true`) |
+| `year` | integer | Year used when naming the generated workbook |
+
+The pasted content is converted internally into an Excel workbook and processed through the same extraction pipeline as file uploads. Batches of 20 rows or fewer are processed synchronously (express mode), so results appear immediately.
+
+## Creating a campaign from CRM profiles
+
+If you want to target specific clients already in the CRM — for example, a hand-picked set of active escort profiles — use the **Select CRM escorts** flow instead of uploading a workbook.
+
+Click **Select CRM escorts** on the Push Campaigns page to open the escort selection modal. Search and filter by market, then select the profiles you want to include. Provide a message and an optional campaign name and scheduled time.
+
+Internally this calls `POST /api/crm/push-campaigns/from-crm`, which creates a draft campaign with one item per selected profile.
+
+## Matching campaign items to CRM profiles
+
+After extraction, each campaign item has a **profile URL** scraped from the workbook. Exotic CRM attempts to automatically match that URL to an existing CRM client record. Items that cannot be matched automatically are flagged as `needs_preset` or remain `pending_extraction`.
+
+You can manually match an item by opening the campaign detail view and using the **Match to CRM profile** action on any item row.
+
+**API: `POST /api/crm/push-campaigns/{pushCampaign}/items/{pushCampaignItem}/match-crm`**
+
+| Field | Type | Description |
+|---|---|---|
+| `client_id` | integer | CRM client to link to this item |
+| `replace_profile_url` | boolean | Update the item's profile URL to the client's canonical URL (default `true`) |
+| `hydrate_wp_details` | boolean | Pull phone, image, and age from the WordPress profile (default `true`) |
+
+To see candidates for a fuzzy match, call `GET /api/crm/push-campaigns/{pushCampaign}/items/{pushCampaignItem}/match-candidates` before committing.
+
+## Uploading or selecting media per item
+
+Each campaign item can have a profile image attached as the push notification thumbnail. You can select from existing WordPress media or upload a new image.
+
+<Tabs>
+  <Tab title="Select existing media">
+    Call `GET /api/crm/push-campaigns/{pushCampaign}/items/{pushCampaignItem}/media` to retrieve available images from the profile's WordPress post. The response includes a `recommended_url` chosen by the CRM.
+
+    To apply a specific image, call `POST /api/crm/push-campaigns/{pushCampaign}/items/{pushCampaignItem}/media/select` with the `attachment_id` from the media list.
+  </Tab>
+  <Tab title="Upload a new image">
+    Call `POST /api/crm/push-campaigns/{pushCampaign}/items/{pushCampaignItem}/media/upload` with a `file` field (JPEG, PNG, or WEBP, max 5 MB). The image is uploaded to WordPress and automatically applied to the item.
+  </Tab>
+</Tabs>
+
+<Note>
+  Media selection and upload are only available for items that have been matched to a CRM client profile with a linked WordPress listing. Unmatched items will show an error when you try to access the media panel.
+</Note>
+
+## Checking dispatch readiness
+
+Before executing or scheduling a campaign, check whether all items are in a dispatchable state. The readiness check flags overdue items, missing media, unresolved profiles, and other blockers.
+
+**API: `GET /api/crm/push-campaigns/{pushCampaign}/dispatch-readiness`**
+
+| Parameter | Description |
+|---|---|
+| `mode` | `execute_now` (default) or `schedule` |
+| `scheduled_at` | Required when `mode` is `schedule` |
+
+The response includes a `can_activate` boolean. If `false`, the `blockers` array describes what needs to be resolved before you can execute.
+
+## Executing a campaign
+
+Once all items are ready, execute the campaign to start dispatching push notifications.
+
+**API: `POST /api/crm/push-campaigns/{pushCampaign}/execute`**
+
+The system performs a readiness check before proceeding. If any items are overdue (their `scheduled_at` has passed beyond the grace period), pass `reschedule_overdue: true` in the request body to move those items to now before execution.
+
+<Warning>
+  Executing a campaign sends live push notifications to subscribers immediately. Confirm your item list, media, and messages in the campaign detail view before calling this endpoint.
+</Warning>
+
+## Scheduling for later
+
+Instead of executing immediately, you can queue a campaign to run at a specific future time.
+
+**API: `POST /api/crm/push-campaigns/{pushCampaign}/schedule`**
+
+| Field | Type | Description |
+|---|---|---|
+| `scheduled_at` | datetime | Future date and time for dispatch (required) |
+| `timezone` | string | IANA timezone name; defaults to the market's configured timezone |
+
+The `scheduled_at` value must be in the future. The system validates readiness against the scheduled time and returns a `dispatch_plan` in the response showing when each item is expected to fire.
+
+## Viewing analytics
+
+After a campaign runs, retrieve delivery metrics by campaign.
+
+**API: `GET /api/crm/push-campaigns/{pushCampaign}/analytics`**
+
+The response includes:
+
+| Field | Description |
+|---|---|
+| `analytics.total_sent` | Items for which dispatch was attempted |
+| `analytics.delivered` | Confirmed deliveries from the push provider |
+| `analytics.clicked` | Notifications the subscriber tapped |
+| `analytics.failed` | Items that failed at the provider level |
+| `analytics.ctr` | Click-through rate as a percentage |
+| `item_summary` | Breakdown of item statuses: `sent`, `failed`, `skipped`, `pending`, `scheduled` |
+
+Analytics are refreshed from the push provider each time you call this endpoint. The dashboard metric card shows an aggregate average CTR across all campaigns in your market scope.
+
+## Campaign presets
+
+Presets store the CSS selectors and regex patterns used to extract profile details (name, phone, age, image) from a market's profile pages during workbook processing. Without a matching preset, items remain in `needs_preset` status and cannot be dispatched.
+
+<Tabs>
+  <Tab title="List presets">
+    `GET /api/crm/push-campaigns/presets`
+
+    Filter by `domain`, `platform_id`, or `is_active`. Presets scoped to a platform are only visible to users with access to that market.
+  </Tab>
+  <Tab title="Create or update a preset">
+    `POST /api/crm/push-campaigns/presets`
+
+    | Field | Description |
+    |---|---|
+    | `domain` | The site domain this preset applies to (e.g. `exotickenya.com`) |
+    | `platform_id` | Associate with a specific market (optional) |
+    | `name_selector` | CSS selector for the profile name |
+    | `phone_selector` | CSS selector for the phone number |
+    | `image_selector` | CSS selector for the main image |
+    | `age_selector` | CSS selector for the age field |
+    | `city_selector` | CSS selector for the city field |
+    | `name_regex` | Optional regex applied after the name selector |
+    | `age_regex` | Optional regex applied after the age selector |
+    | `test_url` | A profile URL to test this preset against |
+
+    If a preset for the given domain already exists, the endpoint updates it in place.
+
+    Updating a preset's `is_active` flag or `domain` requires the `admin` or `sub_admin` role (`PATCH /api/crm/push-campaigns/presets/{preset}`).
+  </Tab>
+  <Tab title="Auto-detect selectors">
+    `POST /api/crm/push-campaigns/presets/detect`
+
+    Pass a `url` and the system fetches the page and attempts to auto-detect selectors. The response includes both the detected selectors and any existing preset for that domain, so you can decide whether to create a new preset or update the existing one.
+  </Tab>
+</Tabs>
+
+## Subscriber sync
+
+The Subscriber Overview panel shows the active and total subscriber counts for each market, sourced from your push provider. Keep these numbers current by syncing before a campaign run.
+
+**Sync all markets: `POST /api/crm/push-campaigns/subscribers/sync`**
+
+**Sync a single market:** Include `platform_id` in the request body.
+
+The response includes a `diagnostics` array for any market where the sync failed, including the provider error message. If a market shows **not configured** in the subscriber table, check that its push provider credentials are set in Settings.
+
+<Tip>
+  Subscriber counts are captured as point-in-time snapshots. The panel displays the most recent snapshot date alongside each count so you can tell how fresh the data is.
+</Tip>

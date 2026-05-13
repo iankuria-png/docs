@@ -1,0 +1,219 @@
+---
+title: "Billing providers, routing rules, and wallet"
+sidebarTitle: "Billing"
+description: "Configure payment routing rules per market, manage billing provider profiles, set up wallet auto-renew, and adjust manual payment methods from the Billing settings."
+---
+
+The Billing settings workspace gives admins and sub-admins full control over how payments are processed across every market. You configure provider profiles once and then assign them to markets through routing rules, giving you fine-grained control over which provider handles each payment surface. Wallet rules, subscription policies, and manual payment methods are all configured per market.
+
+<Note>
+  The Billing workspace is restricted to **admin** and **sub-admin** users. Kill switch controls require the **admin** role.
+</Note>
+
+## Billing workspace overview
+
+When you open **Settings → Billing**, the overview panel summarises the current state of the billing system:
+
+- **Billing enabled** — whether the billing engine is active
+- **Wallet mode** — the global wallet operating mode (disabled, sandbox, or production)
+- **Total markets** — number of connected markets
+- **Wallet-enabled markets** — markets with the wallet system active
+
+The markets list shows the wallet status and mode override for each market at a glance. Click a market to jump directly to its routing rules.
+
+## Provider profiles
+
+A provider profile stores the credentials and configuration for a specific payment provider (e.g. Paystack production, PawaPay sandbox). Profiles are shared across markets and referenced by routing rules.
+
+### Creating a provider profile
+
+<Steps>
+  <Step title="Open the Providers tab">
+    Navigate to **Settings → Billing → Providers** and click **Add profile**.
+  </Step>
+  <Step title="Select the provider type">
+    Choose a provider from the catalog. The form updates to show the fields required for that provider's credentials.
+  </Step>
+  <Step title="Complete the profile details">
+    | Field | Description |
+    |---|---|
+    | **Profile name** | A descriptive label (e.g. "Paystack KE Production") |
+    | **Provider type** | The payment provider (e.g. `paystack`, `pesapal`, `pawapay`) |
+    | **Environment** | `sandbox` or `production` |
+    | **Country code** | Two-letter ISO code if the profile is country-scoped (optional) |
+    | **Market** | Restrict the profile to a specific market (optional) |
+    | **Active** | Whether this profile is available for routing |
+  </Step>
+  <Step title="Enter credentials">
+    Fill in the provider-specific credential fields. Secrets are stored encrypted and displayed as masked values after saving.
+  </Step>
+  <Step title="Save">
+    Click **Save**. The profile is immediately available for selection in routing rules.
+  </Step>
+</Steps>
+
+### Updating a provider profile
+
+Select an existing profile from the list and click **Edit**. You can update all fields including credentials. Saving a profile with an empty credential field preserves the existing stored value.
+
+<Warning>
+  Deactivating a provider profile (setting **Active** to off) disables it across all routing rules that reference it. Payments on surfaces using only that profile will fail until you assign a replacement.
+</Warning>
+
+## Billing routing rules
+
+Routing rules define which provider profile handles each payment surface for a specific market. You set one primary profile and optionally one or more fallback profiles that activate in order if the primary provider fails.
+
+### Configuring routing rules for a market
+
+<Steps>
+  <Step title="Select a market">
+    From the **Settings → Billing → Routing rules** tab, choose a market from the dropdown.
+  </Step>
+  <Step title="Configure each billing surface">
+    For each surface (e.g. STK Push, wallet top-up, self checkout), set:
+
+    | Option | Description |
+    |---|---|
+    | **Active** | Whether this surface is enabled for the market |
+    | **Primary profile** | The provider profile to use first |
+    | **Fallback profiles** | Additional profiles tried in order if the primary fails |
+    | **Execution mode** | `direct` (provider API called directly) or `proxy` (CRM-hosted checkout) |
+    | **Operator enabled** | Allow CRM agents to initiate payments on this surface |
+    | **Self-service enabled** | Allow clients to initiate payments themselves |
+    | **Amount limits** | Optional minimum and maximum transaction amounts |
+  </Step>
+  <Step title="Save">
+    Click **Save routing rules**. Changes are applied immediately and provider configuration is pushed to the market's WordPress site automatically.
+  </Step>
+</Steps>
+
+<Note>
+  Only profiles scoped to the selected market or with no market restriction are available for selection. Profiles scoped to a different market are excluded.
+</Note>
+
+## Wallet rules
+
+Wallet rules control how the wallet top-up experience works for clients on a specific market's WordPress site.
+
+Navigate to **Settings → Billing → Wallet rules** and select a market to configure:
+
+<AccordionGroup>
+  <Accordion title="Auto-renew threshold">
+    Enable **Auto-renew** to allow the wallet to automatically renew a client's subscription when their balance meets the required threshold. When enabled, the wallet system charges the wallet balance at renewal time without requiring manual action.
+  </Accordion>
+  <Accordion title="Top-up presets">
+    Define the preset top-up amounts shown to clients in the wallet funding widget. You can set a default list of amounts and override them per currency for multi-currency markets.
+  </Accordion>
+  <Accordion title="Balance limits">
+    Set a maximum single top-up amount and a maximum wallet balance per market. These limits prevent over-funding and can be set per currency for multi-currency wallets.
+  </Accordion>
+  <Accordion title="UI options">
+    Control UI behaviour: allow combined top-up and subscribe flows, show a manual balance refresh button, and set the number of recent transactions shown in the wallet widget.
+  </Accordion>
+  <Accordion title="FX override">
+    For markets that accept payments in a currency different from the wallet's native currency, enable the FX override and provide the target currency and exchange rate.
+  </Accordion>
+</AccordionGroup>
+
+## Subscription rules
+
+Subscription rules define how subscriptions are activated and renewed on a per-market basis.
+
+Navigate to **Settings → Billing → Subscription rules** and select a market:
+
+| Rule | Description |
+|---|---|
+| **Activation methods** | Payment methods accepted to activate a new subscription (`manual`, `payment_link`, `stk_push`, `wallet_balance`) |
+| **Renewal methods** | Payment methods accepted for renewal (`wallet_balance`, `payment_link`, `manual`) |
+| **Wallet auto-renew** | Whether the wallet automatically charges on renewal |
+| **Free trial** | Enable free trials and set the duration in days |
+| **Discount** | Maximum discount percentage agents can apply; optionally require a PIN to apply discounts |
+| **Expiry policy** | Grace period and suspension threshold after a subscription expires |
+
+## Manual payment methods
+
+Manual payment methods appear as fallback options on the client-facing payment page when automated methods are unavailable. Three method types are available: **Collector**, **Paybill**, and **Bank transfer**.
+
+Navigate to **Settings → Billing → Manual payment methods** and select a market to configure:
+
+<Steps>
+  <Step title="Enable a method">
+    Toggle the method on and provide a display name and any relevant instructions.
+  </Step>
+  <Step title="Enter method details">
+    Each method type requires different detail fields:
+
+    <Tabs>
+      <Tab title="Collector">
+        Network, phone number, recipient name, and collector label
+      </Tab>
+      <Tab title="Paybill">
+        Provider name, business number, account reference hint, and recipient name
+      </Tab>
+      <Tab title="Bank transfer">
+        Bank name, account number, account name, and branch
+      </Tab>
+    </Tabs>
+  </Step>
+  <Step title="Set submission requirements">
+    Configure whether clients must submit payment proof, their sender name, and a transaction ID when submitting a manual payment.
+  </Step>
+  <Step title="Save">
+    Click **Save** to apply the methods to the market. Enabled methods immediately appear on the market's client-facing payment page.
+  </Step>
+</Steps>
+
+## Billing diagnostics
+
+The **Diagnostics** tab gives you visibility into how the billing system is routing payments and where issues may exist.
+
+### Route simulator
+
+The route simulator lets you test which providers are eligible for a given market and billing surface without initiating a real transaction.
+
+<Steps>
+  <Step title="Open the Route simulator">
+    Navigate to **Settings → Billing → Diagnostics → Route simulator**.
+  </Step>
+  <Step title="Select parameters">
+    Choose a market, a billing surface, and optionally filter by a specific provider key.
+  </Step>
+  <Step title="Review results">
+    The simulator returns a list of matching providers with their eligibility status, active profiles, supported environments, and whether they are selected by the market's current routing policy.
+  </Step>
+</Steps>
+
+### Diagnostics summary
+
+The diagnostics summary (`GET /api/crm/settings/billing/diagnostics-summary`) provides an aggregated view of billing health across markets and providers — including SMS and push provider status, wallet system mode, and any routing gaps the system has detected. Use the market and provider filters to drill into a specific combination.
+
+## Kill switches (admin only)
+
+Kill switches let an admin disable specific billing flows for one or more markets without removing the underlying routing configuration. This is useful during incidents or when a provider is experiencing downtime.
+
+<Warning>
+  Kill switches are an emergency control. Disabling a billing surface stops all payments on that surface for the affected markets until the switch is re-enabled. Use with caution.
+</Warning>
+
+Navigate to **Settings → Billing → System → Kill switches**, select the markets and billing surfaces to disable, and click **Apply**. The change takes effect immediately.
+
+## Wallet configuration
+
+The wallet configuration panel (`PATCH /api/crm/settings/wallet`) controls system-wide wallet settings including the operating mode, default currency, top-up and balance limits, billing domains, and SMTP settings for wallet notification emails.
+
+<AccordionGroup>
+  <Accordion title="Test wallet email">
+    Use **Test email** to send a test message through the configured SMTP server and confirm delivery before enabling wallet emails in production.
+  </Accordion>
+  <Accordion title="Test wallet domain">
+    Use **Test domain** to verify that the billing domain URL resolves and returns the expected response.
+  </Accordion>
+  <Accordion title="Test SSL">
+    Use **Test SSL** to confirm the billing domain's SSL certificate is valid and not expiring soon.
+  </Accordion>
+</AccordionGroup>
+
+<Note>
+  Only **admin** users can modify the wallet system configuration and run the domain and SSL tests.
+</Note>

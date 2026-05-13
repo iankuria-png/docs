@@ -1,0 +1,151 @@
+---
+title: "Roles and permissions in Exotic CRM"
+sidebarTitle: "Roles"
+description: "Exotic CRM has four roles — admin, sub-admin, sales, and marketing — each with different levels of access to clients, payments, and settings."
+---
+
+Every user in Exotic CRM is assigned one of four roles: **admin**, **sub-admin**, **sales**, or **marketing**. Your role controls which sections of the CRM you can see and what actions you can take. Admins assign and update roles from **Settings → Roles**.
+
+<Note>
+  Only admins can view and manage team roles. If you need your role changed, contact your CRM administrator.
+</Note>
+
+## Role overview
+
+<Tabs>
+  <Tab title="Admin">
+    The admin role has unrestricted access to every feature in the CRM.
+
+    **What admins can do:**
+
+    - Access all client profiles, timelines, payments, deals, leads, and reports
+    - Create, update, and delete clients, deals, leads, and payments
+    - Delete test payments and void manual payment bundles
+    - Manage team roles and invite new users under **Settings → Roles**
+    - Configure Google SSO and authentication settings
+    - Adjust billing kill-switches, wallet configuration, and discount settings
+    - Deploy system updates and roll back to previous versions
+    - Retry, flush, or clear background job queues
+    - Manage all integration settings including SMS provider, push provider, and platform connections
+    - Create and send push campaigns; update campaign presets
+    - Set and delete team goals and goal overrides
+    - View team presence, leaderboard, and per-agent activity feeds
+
+    **Unique to admin:**
+
+    Admins are the only role that can mark or delete test payments, manage authentication settings (including Google SSO activation and rollback), deploy updates, manage background queues, and control wallet and discount PINs.
+  </Tab>
+  <Tab title="Sub-admin">
+    Sub-admins share most capabilities with admins but cannot access the most sensitive operational controls.
+
+    **What sub-admins can do:**
+
+    - Access all client profiles, timelines, payments, deals, leads, and reports
+    - Create, update, and delete clients, deals, leads, and payments
+    - Configure billing settings, FX rates, and reporting currency
+    - Set team goals and goal overrides
+    - Update campaign presets (but cannot delete test payments)
+    - Manage platform integrations, platform sync, and provider profiles
+    - Create and send push campaigns
+    - View team presence, leaderboard, and per-agent activity feeds
+    - View system health, update history, and backups
+
+    **What sub-admins cannot do:**
+
+    - Delete or mark test payments
+    - Manage team roles or invite users
+    - Configure authentication settings (Google SSO)
+    - Deploy system updates or roll back deployments
+    - Manage background job queues
+    - Adjust wallet settings, PINs, or discount configuration
+  </Tab>
+  <Tab title="Sales">
+    Sales users focus on client-facing work: managing profiles, processing payments, running deals, and working the lead pipeline.
+
+    **What sales users can do:**
+
+    - Access all client profiles, timelines, analytics, and health information
+    - Create and update clients; sync individual client profiles with WordPress
+    - Create notes, send messages, and dispatch credentials to clients
+    - Create, update, and manage deals and leads (including converting leads to clients)
+    - Match and process payments; send payment links
+    - Run renewal campaigns and send renewal reminders
+    - View reports and export scorecards
+    - Manage personal to-do items
+
+    **What sales users cannot do:**
+
+    - Delete clients or perform bulk client deletions
+    - Delete or mark test payments
+    - Configure billing, FX rates, reporting currency, or integration settings
+    - Manage team roles, goals, or leaderboard data
+    - Create or send push campaigns
+    - Access system health, updates, or deployment tools
+  </Tab>
+  <Tab title="Marketing">
+    Marketing users have a read-focused role with write access limited to push campaigns.
+
+    **What marketing users can do:**
+
+    - View all client profiles, timelines, analytics, retention data, and reports
+    - Create and send push campaigns; upload contact lists
+    - View the profile engagement report
+    - View their assigned markets on the dashboard
+
+    **What marketing users cannot do:**
+
+    - Create, edit, or delete client profiles
+    - Create notes on clients
+    - Access deals, leads, payments, or renewals
+    - Configure any settings
+    - View team presence, goals, or leaderboard
+  </Tab>
+</Tabs>
+
+## Permissions at a glance
+
+The table below summarizes access by feature area across all four roles. A checkmark means the role can perform actions in that area (read and write where applicable); "Read only" means viewing is permitted but no changes can be made.
+
+| Feature area | Admin | Sub-admin | Sales | Marketing |
+|---|---|---|---|---|
+| Clients — view profiles and timeline | Yes | Yes | Yes | Read only |
+| Clients — create, edit, sync | Yes | Yes | Yes | No |
+| Clients — delete, bulk delete | Yes | Yes | No | No |
+| Client notes | Yes | Yes | Yes | No |
+| Deals | Yes | Yes | Yes | No |
+| Leads | Yes | Yes | Yes | No |
+| Payments — view and match | Yes | Yes | Yes | No |
+| Payments — delete/mark test | Yes | No | No | No |
+| Renewals | Yes | Yes | Yes | No |
+| Push campaigns | Yes | Yes | No | Yes |
+| Push campaign presets — edit | Yes | Yes | No | No |
+| Reports and analytics | Yes | Yes | Yes | Read only |
+| Team goals and leaderboard | Yes | Yes | No | No |
+| Billing and FX settings | Yes | Yes | No | No |
+| Integration settings | Yes | Yes (partial) | No | No |
+| Authentication settings (SSO) | Yes | No | No | No |
+| Roles management | Yes | No | No | No |
+| System health and deployments | Yes | Read only | No | No |
+
+## Managing team roles
+
+Admins manage all team members from **Settings → Roles**. From there you can:
+
+- **Invite a new user** — enter their name, email, and assign a role. They receive login credentials to access the CRM.
+- **Change a user's role** — select a team member and update their role. The change takes effect immediately on their next request.
+- **Deactivate a user** — set their status to inactive to revoke access without deleting their history.
+- **Generate an impersonation link** — temporarily access the CRM as another user for troubleshooting purposes.
+
+<Warning>
+  Changing a user's role immediately affects what they can see and do. If a sales user is switched to marketing, they lose access to deals, leads, payments, and notes. Communicate role changes to your team before making them.
+</Warning>
+
+## Google SSO and authentication policy
+
+If your admin has configured Google SSO, you may see a **Continue with Google** button on the login screen. Admins can also restrict password login per role, requiring certain users to authenticate through Google only.
+
+Authentication settings are managed exclusively by admins under **Settings → Auth**. The public config endpoint (`GET /api/crm/auth/config`) tells the login screen which authentication methods to display based on your organization's current policy.
+
+<Tip>
+  If you're locked out because password login has been disabled for your role and you don't have Google SSO access configured, contact your admin to restore access or adjust the authentication policy.
+</Tip>

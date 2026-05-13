@@ -1,0 +1,116 @@
+---
+title: "Client wallet balance and top-ups"
+sidebarTitle: "Wallet"
+description: "Each client has a wallet for automated billing. View balance and transactions, top up manually, and apply credit or debit adjustments from the client detail page."
+---
+
+Every client in Exotic CRM has a wallet that holds a balance in their market's local currency. The wallet is the funding source for automatic subscription renewals — when a renewal is due, the billing system draws from the wallet balance before falling back to other payment methods. You can view the current balance, review recent transactions, top up the wallet manually, and post credit or debit adjustments directly from the client detail page.
+
+## What the wallet is used for
+
+When auto-renewal is configured for a market, the billing system checks the client's wallet balance at the point of renewal. If the balance is sufficient to cover the subscription cost, the renewal is processed automatically without requiring the client to initiate a payment. This is the primary use case for wallet top-ups — pre-loading a client's wallet so their subscription renews without interruption.
+
+<Note>
+  Wallet balances are stored in the CRM and reflected on the WordPress site through the wallet sync plugin. The CRM is the authoritative store for wallet balance; WordPress reads it for display purposes only.
+</Note>
+
+## Viewing wallet balance and transactions
+
+<Steps>
+  <Step title="Open the client detail page">
+    Navigate to **Clients**, find the client, and click their name.
+  </Step>
+  <Step title="Click the Wallet tab">
+    The **Wallet** tab loads the client's current balance and a summary of recent transactions. The balance is shown in the market's configured currency.
+  </Step>
+  <Step title="Review the transaction list">
+    The transaction list shows the most recent entries by default. Each entry includes:
+
+    - **Date and time** of the transaction
+    - **Type** (top-up, adjustment credit, adjustment debit, renewal charge, refund)
+    - **Amount** and **currency**
+    - **Description** logged at the time of the transaction
+    - **Performed by** — the agent who posted the transaction, for manual operations
+  </Step>
+</Steps>
+
+## Topping up a wallet
+
+A top-up credits the client's wallet with an amount you specify. Use this to pre-fund a wallet ahead of an upcoming renewal or to correct a balance that is too low to cover the next billing cycle.
+
+<Steps>
+  <Step title="Open the Wallet tab">
+    Navigate to the client detail page and click **Wallet**.
+  </Step>
+  <Step title="Click Top up">
+    The top-up form appears in a panel below the balance summary.
+  </Step>
+  <Step title="Enter the amount">
+    Type the amount you want to add. For markets with multiple currencies, select the correct currency from the dropdown. The amount must be greater than zero.
+  </Step>
+  <Step title="Add a reason">
+    Enter a short description of why you are topping up (e.g. "Advance payment for March renewal"). This is stored in the audit log and shown in the transaction history.
+  </Step>
+  <Step title="Enter the wallet PIN">
+    Type the wallet operator PIN. This is a 4–6 digit PIN configured by your administrator in Settings. The PIN is required for all wallet write operations to prevent accidental or unauthorised balance changes.
+  </Step>
+  <Step title="Confirm the top-up">
+    Click **Top up**. The balance updates immediately and a new transaction entry appears in the history.
+  </Step>
+</Steps>
+
+<Warning>
+  If the wallet PIN has not been configured, you will see an error message asking you to contact an administrator. Top-ups and adjustments cannot be posted until a PIN is set in **Settings → Wallet**.
+</Warning>
+
+## Adding an adjustment
+
+Adjustments let you post a manual credit or debit to a wallet outside of the normal top-up and billing flows. Use a credit adjustment to correct an undercharge or issue a partial refund, and a debit adjustment to correct an overcharge or recover a balance that should not have been credited.
+
+<Steps>
+  <Step title="Open the Wallet tab">
+    Navigate to the client detail page and click **Wallet**.
+  </Step>
+  <Step title="Click Add adjustment">
+    The adjustment form appears below the transaction list.
+  </Step>
+  <Step title="Select the adjustment type">
+    Choose **Credit** (adds to the balance) or **Debit** (subtracts from the balance).
+  </Step>
+  <Step title="Enter the amount and currency">
+    Type the adjustment amount. For multi-currency wallets, select the correct currency.
+  </Step>
+  <Step title="Add a reason">
+    Describe the adjustment clearly (e.g. "Credit issued — overcharge on February renewal"). The reason is mandatory and is stored in the audit log.
+  </Step>
+  <Step title="Enter the wallet PIN">
+    Type the wallet operator PIN to authorise the adjustment.
+  </Step>
+  <Step title="Confirm">
+    Click **Apply adjustment**. The balance updates and the transaction is recorded immediately.
+  </Step>
+</Steps>
+
+<Note>
+  Debit adjustments will fail if the resulting balance would drop below zero. If you need to post a debit that exceeds the current balance, contact an administrator — they can adjust the wallet floor setting or override the restriction for that market.
+</Note>
+
+## When wallet auto-renew is triggered
+
+The wallet is drawn from automatically during the renewal billing run. Auto-renewal is triggered when all of the following conditions are true:
+
+1. The client has an active deal that is approaching or past its expiry date.
+2. The market's billing settings have auto-renewal enabled.
+3. The client's wallet balance is equal to or greater than the renewal cost for their plan.
+
+When the billing run executes, it debits the wallet by the renewal amount, extends the deal's expiry date, and records the transaction in the wallet history with the type `renewal_charge`. If the balance is insufficient, the system falls back to the configured secondary payment method (e.g. STK Push or payment link) rather than failing silently.
+
+<Tip>
+  You can see whether auto-renewal is active for a specific client's market by checking the billing method policy shown in the client's subscription panel. Markets with wallet auto-renewal enabled display a wallet indicator in the subscription header.
+</Tip>
+
+## Wallet access permissions
+
+Wallet read access (viewing balance and transactions) is available to all CRM roles: admin, sub-admin, sales, and marketing.
+
+Wallet write operations — top-ups and adjustments — require the **admin**, **sub-admin**, or **sales** role, plus a valid wallet PIN. Marketing users cannot post wallet transactions.

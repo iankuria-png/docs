@@ -1,0 +1,153 @@
+---
+title: "Renewal workflows and reminders"
+sidebarTitle: "Renewals"
+description: "The renewals module shows clients with expiring subscriptions, lets you send reminder messages, and automates outreach through renewal campaigns."
+---
+
+The renewals module surfaces clients whose subscriptions are about to expire and gives your sales team the tools to reach out — individually or in bulk — before a subscription lapses. You can send one-off SMS reminders, run automated renewal campaigns, and track the history of every outreach attempt from a single view.
+
+## The renewals overview
+
+The renewals overview (`GET /api/crm/renewals`) loads every active deal that is approaching its expiry date, grouped by how urgently each client needs attention. The list respects your market access, so each agent only sees clients from their own platforms.
+
+The overview includes key metrics for each client: the deal's expiry date, the product they are subscribed to, whether renewal reminders have been paused, and the result of any previous reminder attempts.
+
+## Renewal risk buckets
+
+Exotic CRM divides expiring subscriptions into two urgency buckets based on days remaining:
+
+<CardGroup cols={2}>
+  <Card title="Critical — 0 to 3 days" icon="triangle-exclamation">
+    The subscription expires within the next 72 hours. These clients need immediate outreach. Deals in this bucket are highlighted prominently in the renewals list.
+  </Card>
+  <Card title="Upcoming — 4 to 14 days" icon="calendar">
+    The subscription expires in 4 to 14 days. These clients are in the planning window — contact them now to avoid a last-minute scramble.
+  </Card>
+</CardGroup>
+
+<Tip>
+  Run a renewal campaign targeting the **4–14 day** bucket at the start of the week, then follow up manually with the **0–3 day** bucket on Thursday or Friday. This two-stage approach improves conversion without over-messaging clients.
+</Tip>
+
+## Sending a renewal reminder to a single client
+
+You can send an SMS reminder to one client directly from the renewals list without starting a full campaign.
+
+<Steps>
+  <Step title="Find the client in the renewals list">
+    Open the **Renewals** page. Use the market filter or search to locate the client you want to contact.
+  </Step>
+  <Step title="Open the reminder dialog">
+    Click the reminder action on the client's row. The dialog shows the client's name, phone number, and expiry date.
+  </Step>
+  <Step title="Compose or select a message">
+    Type a custom message or choose an SMS template from the dropdown. Templates can include placeholders that are filled in automatically with the client's details.
+  </Step>
+  <Step title="Send">
+    Click **Send Reminder**. Exotic CRM dispatches the SMS and records the outreach attempt in the client's timeline.
+  </Step>
+</Steps>
+
+## Bulk remind
+
+Bulk remind lets you send a renewal message to every client in the current renewals view at once — or to a curated selection.
+
+<Steps>
+  <Step title="Select clients (optional)">
+    Use the checkboxes on the renewals list to select specific clients. Leave the selection empty to target all clients returned by the current filters.
+  </Step>
+  <Step title="Click Bulk Remind">
+    Click the **Bulk Remind** button in the toolbar. Choose or compose the reminder message.
+  </Step>
+  <Step title="Confirm and monitor">
+    Confirm the send. Exotic CRM dispatches messages in the background and records each outreach in the respective client timelines. Watch the results in the campaign run history.
+  </Step>
+</Steps>
+
+<Warning>
+  Bulk remind sends to **all clients that match your current filters** if you have not made an explicit row selection. Always double-check the active filters before sending to avoid unintended mass messaging.
+</Warning>
+
+## Running a renewal campaign
+
+A renewal campaign is an automated outreach run that sends reminders to all eligible clients in the selected markets according to your configured rules. Campaigns are more structured than bulk remind — they respect per-client pause flags and track a full run record for reporting.
+
+<Steps>
+  <Step title="Open the renewal campaign panel">
+    On the Renewals page, click **Run Campaign**.
+  </Step>
+  <Step title="Configure the run parameters">
+    Select the target markets, choose the message template, and set any additional filters such as risk bucket or product type.
+  </Step>
+  <Step title="Start the campaign">
+    Click **Run**. Exotic CRM creates a campaign run record, dispatches messages to eligible clients, and updates each client's last-reminded timestamp.
+  </Step>
+  <Step title="Monitor progress">
+    The run appears immediately in the **Run History** tab. Refresh to see live progress as messages are dispatched.
+  </Step>
+</Steps>
+
+<Note>
+  Clients whose renewal reminders have been paused are automatically skipped during a campaign run, regardless of how the campaign is configured.
+</Note>
+
+## Pausing and resuming renewal campaigns
+
+You can pause an in-progress campaign run to prevent further messages from being sent — for example, if you notice an incorrect template was selected.
+
+<Tabs>
+  <Tab title="Pause a campaign">
+    From the **Run History** view, click **Pause** on an active run. Exotic CRM stops dispatching messages immediately. Any messages already sent are not recalled.
+  </Tab>
+  <Tab title="Resume a campaign">
+    Click **Resume** on a paused run. Exotic CRM picks up from where it left off and continues sending to clients who have not yet received a message in this run.
+  </Tab>
+</Tabs>
+
+You can also pause renewal reminders for an individual client — for example, if a client has asked not to be contacted during a certain period. Open the client's deal record and toggle **Pause renewal reminders**. You can optionally set a date at which reminders automatically resume.
+
+## Viewing renewal run history
+
+The run history (`GET /api/crm/renewals/runs`) lists every campaign run with its status, the number of clients targeted, messages sent, and the timestamp of the run.
+
+<Steps>
+  <Step title="Open the Run History tab">
+    On the Renewals page, click the **History** or **Runs** tab.
+  </Step>
+  <Step title="Review individual runs">
+    Click on any run record to see a breakdown: which markets were targeted, how many messages were sent, and any errors encountered during dispatch.
+  </Step>
+</Steps>
+
+## How deals renew
+
+When a client is ready to continue their subscription, you renew their deal from the Deals page. Renewal creates a new deal record linked to the client and marks the original deal as `renewed`. The old deal is preserved for reporting so you retain a complete subscription history.
+
+<Steps>
+  <Step title="Locate the expired or cancelled deal">
+    On the Deals page, filter by status **Expired** or **Cancelled** to find the deal you want to renew.
+  </Step>
+  <Step title="Open the renew dialog">
+    Click **Renew** from the deal's action menu. Only deals with status `expired` or `cancelled` can be renewed.
+  </Step>
+  <Step title="Set the renewal period">
+    Enter the number of days for the new subscription (1–365 days).
+  </Step>
+  <Step title="Choose a payment method">
+    Select how the renewal is being paid. The same payment methods available at activation apply here: manual reference, STK Push, payment link, or free trial.
+  </Step>
+  <Step title="Apply a discount (optional)">
+    Enter a discount percentage or a specific payable amount if you are offering a loyalty discount. A discount PIN is required above the configured threshold.
+  </Step>
+  <Step title="Confirm">
+    Click **Renew**. For manual and free-trial renewals, the new deal activates immediately and the client's profile is re-published on the platform. For STK Push and payment links, the new deal sits in `awaiting_payment` until the payment clears.
+  </Step>
+</Steps>
+
+<Note>
+  When a manual or free-trial renewal is confirmed, Exotic CRM pushes the new expiry date to WordPress immediately and syncs the client's profile status — no manual sync is needed.
+</Note>
+
+<Warning>
+  You cannot renew an **active** deal. If a client wants to extend an ongoing subscription before it expires, use the **Extend** action instead of **Renew**.
+</Warning>

@@ -1,0 +1,102 @@
+---
+title: "Get started with Exotic CRM"
+sidebarTitle: "Quick Start"
+description: "Log in to Exotic CRM, navigate the dashboard, open the Clients list, view a client profile, and create your first note — all in under five minutes."
+---
+
+Exotic CRM is your team's central workspace for managing advertising market clients, tracking subscription deals, and processing payments. This guide walks you through signing in, finding your way around the dashboard, and completing a basic client interaction — from opening the Clients list to leaving your first note.
+
+<Steps>
+  <Step title="Sign in to Exotic CRM">
+    Open your CRM URL in a browser. You'll see the sign-in screen with the Exotic Online Advertising logo.
+
+    Enter your **email address** and **password**, then click **Sign in**. The CRM authenticates your credentials against the `POST /api/crm/login` endpoint and issues a bearer token that keeps your session active.
+
+    <Tip>
+      If your admin has enabled Google SSO, a **Continue with Google** button appears on the login screen. Click it to sign in with your Google workspace account without entering a password. If both options are available, you can use either method.
+    </Tip>
+
+    <Note>
+      If you see a message saying "Password login is not enabled for this account. Use Google SSO." your admin has restricted password login for your role. Use the Google option instead.
+    </Note>
+
+    Once authenticated, you land on the main dashboard.
+  </Step>
+
+  <Step title="Navigate the dashboard">
+    The dashboard gives you a live snapshot of your team's performance across all connected markets. You'll see key metrics including active clients, revenue in the reporting currency, payment recovery queue size, and upcoming subscription renewals.
+
+    The left sidebar provides access to all major sections:
+
+    | Section | What you'll find |
+    |---|---|
+    | **Dashboard** | Revenue KPIs, market overview, and renewal workload |
+    | **Clients** | Synced advertiser profiles from your markets |
+    | **Leads** | Prospects moving through your sales pipeline |
+    | **Deals** | Active and pending subscription agreements |
+    | **Payments** | Incoming payments awaiting matching |
+    | **Campaigns** | Push and renewal campaign management |
+    | **Reports** | Scorecard exports and engagement analytics |
+    | **Settings** | Integrations, team roles, billing, and templates |
+
+    Your role determines which sections are visible and what actions you can take. See [Roles and permissions](/roles-permissions) for a full breakdown.
+  </Step>
+
+  <Step title="Open the Clients list">
+    Click **Clients** in the left sidebar. The Clients list shows all advertiser profiles synced from your connected WordPress markets.
+
+    You can filter the list by market, subscription status, country, or city. Use the search bar at the top to find a specific client by name or phone number.
+
+    <Note>
+      Client profiles are pulled from WordPress and kept in sync automatically. WordPress remains the source of truth — changes made in the CRM (such as editing a profile or resetting credentials) are written back to WordPress.
+    </Note>
+  </Step>
+
+  <Step title="Find and open a client profile">
+    Locate the client you want to work with using the search field or by scrolling the list. Click the client's name or row to open their profile.
+
+    A client profile is organized into tabs:
+
+    - **Overview** — subscription status, deal history, and retention signals
+    - **Timeline** — a chronological log of all events and notes for this client
+    - **Payments** — payment history linked to this client's deals
+    - **Analytics** — profile engagement data from the advertising market
+    - **Media** — photos and files attached to the profile
+    - **Health** — diagnostics for the client's platform connectivity and subscription state
+
+    <Tip>
+      The **Retention Insight** panel on the Overview tab shows churn risk signals such as last-seen date and subscription length. Use this to prioritize which clients need attention.
+    </Tip>
+  </Step>
+
+  <Step title="Create a note on the client">
+    Notes are the most common way to record a client interaction, follow-up outcome, or internal context.
+
+    With the client profile open, click the **Timeline** tab. At the top of the timeline, click **Add note**. Type your note in the text field and press **Save**.
+
+    Your note appears immediately in the timeline with your name, role, and a timestamp. All team members with access to this client can see notes in the timeline.
+
+    <Note>
+      Creating notes requires the **admin**, **sub-admin**, or **sales** role. If you only see the timeline without an input field, your role is set to **marketing**, which has read-only access to client profiles.
+    </Note>
+  </Step>
+</Steps>
+
+## What to do next
+
+You've signed in, explored the dashboard, found a client, and created a note. Here are natural next steps depending on your role:
+
+<CardGroup cols={2}>
+  <Card title="Manage client profiles" icon="users" href="/clients/overview">
+    Learn how to edit profiles, update subscription status, sync with WordPress, and manage client media.
+  </Card>
+  <Card title="Work the lead pipeline" icon="filter" href="/leads/overview">
+    Add prospects, move leads through stages, and convert them to clients when they're ready.
+  </Card>
+  <Card title="Process payments" icon="credit-card" href="/payments/overview">
+    Match incoming payments to deals, approve manual submissions, and handle unmatched entries.
+  </Card>
+  <Card title="Roles and permissions" icon="shield" href="/roles-permissions">
+    Understand what your role can access and how admins manage team access in Settings.
+  </Card>
+</CardGroup>
