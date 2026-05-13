@@ -1,13 +1,22 @@
 ---
 title: "Stage 8 — Upgrades"
-description: "How an escort moves to a higher subscription package tier."
+description: "How an escort moves to a higher subscription package tier — and what changes for them when they do."
 ---
 
 ## What the customer sees
 
-An escort on a lower tier (e.g. Basic or Featured) may want to upgrade to a higher-visibility package (e.g. Premium or VIP) after seeing the difference in client enquiry volume. Upgrades are not self-service — the escort contacts their sales agent or the Exotic CS team, who process the upgrade through the CRM.
+After being on the platform for a period, an escort on a lower tier — Basic or Featured — may notice that escorts on higher tiers appear above them in search results and receive more enquiries. Or a sales agent may proactively reach out with an upgrade offer.
 
-Once an upgrade is processed, the escort's profile re-provisions at the new tier on WordPress — their listing moves to the higher position in search results and gains any additional features of the new package.
+The escort contacts their sales agent or CS, expresses interest in moving to a higher tier (Featured → Premium, or Premium → VIP, etc.), and the agent processes the upgrade through the CRM. **Upgrades are not self-service** — they are handled by staff via the CRM's deal management.
+
+Once upgraded and payment is confirmed, the escort's profile is re-provisioned at the new tier on WordPress immediately — their listing moves to the higher tier position in search results, and any additional features of the new package become active.
+
+**Available package tiers (highest to lowest visibility):**
+- VVIP
+- VIP
+- Premium
+- Featured
+- Basic
 
 ---
 
@@ -15,23 +24,200 @@ Once an upgrade is processed, the escort's profile re-provisions at the new tier
 
 | What happens | Code reference |
 |---|---|
-| Staff updates the deal's product and/or duration | `DealController::update()` — `app/Http/Controllers/CRM/DealController.php:87` — updates `product_id`, `duration`, `status` |
-| Lifecycle re-classification triggered | `SubscriptionLifecycleService::resolveForDeal()` — determines if this is a new subscription or renewal |
-| Profile reprovisioned at new tier on WordPress | `SubscriptionProvisioningService` — same activation path as Stage 5d |
-| Discount support | `deals.discount_percentage`, `deals.discount_approved_by` — discounts above threshold require approval |
-| Product tiers | `products.tier` — links to `ProductPrice` (weekly / bi-weekly / monthly pricing) |
+| Staff updates the deal's product and/or duration | `DealController::update()` — `app/Http/Controllers/CRM/DealController.php:87` — updates `product_id`, `duration`, `status` on the active deal |
+| Lifecycle re-classification | `SubscriptionLifecycleService::resolveForDeal()` — determines if the change is a new subscription, renewal, or mid-period upgrade |
+| Profile re-provisioned at new tier on WordPress | `SubscriptionProvisioningService` — same activation path as Stage 5d, with updated `plan_type` |
+| WordPress tier update | `WpSyncService::activateClient()` — sends updated `product_type` and `duration_days` to `POST /clients/{postId}/activate` |
+| Discount recording | `deals.discount_percentage`, `deals.discount_approved_by` — upgrade discounts above threshold require supervisor approval |
+| Product tier definition | `products.tier` — links to `ProductPrice` (weekly / bi-weekly / monthly pricing per tier) |
+| Audit trail | `AuditService` records all deal changes including product updates |
+
+**Mid-period upgrade pricing:** When an escort upgrades mid-period, the standard practice is to charge the full new-tier rate for the next period — they do not pay a prorated "difference" from their current tier. The upgrade takes effect immediately on payment confirmation.
 
 ---
 
-<Note>
-  **Interview pending — content to be added:** SOP for processing an upgrade (does the escort pay the difference or a full new fee?), pricing policy for mid-period upgrades, the approval workflow for discount-assisted upgrades, Finance notes on upgrade revenue, and certification questions.
-</Note>
+## Step-by-step SOP
 
-<CardGroup cols={2}>
-  <Card title="Back to Overview →" icon="arrow-left" href="/product/overview">
-    Return to the full journey map
-  </Card>
-  <Card title="Deals & subscriptions (CRM guide)" icon="file-contract" href="/deals/overview">
-    Managing deals and package changes in the CRM
-  </Card>
-</CardGroup>
+<Steps>
+  <Step title="Identify upgrade candidates">
+    Proactive upgrade outreach is one of the highest-ROI activities for a sales agent. The best candidates are:
+    - Escorts on Basic or Featured who have been active for 1+ months (have seen traffic but want more)
+    - Escorts who have mentioned low enquiry volume in recent conversations
+    - Escorts whose renewal is coming up — an upgrade at renewal is a natural upsell moment
+
+    In the CRM, filter: CRM → Clients → subscription tier = Basic or Featured + status = Active.
+  </Step>
+  <Step title="Make the upgrade pitch">
+    **Opening:**
+    > *"Hi [Name] — I've been looking at your account and I think you could be getting a lot more contacts. Escorts on Premium and VIP appear above Basic and Featured in search results, both on our site and on Google. I'd love to show you the difference — can you take 5 minutes?"*
+
+    **The upgrade value proposition:**
+    1. **Search position:** Higher tiers appear above lower tiers — clients see them first
+    2. **Google ranking:** Premium+ profiles get more SEO weight and rank higher in Google for location searches
+    3. **Perceived quality:** Clients associate higher-tier badges with a more premium experience — they're more likely to send a serious enquiry
+
+    **Handling "what's the difference in price?":**
+    Walk through the pricing for the target tier (check CRM → Settings → Integrations → [market] → Packages for current pricing). Emphasise the ROI: *"If one additional serious client contacts you per week, the upgrade pays for itself in days."*
+  </Step>
+  <Step title="Process the upgrade in the CRM">
+    When the escort agrees:
+    1. CRM → Clients → [client] → active deal
+    2. Click **Edit Deal** (or **Upgrade**)
+    3. Change the `product_id` to the new tier product
+    4. Confirm the duration (weekly / monthly — keep consistent with what the escort was on, unless they're changing)
+    5. Apply any agreed discount if applicable (requires supervisor PIN above threshold)
+    6. Save — the deal is updated; the new price and tier are recorded
+
+    **Screenshot slot:** *CRM Deal detail showing product dropdown being changed from Featured to Premium*
+  </Step>
+  <Step title="Initiate the upgrade payment">
+    After updating the deal, initiate payment for the new tier:
+    1. CRM → Deals → [deal] → Activate (or Renew/Upgrade as shown in the action menu)
+    2. Select payment method: `stk` (M-Pesa STK Push), `link` (payment link), or other available method for the market
+    3. The escort pays via their preferred method — same flow as Stage 5b–5c
+    4. On payment confirmation, the CRM automatically re-provisions the profile at the new tier on WordPress
+
+    **Screenshot slot:** *STK Push initiation from the CRM deal action menu*
+  </Step>
+  <Step title="Confirm the upgrade is live">
+    After payment confirmation:
+    1. CRM → Clients → [client] → active deal — confirm `product_id` shows the new tier
+    2. Open the public profile URL — confirm the tier badge shows the correct new tier
+    3. Search for the escort's city + category on the public site — confirm they appear higher than they did before
+
+    Send the escort a confirmation WhatsApp:
+    > *"You're now live on [Premium/VIP/VVIP]! Your listing is showing at the higher tier — you should start seeing more contacts within a day or two. Let me know how it goes!"*
+
+    Add a timeline note to the client record.
+  </Step>
+</Steps>
+
+---
+
+## Department notes
+
+<AccordionGroup>
+  <Accordion title="Sales & CS">
+    **Best time to pitch an upgrade: at renewal.** An escort paying for another month is already in a buying mindset. The renewal call is the natural moment to say: "While I have you — have you thought about trying Premium for this next period? Lots of escorts who upgraded tell me they wish they'd done it sooner."
+
+    **Upgrade vs. renew at same tier:** If an escort is happy and just renewing, don't unnecessarily push them up a tier — a happy renewing escort is more valuable than a churned one who felt upsold. Reserve upgrade pitches for escorts who have mentioned wanting more traffic.
+
+    **Discount policy for upgrades:**
+    - A first-upgrade discount ("try Premium at 20% off for one month") can be a strong conversion tool
+    - Discounts above the threshold (set by your market manager) require a supervisor PIN
+    - Discount is recorded in `deals.discount_percentage` and `deals.discount_approved_by` — Finance reviews these
+    - Never offer a discount and then fail to record it — it creates a reconciliation problem
+
+    **Downgrade requests:** If an escort wants to downgrade to a lower tier (e.g. VIP → Featured), follow the same deal update process but select the lower product. This typically happens at renewal. Note in the client timeline why they downgraded — this is useful for win-back conversations later.
+  </Accordion>
+
+  <Accordion title="Finance">
+    **Upgrade revenue:** Each upgrade creates a new payment record. Finance should track upgrade revenue separately from first-time subscription and renewal revenue to measure upsell performance.
+
+    **Prorated refunds:** Exotic does not offer prorated refunds for mid-period upgrades. If an escort upgrades mid-period, they pay the full new-tier rate for the next period. This should be communicated clearly before processing the upgrade.
+
+    **Discount reconciliation:** All deals with `discount_percentage > 0` are flagged in Finance reconciliation reports. Confirm every discounted deal has a `discount_approved_by` value — if it's null, that's an unapproved discount and must be investigated.
+  </Accordion>
+
+  <Accordion title="RD Team">
+    RD Team owns all package tiers, tier features, and tier pricing. Decisions about:
+    - What features each tier includes (number of photos, video allowance, badge type, search position logic)
+    - Pricing for each tier in each market
+    - Whether to introduce new tiers or retire existing ones
+
+    ...are all made by RD. If sales agents notice that a tier's pricing is losing upgrades to a competitor, or if escorts are asking for features that no current tier provides, feed that back to RD via the product feedback process.
+  </Accordion>
+
+  <Accordion title="SEO & IT Infrastructure">
+    **SEO:** Tier is the primary factor determining search position within the Exotic site. Higher tiers rank above lower tiers for all search queries within a market. This is not a configurable weighting — it is hard-coded to `products.tier` value. External Google ranking is influenced by tier indirectly: VIP/VVIP profiles often appear higher because they have more content (photos, richer bio) and more engagement (more contacts = more return visits).
+
+    **IT Infrastructure:** Profile re-provisioning at a new tier follows the same path as Stage 5d activation. If a profile doesn't update to the new tier after the upgrade payment confirms, check `laravel.log` for `WpSyncService` errors. Manual recovery: CRM → Deals → [deal] → Activate manually, which re-sends the `product_type` to WordPress.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Frequently asked questions
+
+<AccordionGroup>
+  <Accordion title="Does an escort need to pay again immediately when upgrading mid-period?">
+    Yes. An upgrade takes effect when the new-tier payment is confirmed. The escort pays the full new-tier rate for the next period. Their existing subscription period ends and the new upgraded period begins from the payment date. There is no prorated credit for remaining days on the lower tier.
+  </Accordion>
+
+  <Accordion title="How quickly does a profile move up in search results after an upgrade?">
+    The tier change is applied to the WordPress profile immediately after payment confirmation — the same 30–60 second activation window as a first-time subscription. Internal Exotic search results will reflect the new position within seconds. External Google results may take a few days to re-crawl and update.
+  </Accordion>
+
+  <Accordion title="Can an escort downgrade to a lower tier?">
+    Yes. A downgrade is processed the same way as an upgrade — the agent updates the product on the deal to a lower tier product. Downgrades typically happen at renewal. The escort pays the lower-tier rate for the new period. Prorated refunds for the higher tier are not available.
+  </Accordion>
+
+  <Accordion title="An escort upgraded but the tier badge on their profile hasn't changed — what do I check?">
+    1. CRM → Clients → [client] → active deal — confirm the `product_id` shows the new product
+    2. Check `laravel.log` for WordPress sync errors during the re-activation step
+    3. If the deal is active but the WordPress profile still shows the old tier: CRM → Deals → [deal] → Activate manually (re-sends the product type to WordPress)
+    4. If the issue persists, escalate to IT Infrastructure
+  </Accordion>
+
+  <Accordion title="Who approves an upgrade discount above the standard threshold?">
+    A supervisor with a supervisor PIN. The agent enters the discount in the deal form — if it exceeds the configured threshold, a PIN prompt appears. The approving supervisor's CRM user ID is stored in `deals.discount_approved_by` for audit purposes.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+| Symptom | Likely cause | Where to look | Fix |
+|---|---|---|---|
+| Profile shows old tier badge after upgrade payment | WordPress re-provisioning failed | `laravel.log`; CRM → Deals → deal provisioning status | Manually activate: CRM → Deals → [deal] → Activate manually |
+| Deal shows updated product but profile not re-activated | `WpSyncService` call failed silently | `laravel.log` for WpSyncService exceptions | Run manual activation; check WP connection: Settings → Integrations → Test connection |
+| Upgrade discount not recorded | `discount_percentage` field left empty | `deals.discount_percentage` | Update the deal record with the agreed discount; get supervisor approval |
+| Escort upgraded but search position hasn't changed | WordPress tier not updated; or caching delay | Profile URL → tier badge; CRM deal product | Verify WP sync completed; clear WordPress cache if available; check again in 5 minutes |
+| Supervisor PIN prompt not appearing for above-threshold discount | Threshold not configured for this market | CRM → Settings → market config | Contact IT Infrastructure to confirm supervisor PIN threshold is set for the market |
+
+---
+
+## Certification — MCQ
+
+<AccordionGroup>
+  <Accordion title="Q1: How are upgrades processed on the Exotic platform?">
+    **A.** The escort selects a new tier from their WordPress profile dashboard
+
+    **B.** Upgrades are processed by staff via the CRM deal management screen ✅
+
+    **C.** Upgrades are automatically applied when the escort's engagement metrics exceed a threshold
+
+    **D.** The escort emails the support team and the upgrade is processed within 24 hours
+  </Accordion>
+
+  <Accordion title="Q2: After an upgrade payment is confirmed, how long does it typically take for the profile to appear at the new tier position?">
+    **A.** Up to 24 hours — the site re-indexes nightly
+
+    **B.** 30–60 seconds — same as first-time activation ✅
+
+    **C.** Immediately for internal search; up to 7 days for Google
+
+    **D.** Only at the next subscription renewal date
+  </Accordion>
+
+  <Accordion title="Q3: When is the best time to pitch an upgrade to an existing escort?">
+    **A.** Immediately after registration, before they have any data on their traffic
+
+    **B.** At renewal — the escort is already in a buying mindset and is weighing the value of the platform ✅
+
+    **C.** Only when the escort complains about low traffic
+
+    **D.** Never proactively — wait for the escort to request it
+  </Accordion>
+
+  <Accordion title="Q4: An escort upgraded but their profile is still showing the old tier badge. What is the FIRST step to investigate?">
+    **A.** Ask the escort to log out and log back in
+
+    **B.** Confirm in the CRM that the deal's product_id was updated to the new tier, then check laravel.log for WordPress sync errors ✅
+
+    **C.** Re-run the payment
+
+    **D.** Update the tier manually in WordPress Admin
+  </Accordion>
+</AccordionGroup>

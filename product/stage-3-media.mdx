@@ -1,13 +1,18 @@
 ---
 title: "Stage 3 — Profile setup & media upload"
-description: "How an escort completes their profile and uploads photos and videos."
+description: "How an escort completes their profile, uploads photos and videos, and prepares their listing to go live."
 ---
 
 ## What the customer sees
 
-After registration, the escort logs into their WordPress account and fills in their profile. This includes their bio, rates, city, available services, and contact preferences. They then upload photos and — optionally — videos. The quality and completeness of this step directly affects how many enquiries they receive once the profile goes live.
+After registration, the escort logs into their WordPress account and begins filling in their profile. This is the step where they craft the listing that potential clients will see — bio, rates, city, available services, and contact preferences. They then upload photos and, optionally, videos.
 
-Photos are uploaded through the WordPress profile editor. Up to **20 images** (max 5MB each) and **5 videos** are supported. Accepted formats: JPEG, PNG, WebP, GIF, AVIF. One photo must be designated as the main (cover) image — this appears in search result cards.
+The quality of this step directly determines how many client enquiries the escort receives once their profile goes live. A complete profile with clear, high-quality photos consistently outperforms an incomplete one. Escorts who go live with a thin profile quickly become disappointed and churn — so this step deserves time and coaching.
+
+**What can be uploaded:**
+- Up to **20 photos** (max 5 MB each) — JPEG, PNG, WebP, GIF, AVIF supported
+- Up to **5 videos**
+- One photo must be set as the **cover image** — this appears on search result cards
 
 ---
 
@@ -15,23 +20,204 @@ Photos are uploaded through the WordPress profile editor. Up to **20 images** (m
 
 | What happens | Code reference |
 |---|---|
-| Photo upload handled by WordPress plugin | `class-media-endpoint.php` in `exotic-crm-sync` — endpoints: `GET/POST/DELETE /clients/{post_id}/media` |
-| Upload limits | 5MB per image, 20 images max, 5 videos max (configurable via WP options) |
-| CRM display image selection | `ClientProfileImageService::normalise()` — `app/Services/ClientProfileImageService.php:10` |
-| Non-blocking upload queue | Recent commits made uploads non-blocking + added retry controls — slow uploads don't block form submission |
-| Profile completeness score | Computed from weighted profile fields; shown in CRM → client detail → Overview tab |
+| Photo/video upload handled by WordPress plugin | `class-media-endpoint.php` in `exotic-crm-sync` — endpoints: `GET / POST / DELETE /clients/{post_id}/media` |
+| Upload limits | 5 MB per image, 20 images max, 5 videos max (configurable via WordPress options) |
+| Non-blocking upload queue | Uploads are non-blocking — slow uploads don't freeze the form; retry controls added in recent commits |
+| CRM display image normalisation | `ClientProfileImageService::normalise()` — `app/Services/ClientProfileImageService.php:10` — selects cover image for CRM thumbnails |
+| Profile completeness score | Computed from weighted profile fields — shown in CRM → Clients → [client] → Overview tab |
+| Profile fields synced to CRM | `ClientSyncService` pulls name, city, bio, photo count, completeness score, and `profile_status` on each sync |
+
+**Completeness scoring:** The platform weights different profile fields. Bio, photos, city, and rates contribute most. A completeness score below 60% typically correlates with poor search performance once the escort goes live.
 
 ---
 
-<Note>
-  **Interview pending — content to be added:** SOP for what staff should check on a new profile (completeness thresholds, common photo rejection reasons, content policy guidance), department notes (SEO: which fields most affect ranking; CS: how to help an escort who can't upload photos), FAQs, troubleshooting, and certification questions.
-</Note>
+## Step-by-step SOP
 
-<CardGroup cols={2}>
-  <Card title="Next: Verification →" icon="arrow-right" href="/product/stage-4-verification">
-    How staff verify the escort's identity and age
-  </Card>
-  <Card title="Profile completeness (CRM guide)" icon="chart-bar" href="/clients/subscriptions">
-    Completeness score and profile health
-  </Card>
-</CardGroup>
+<Steps>
+  <Step title="Guide the escort to the profile editor">
+    After login, the escort accesses their profile editor from their dashboard. Walk them to: **My Account → Edit Profile** (or the equivalent link on their market's WordPress theme).
+
+    The profile editor has sections:
+    - **Basic info:** display name, city, age (or date of birth), nationality
+    - **About me:** free-text bio (aim for 100–200 words — enough to be engaging without being overwhelming)
+    - **Rates:** hourly rate, additional hours, outcall/incall preferences
+    - **Services:** available options (varies by market)
+    - **Contact preferences:** which channels to show (phone, WhatsApp, etc.)
+
+    **Screenshot slot:** *WordPress profile editor showing all sections*
+  </Step>
+  <Step title="Help the escort write a compelling bio">
+    This is the single biggest impact a sales agent can make on an escort's long-term success. A good bio:
+    - Is warm and personal, not a list of services
+    - Mentions the city clearly (helps search ranking)
+    - Addresses what kind of clients the escort prefers to attract
+    - Is in the language used by clients in that market (English, French, Swahili, etc.)
+
+    **Bad bio:** "Hi I'm Amara. I offer various services. Call me."
+    **Good bio:** "Hi, I'm Amara — a warm, attentive companion based in Nairobi's Westlands area. I enjoy genuine connections and conversation as much as anything else. I'm selective about my clients because I value quality time over quantity. Message me on WhatsApp to say hi."
+
+    Offer to help the escort draft or improve their bio on the call.
+  </Step>
+  <Step title="Guide the photo upload">
+    Escort uploads photos from their phone or laptop via the profile editor.
+
+    **Photo guidance to give:**
+    - At least 3–5 photos to start; more is better (up to 20)
+    - Clear lighting, no blurry images
+    - At least one full-body photo and one face/close-up
+    - The cover image (shown in search results) should be the most attractive, well-lit photo
+    - Avoid photos with visible other people in the background
+
+    **If the escort is having trouble uploading:**
+    - Check file size — must be under 5 MB per photo. Suggest resizing via their phone's built-in compress option or a free app.
+    - Check file format — JPEG or PNG recommended; some older photo formats may not upload.
+    - Try a different browser (Chrome recommended on Android)
+
+    **Screenshot slot:** *Photo upload section in WordPress profile editor showing uploaded images and cover image selector*
+  </Step>
+  <Step title="Check the completeness score in the CRM">
+    After the escort has filled in their profile and uploaded photos, check the CRM:
+    1. CRM → Clients → [client name] → Overview tab
+    2. Check the **Profile completeness** score
+    3. If below 60%: identify which fields are missing and guide the escort to complete them
+    4. If above 80%: the profile is ready to proceed to verification and subscription
+
+    **Screenshot slot:** *CRM client Overview tab showing profile completeness score and missing fields*
+  </Step>
+  <Step title="Confirm and set expectations">
+    Once the profile is complete:
+    1. Confirm the escort is happy with how it looks — ask them to preview it
+    2. Explain that the profile is **not yet live** — it will go live after:
+       - Identity verification (Stage 4)
+       - Subscription payment (Stage 5)
+    3. Set the expectation: "Once we verify your ID and you subscribe, your profile will be live within about a minute."
+
+    The journey continues at Stage 4 — Verification.
+  </Step>
+</Steps>
+
+---
+
+## Department notes
+
+<AccordionGroup>
+  <Accordion title="Sales & CS">
+    **Profile quality directly drives retention.** Escorts who go live with a thin, poorly photographed profile get few enquiries, blame the platform, and churn quickly. Invest 10–15 minutes coaching a new escort on their profile — it pays back in renewal and referrals.
+
+    **Top CS issue at this stage: "I can't upload my photos."**
+    Troubleshoot in this order:
+    1. File size over 5 MB → ask escort to compress the photo on their phone
+    2. Wrong file format → suggest JPEG/PNG
+    3. Browser issue → recommend Chrome
+    4. Slow internet connection → suggest uploading on Wi-Fi
+    5. If all of the above checked and still failing → escalate to IT Infrastructure
+
+    **Completeness coaching script:**
+    > *"Your profile is looking good! The thing that will make the biggest difference to the number of clients who message you is your main photo — it's the first thing they see in search. Can we take a moment to make sure your cover photo is your best one?"*
+  </Accordion>
+
+  <Accordion title="RD Team">
+    RD Team owns decisions about:
+    - Which content categories and service types are available in each market (the services checklist varies by country)
+    - Any market-specific content policies
+
+    If escorts in a specific market are asking about service categories that don't appear in their profile editor, this is a configuration decision for RD — not something CS or IT Infrastructure should add unilaterally.
+  </Accordion>
+
+  <Accordion title="SEO & IT Infrastructure">
+    **SEO:** Profile quality is a key SEO ranking signal. Fields that directly affect ranking:
+    - **City/location** — must be accurate and match the market. City mentions in the bio also help.
+    - **Bio length and keywords** — longer, keyword-rich bios rank better for location-based searches
+    - **Photo count** — profiles with more photos rank higher within the site's internal search
+    - **Cover image** — the Open Graph image used when the profile URL is shared on social media
+
+    Encourage CS agents to treat bio quality and city accuracy as SEO hygiene, not just profile niceness.
+
+    **IT Infrastructure:** Photo upload failures that persist after standard troubleshooting (wrong size, wrong format, browser change) should be escalated. Check `laravel.log` for `ClientProfileImageService` exceptions and the `exotic-crm-sync` plugin media endpoint for errors. Recent commits added a non-blocking upload queue — if uploads are timing out, confirm the latest plugin version is deployed on the WordPress site.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Frequently asked questions
+
+<AccordionGroup>
+  <Accordion title="How many photos should an escort upload before going live?">
+    A minimum of 3 photos is recommended before activating a subscription. Profiles with 5 or more photos consistently receive more enquiries. Encourage escorts to upload at least 5–8 photos and set the best one as their cover image. They can always add more later while the subscription is active.
+  </Accordion>
+
+  <Accordion title="Can the escort update their profile after they go live?">
+    Yes. The escort can edit their bio, rates, and services at any time from their WordPress dashboard. Photo changes take effect immediately. They do not need to re-subscribe or re-verify for profile updates. Encourage escorts to keep their profile fresh — updated profiles rank higher in the site's internal search algorithm.
+  </Accordion>
+
+  <Accordion title="What file formats are accepted for photo uploads?">
+    JPEG, PNG, WebP, GIF, and AVIF. JPEG and PNG are recommended as they are universally supported by all phones and browsers. Maximum 5 MB per photo. Most modern phone cameras produce JPEG by default — only iPhones on default settings produce HEIC, which is not supported; iPhone users should switch to Most Compatible in their camera settings.
+  </Accordion>
+
+  <Accordion title="What is the profile completeness score and where do I find it?">
+    The completeness score is a weighted calculation of how many key profile fields have been filled in — bio, photos, city, rates, contact info. It is visible in CRM → Clients → [client] → Overview tab. A score of 80% or above is considered a "ready to go live" profile.
+  </Accordion>
+
+  <Accordion title="What if an escort's photos are rejected — what are the content rules?">
+    Content moderation is handled by the platform's editorial team during verification (Stage 4). If a specific photo is flagged during verification, the verification staff will communicate what needs to change. Common reasons for rejection: obscured face on the cover image, photos that include identifiable third parties without their consent, photos that violate the platform's explicit content policy for the specific market.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+| Symptom | Likely cause | Where to look | Fix |
+|---|---|---|---|
+| Photo upload fails immediately | File size over 5 MB or unsupported format | Check file size and format | Ask escort to compress photo or convert to JPEG/PNG |
+| Photo upload starts but times out | Slow internet connection or server issue | Check escort's connection; check `laravel.log` | Advise Wi-Fi upload; if server-side, escalate to IT Infrastructure |
+| Uploaded photos don't appear after refresh | Browser cache or sync delay | Hard-refresh (Ctrl/Cmd+Shift+R) | Clear cache; if still missing, check `class-media-endpoint.php` logs |
+| Cover image not updating in CRM thumbnail | `ClientProfileImageService` sync delay | CRM → Clients → [client] → sync | Run manual sync from client detail page |
+| Completeness score not updating after filling fields | Sync hasn't run since profile was updated | CRM → Clients → [client] → Overview | Trigger a client sync or wait for scheduled sync |
+| Video upload fails | Video format not supported or file too large | Check file format and size | MP4/H.264 recommended; advise the escort to compress video |
+
+---
+
+## Certification — MCQ
+
+<AccordionGroup>
+  <Accordion title="Q1: What is the maximum number of photos an escort can upload, and what is the maximum size per photo?">
+    **A.** 10 photos, 10 MB each
+
+    **B.** 20 photos, 5 MB each ✅
+
+    **C.** 15 photos, 8 MB each
+
+    **D.** Unlimited photos, 2 MB each
+  </Accordion>
+
+  <Accordion title="Q2: An escort says their photos aren't uploading. You've confirmed the file sizes are under 5 MB and the format is JPEG. What do you try next?">
+    **A.** Tell them to wait 24 hours and try again
+
+    **B.** Ask them to try uploading from Chrome browser, and if that fails, escalate to IT Infrastructure ✅
+
+    **C.** Create a new client record for them
+
+    **D.** Ask them to email the photos to the support team
+  </Accordion>
+
+  <Accordion title="Q3: A profile completeness score of 45% is showing in the CRM. What should you do before encouraging the escort to subscribe?">
+    **A.** Proceed with subscription — completeness score is just cosmetic
+
+    **B.** Guide the escort to complete the missing profile fields first, targeting at least 80% before going live ✅
+
+    **C.** Escalate to IT Infrastructure to fix the completeness calculation
+
+    **D.** Mark the profile as verified and bypass the completeness check
+  </Accordion>
+
+  <Accordion title="Q4: Which field most directly affects an escort's ranking in search results AND in Google for location-based searches?">
+    **A.** Number of videos uploaded
+
+    **B.** Subscription package tier
+
+    **C.** City / location field (accurate and matching the market) ✅
+
+    **D.** Number of WhatsApp contacts received
+  </Accordion>
+</AccordionGroup>

@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Exotic Online University — Certification Quiz</title>
+  <style>
+    :root {
+      --red: #fc2c24;
+      --red-dark: #d41e17;
+      --red-light: #fff0ef;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-400: #9ca3af;
+      --gray-600: #4b5563;
+      --gray-800: #1f2937;
+      --green: #16a34a;
+      --green-light: #dcfce7;
+      --amber: #d97706;
+      --amber-light: #fef3c7;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-800);
+      line-height: 1.6;
+    }
+
+    header {
+      background: var(--red);
+      color: white;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    header .logo {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    header .subtitle {
+      font-size: 13px;
+      opacity: 0.85;
+      font-weight: 400;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 32px 20px 64px;
+    }
+
+    /* ─── Name screen ─── */
+    #name-screen {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      padding: 40px;
+      text-align: center;
+    }
+    #name-screen h1 {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    #name-screen p {
+      color: var(--gray-600);
+      margin-bottom: 28px;
+      font-size: 15px;
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    @media (max-width: 500px) { .meta-grid { grid-template-columns: 1fr; } }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-600);
+      margin-bottom: 6px;
+      text-align: left;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 8px;
+      font-size: 15px;
+      transition: border-color .2s;
+    }
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: var(--red);
+    }
+    .stats-row {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-bottom: 32px;
+    }
+    .stat { text-align: center; }
+    .stat .number { font-size: 28px; font-weight: 800; color: var(--red); }
+    .stat .label { font-size: 12px; color: var(--gray-600); text-transform: uppercase; letter-spacing: .5px; }
+
+    /* ─── Quiz screen ─── */
+    #quiz-screen { display: none; }
+
+    .progress-bar-wrap {
+      background: var(--gray-200);
+      border-radius: 99px;
+      height: 6px;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--red);
+      border-radius: 99px;
+      transition: width .3s ease;
+    }
+    .progress-label {
+      font-size: 13px;
+      color: var(--gray-600);
+      margin-bottom: 28px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .question-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      padding: 32px;
+      margin-bottom: 20px;
+    }
+    .question-stage {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--red);
+      margin-bottom: 8px;
+    }
+    .question-text {
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .options { display: flex; flex-direction: column; gap: 10px; }
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all .18s;
+      user-select: none;
+    }
+    .option:hover { border-color: var(--red); background: var(--red-light); }
+    .option.selected { border-color: var(--red); background: var(--red-light); }
+    .option.correct  { border-color: var(--green); background: var(--green-light); }
+    .option.wrong    { border-color: #ef4444; background: #fef2f2; }
+    .option.show-correct { border-color: var(--green); background: var(--green-light); }
+
+    .option-letter {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: var(--gray-100);
+      border: 1.5px solid var(--gray-200);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .option.selected .option-letter { background: var(--red); color: white; border-color: var(--red); }
+    .option.correct  .option-letter { background: var(--green); color: white; border-color: var(--green); }
+    .option.wrong    .option-letter { background: #ef4444; color: white; border-color: #ef4444; }
+    .option.show-correct .option-letter { background: var(--green); color: white; border-color: var(--green); }
+
+    .option-text { font-size: 15px; line-height: 1.4; }
+    .feedback-msg {
+      margin-top: 14px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      display: none;
+    }
+    .feedback-msg.correct-msg { background: var(--green-light); color: #166534; }
+    .feedback-msg.wrong-msg   { background: #fef2f2; color: #991b1b; }
+
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 4px;
+    }
+    .btn {
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all .18s;
+    }
+    .btn-primary { background: var(--red); color: white; }
+    .btn-primary:hover { background: var(--red-dark); }
+    .btn-primary:disabled { opacity: .45; cursor: not-allowed; }
+    .btn-outline { background: white; color: var(--gray-800); border: 1.5px solid var(--gray-200); }
+    .btn-outline:hover { border-color: var(--gray-400); }
+
+    /* ─── Results screen ─── */
+    #results-screen { display: none; }
+
+    .result-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      padding: 40px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .score-ring {
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      font-size: 32px; font-weight: 800;
+    }
+    .score-ring.pass { background: var(--green-light); color: var(--green); border: 4px solid var(--green); }
+    .score-ring.fail { background: var(--amber-light); color: var(--amber); border: 4px solid var(--amber); }
+    .score-ring .score-pct { line-height: 1; }
+    .score-ring .score-label { font-size: 11px; font-weight: 600; opacity: .8; }
+    .result-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+    .result-sub { color: var(--gray-600); font-size: 15px; margin-bottom: 24px; }
+    .result-stats {
+      display: flex; justify-content: center; gap: 32px;
+      padding: 20px 0; border-top: 1px solid var(--gray-100); border-bottom: 1px solid var(--gray-100);
+      margin-bottom: 24px;
+    }
+    .result-stat .num { font-size: 24px; font-weight: 800; }
+    .result-stat .num.green { color: var(--green); }
+    .result-stat .num.red   { color: #ef4444; }
+    .result-stat .lbl { font-size: 12px; color: var(--gray-600); }
+    .btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    /* ─── Certificate ─── */
+    #certificate {
+      display: none;
+      background: white;
+      border: 3px solid var(--red);
+      border-radius: 12px;
+      padding: 48px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    #certificate::before {
+      content: '';
+      position: absolute; inset: 8px;
+      border: 1.5px solid var(--red);
+      border-radius: 8px;
+      opacity: .25;
+      pointer-events: none;
+    }
+    .cert-logo { font-size: 22px; font-weight: 800; color: var(--red); margin-bottom: 4px; }
+    .cert-university { font-size: 13px; color: var(--gray-600); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 28px; }
+    .cert-heading { font-size: 13px; text-transform: uppercase; letter-spacing: 2px; color: var(--gray-600); margin-bottom: 8px; }
+    .cert-name { font-size: 34px; font-weight: 800; color: var(--gray-800); margin-bottom: 8px; font-style: italic; }
+    .cert-body { font-size: 15px; color: var(--gray-600); max-width: 420px; margin: 0 auto 24px; line-height: 1.7; }
+    .cert-score-badge {
+      display: inline-block;
+      background: var(--red);
+      color: white;
+      font-size: 20px;
+      font-weight: 800;
+      padding: 10px 28px;
+      border-radius: 99px;
+      margin-bottom: 24px;
+    }
+    .cert-footer {
+      display: flex; justify-content: space-around; gap: 16px;
+      padding-top: 24px; border-top: 1px solid var(--gray-100);
+      font-size: 13px; color: var(--gray-600);
+    }
+    .cert-footer strong { display: block; font-size: 15px; color: var(--gray-800); }
+
+    /* ─── Review section ─── */
+    .review-section { margin-top: 8px; }
+    .review-section h3 { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+    .review-item {
+      background: white;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 10px;
+      border-left: 4px solid;
+    }
+    .review-item.correct { border-color: var(--green); }
+    .review-item.wrong   { border-color: #ef4444; }
+    .review-item .q-text { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+    .review-item .your-ans { font-size: 13px; color: var(--gray-600); }
+    .review-item .your-ans span { font-weight: 600; }
+    .review-item.wrong .your-ans span.wrong-ans { color: #ef4444; }
+    .review-item .correct-ans { font-size: 13px; color: var(--green); font-weight: 600; margin-top: 4px; }
+
+    @media print {
+      body { background: white; }
+      header, .container > *:not(#certificate) { display: none !important; }
+      #certificate { display: block !important; border: 3px solid #fc2c24; }
+      #certificate::before { border: 1.5px solid #fc2c24; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">Exotic</div>
+    <div class="subtitle">Online University</div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ─── Name / Start Screen ─── -->
+  <div id="name-screen">
+    <h1>Certification Quiz</h1>
+    <p>20 questions across all stages of the escort lifecycle.<br>Score 80% or above to receive your certificate.</p>
+
+    <div class="stats-row">
+      <div class="stat"><div class="number">20</div><div class="label">Questions</div></div>
+      <div class="stat"><div class="number">80%</div><div class="label">Pass mark</div></div>
+      <div class="stat"><div class="number">∞</div><div class="label">Attempts</div></div>
+    </div>
+
+    <div class="meta-grid">
+      <div class="form-group">
+        <label for="user-name">Your full name</label>
+        <input type="text" id="user-name" placeholder="e.g. Amara Osei" />
+      </div>
+      <div class="form-group">
+        <label for="user-dept">Department</label>
+        <select id="user-dept">
+          <option value="">Select department…</option>
+          <option>Sales & CS</option>
+          <option>Finance</option>
+          <option>RD Team</option>
+          <option>SEO</option>
+          <option>IT Infrastructure</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="start-btn" onclick="startQuiz()">Start quiz →</button>
+    <p style="margin-top:12px; font-size:13px; color:var(--gray-400)">Covers: Discover · Register · Media · Verification · Subscription · Payment · Activation · Contact · Renewal · Upgrades</p>
+  </div>
+
+  <!-- ─── Quiz Screen ─── -->
+  <div id="quiz-screen">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="progress-label">
+      <span id="progress-text">Question 1 of 20</span>
+      <span id="score-tally">Score: 0</span>
+    </div>
+
+    <div class="question-card" id="question-card">
+      <div class="question-stage" id="q-stage"></div>
+      <div class="question-text" id="q-text"></div>
+      <div class="options" id="q-options"></div>
+      <div class="feedback-msg" id="q-feedback"></div>
+    </div>
+
+    <div class="nav-row">
+      <span style="font-size:13px; color:var(--gray-400)" id="answered-hint">Select an answer to continue</span>
+      <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- ─── Results Screen ─── -->
+  <div id="results-screen">
+    <div class="result-card" id="result-card">
+      <div class="score-ring" id="score-ring">
+        <div class="score-pct" id="score-pct-text">—</div>
+        <div class="score-label">SCORE</div>
+      </div>
+      <div class="result-title" id="result-title">—</div>
+      <div class="result-sub" id="result-sub">—</div>
+      <div class="result-stats">
+        <div class="result-stat"><div class="num green" id="res-correct">—</div><div class="lbl">Correct</div></div>
+        <div class="result-stat"><div class="num red"   id="res-wrong">—</div><div class="lbl">Incorrect</div></div>
+        <div class="result-stat"><div class="num"       id="res-total">20</div><div class="lbl">Total</div></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="cert-btn" onclick="showCertificate()" style="display:none">View certificate 🏆</button>
+        <button class="btn btn-outline" onclick="retakeQuiz()">Retake quiz</button>
+      </div>
+    </div>
+
+    <!-- Certificate (shown on pass) -->
+    <div id="certificate">
+      <div class="cert-logo">Exotic</div>
+      <div class="cert-university">Online University</div>
+      <div class="cert-heading">Certificate of Completion</div>
+      <div style="font-size:32px; margin-bottom:8px;">🏆</div>
+      <div class="cert-heading" style="margin-bottom:4px;">This certifies that</div>
+      <div class="cert-name" id="cert-name-display">—</div>
+      <div class="cert-body">
+        has successfully completed the <strong>Exotic Online University Certification</strong>,
+        demonstrating comprehensive knowledge of the Exotic platform, the escort lifecycle across Africa,
+        and the responsibilities of their role.
+      </div>
+      <div class="cert-score-badge" id="cert-score-display">—</div>
+      <div class="cert-footer">
+        <div><strong id="cert-dept-display">—</strong>Department</div>
+        <div><strong id="cert-date-display">—</strong>Date issued</div>
+        <div><strong id="cert-market-display">All 54 African markets</strong>Scope</div>
+      </div>
+      <div style="margin-top:20px;">
+        <button class="btn btn-primary" onclick="window.print()">🖨 Print certificate</button>
+      </div>
+    </div>
+
+    <!-- Review of wrong answers -->
+    <div class="review-section" id="review-section"></div>
+  </div>
+
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    stage: "Stage 1 — Discover",
+    text: "Which discovery channel typically produces the highest conversion rate for new escorts?",
+    options: [
+      "Organic SEO arrivals who found Exotic on Google",
+      "Outbound cold calls made by the sales team",
+      "Referrals from existing escorts on the platform",
+      "Social media advertising"
+    ],
+    correct: 2,
+    explanation: "Referrals convert fastest — an escort who heard 'I'm on Exotic and getting good clients' from a trusted colleague arrives with strong intent and minimal objections."
+  },
+  {
+    stage: "Stage 1 — Discover",
+    text: "After how many failed contact attempts should you mark a prospect as 'Lost'?",
+    options: [
+      "After 1 attempt with no response",
+      "After 3 attempts over 7 days",
+      "After 10 attempts over a month",
+      "Only when they explicitly say they are not interested"
+    ],
+    correct: 1,
+    explanation: "Standard practice: 3 contact attempts over 7 days. If no response, mark lost with reason 'no response'. You can always re-open a lost lead if they contact you later."
+  },
+  {
+    stage: "Stage 2 — Register",
+    text: "What is the default profile_status for a client record immediately after registration?",
+    options: [
+      "active",
+      "pending_review",
+      "private",
+      "draft"
+    ],
+    correct: 2,
+    explanation: "New profiles are created with profile_status = 'private'. The profile is not publicly visible until verification is complete and a subscription is activated."
+  },
+  {
+    stage: "Stage 2 — Register",
+    text: "An escort registered on the Exotic website themselves (organic arrival) but does not appear in the CRM. What is your FIRST action?",
+    options: [
+      "Create a new client record manually in the CRM",
+      "Ask the escort to register again using a different email",
+      "Run a manual sync from CRM → Settings → Integrations → [market] → Sync clients",
+      "Escalate to IT Infrastructure immediately"
+    ],
+    correct: 2,
+    explanation: "Self-service registrations are pulled into the CRM by the sync process. Run a manual sync first — the client record likely exists in WordPress and just needs to be synced across."
+  },
+  {
+    stage: "Stage 3 — Media upload",
+    text: "What is the maximum number of photos an escort can upload, and the maximum size per photo?",
+    options: [
+      "10 photos, 10 MB each",
+      "20 photos, 5 MB each",
+      "15 photos, 8 MB each",
+      "Unlimited photos, 2 MB each"
+    ],
+    correct: 1,
+    explanation: "Escorts can upload up to 20 images at a maximum of 5 MB each. Accepted formats: JPEG, PNG, WebP, GIF, AVIF. Up to 5 videos are also supported."
+  },
+  {
+    stage: "Stage 3 — Media upload",
+    text: "A newly activated escort has a profile completeness score of 35% and is asking why they aren't getting client contacts. What should you do first?",
+    options: [
+      "Upgrade their subscription tier",
+      "Guide them to complete missing profile fields — target 80%+ before expecting results",
+      "Escalate to IT Infrastructure to investigate the completeness calculation",
+      "Advise them to wait — it takes time for new profiles to get traction"
+    ],
+    correct: 1,
+    explanation: "A completeness score below 60% correlates strongly with poor performance. Bio, photos, city, and rates are the highest-weight fields. Fix these before attributing low traffic to any other cause."
+  },
+  {
+    stage: "Stage 4 — Verification",
+    text: "When must verification be completed?",
+    options: [
+      "Before the escort uploads their profile photos",
+      "Before the escort's first subscription can be activated",
+      "Before the escort can register on the WordPress site",
+      "Before the escort's profile appears in Google Search"
+    ],
+    correct: 1,
+    explanation: "Verification is mandatory before the first subscription activation. The clients.verified flag must be true for the deal activation to proceed. It is a one-time step — not required at renewal."
+  },
+  {
+    stage: "Stage 4 — Verification",
+    text: "An escort's ID photo shows they are 17 years old. What is the correct action?",
+    options: [
+      "Approve verification — one year off the age limit is close enough",
+      "Ask the escort to send a different ID that shows a different date of birth",
+      "Delay verification until the escort's 18th birthday and note it in the CRM",
+      "Decline the account, mark is_high_risk with reason 'underage', and escalate to supervisor immediately"
+    ],
+    correct: 3,
+    explanation: "Under-age applicants must be declined without exception. Mark is_high_risk = true with risk_reason_code = 'underage' and escalate to your supervisor immediately. This is a legal compliance requirement."
+  },
+  {
+    stage: "Stage 5a — Subscription selection",
+    text: "An escort reaches the subscription checkout page but sees no packages listed. What is the FIRST thing you check in the CRM?",
+    options: [
+      "The escort's payment history",
+      "Whether the market has at least one active payment provider binding under Settings → Integrations",
+      "The escort's profile completeness score",
+      "The WordPress sync status for the market"
+    ],
+    correct: 1,
+    explanation: "No packages on checkout = no active subscription_push provider binding for the market. At least one provider (KopoKopo, Daraja, Paystack, etc.) must be enabled with type 'subscription_push' and status 'active'."
+  },
+  {
+    stage: "Stage 5b — Payment initiation",
+    text: "An escort wants to pay but is using a phone number different from their registered number. Which payment method should CS suggest?",
+    options: [
+      "Ask the escort to update their registered phone number before paying",
+      "STK Push — it will work from any M-Pesa registered number",
+      "Payment link — it can be opened and paid from any device or number",
+      "Tell the escort to visit an M-Pesa agent and pay in cash"
+    ],
+    correct: 2,
+    explanation: "A payment link (method = 'link') can be opened on any device and paid from any phone number or card. It bypasses the STK Push's dependency on the registered phone number."
+  },
+  {
+    stage: "Stage 5c — Payment confirmation",
+    text: "A payment shows status 'completed' but the deal is still 'pending'. What is the most likely cause?",
+    options: [
+      "The escort cancelled their subscription after paying",
+      "M-Pesa reversed the payment after confirmation",
+      "Provisioning is stuck — likely client_unresolved or a WordPress sync failure",
+      "The payment has not been confirmed yet — status update is delayed"
+    ],
+    correct: 2,
+    explanation: "Completed payment + pending deal = provisioning did not complete. Most common causes: the payment couldn't be matched to a client (client_unresolved), or the WordPress activation API failed."
+  },
+  {
+    stage: "Stage 5c — Payment confirmation",
+    text: "What does 'wallet_funding_settlement_review' mean on a payment record?",
+    options: [
+      "The escort's M-Pesa balance was too low to complete the payment",
+      "The payment amount received differs from the expected subscription price by more than 5% — Finance must review before provisioning proceeds",
+      "The payment provider has not yet settled funds to Exotic's bank account",
+      "The CRM is waiting for a second payment confirmation to validate the subscription"
+    ],
+    correct: 1,
+    explanation: "A ±5% amount mismatch triggers manual Finance review. Finance confirms whether the difference is acceptable (e.g. due to a discount), then approves — provisioning proceeds automatically on approval."
+  },
+  {
+    stage: "Stage 5d — Profile activation",
+    text: "Under normal conditions, how long does profile activation take after payment is confirmed?",
+    options: [
+      "Instantly — under 1 second",
+      "30–60 seconds",
+      "5–10 minutes",
+      "Up to 24 hours depending on server load"
+    ],
+    correct: 1,
+    explanation: "The activation sequence (CRM creates deal → calls WordPress → WordPress publishes profile → CRM syncs back) takes 30–60 seconds under normal conditions. If it takes more than 5 minutes, something is likely stuck."
+  },
+  {
+    stage: "Stage 5e — Failures & recovery",
+    text: "A payment shows 'completed' but provisioning_status = 'client_unresolved'. What does this mean?",
+    options: [
+      "M-Pesa reversed the payment after it was processed",
+      "The escort selected the wrong subscription package",
+      "The payment could not be automatically linked to a CRM client record",
+      "The WordPress site was unavailable at the time of activation"
+    ],
+    correct: 2,
+    explanation: "client_unresolved means the phone number on the payment doesn't match any client record — often the escort paid from a different number than they registered with. Finance manually matches the payment to the correct client to resolve it."
+  },
+  {
+    stage: "Stage 5e — Failures & recovery",
+    text: "Logs show webhook_verification_failed errors during a 90-minute window, and 15 escorts paid successfully but were never activated. What is the root cause and fix?",
+    options: [
+      "The WordPress site was down — fix by restoring the WordPress server",
+      "HMAC secret mismatch — update the KopoKopo webhook secret in CRM Settings to match the current secret in KopoKopo's dashboard",
+      "The escorts paid the wrong amount — Finance must review each payment manually",
+      "The payment provider is down — wait for provider to restore service"
+    ],
+    correct: 1,
+    explanation: "webhook_verification_failed (401) = HMAC secret mismatch. Fix: copy the current secret from KopoKopo dashboard → update in CRM → Settings → Integrations → [market]. Then manually activate each missed deal using their confirmed M-Pesa references."
+  },
+  {
+    stage: "Stage 6 — Customer contact",
+    text: "An escort has been live for 2 weeks and reports receiving no WhatsApp messages. What is the MOST likely cause?",
+    options: [
+      "The WhatsApp integration is broken for this market",
+      "The escort's profile quality, completeness, or subscription tier is insufficient to generate search visibility",
+      "The escort's phone number is not registered on WhatsApp",
+      "The escort needs to be re-verified before client contacts can be received"
+    ],
+    correct: 1,
+    explanation: "Zero contacts is almost always a profile quality or visibility issue — low completeness score, weak cover photo, low-tier subscription, or poor bio. Check these before investigating technical causes."
+  },
+  {
+    stage: "Stage 6 — Customer contact",
+    text: "What is Exotic Chat and what problem does it solve?",
+    options: [
+      "A CRM tool for staff to message escorts internally",
+      "A bulk WhatsApp messaging tool for renewal campaigns",
+      "A native in-app messaging channel allowing website visitors to contact escorts without needing WhatsApp or any third-party app",
+      "A replacement for the SupportBoard live chat widget on the Exotic website"
+    ],
+    correct: 2,
+    explanation: "Exotic Chat is a pan-African native messaging app built into the Exotic platform. It removes the dependency on WhatsApp or any third-party app — visitors can message escorts directly within Exotic. Launch timeline is owned by RD Team."
+  },
+  {
+    stage: "Stage 7 — Renewal",
+    text: "What happens to an escort's profile data when their subscription expires?",
+    options: [
+      "The profile and all photos are permanently deleted from WordPress",
+      "The profile is set to private — invisible to visitors but all data (photos, bio, history) is preserved",
+      "The profile stays live but is moved to a free-tier listing with reduced visibility",
+      "The profile stays live for a 7-day grace period, then is archived"
+    ],
+    correct: 1,
+    explanation: "On expiry, the deal is marked 'expired' and WordPress sets post_status = 'private'. Nothing is deleted. The profile is restored immediately when the escort renews — a key retention argument vs. competitors."
+  },
+  {
+    stage: "Stage 8 — Upgrades",
+    text: "How are subscription package upgrades processed on Exotic?",
+    options: [
+      "The escort selects a new tier from their self-service profile dashboard",
+      "Upgrades are processed by staff via the CRM deal management screen",
+      "Upgrades are automatically applied when the escort's enquiry metrics exceed a tier threshold",
+      "The escort emails the support team and the upgrade is processed within 24 hours"
+    ],
+    correct: 1,
+    explanation: "Upgrades are not self-service. The agent updates the product_id on the active deal via CRM → Deals → Edit Deal, then initiates a new payment. On payment confirmation, the CRM re-provisions the profile at the new tier on WordPress."
+  },
+  {
+    stage: "Cross-stage — Departments",
+    text: "Which department owns package tiers, pricing, and the decision to open new African markets?",
+    options: [
+      "IT Infrastructure — they configure the technical setup for each market",
+      "Sales & CS — they understand what escorts need and set pricing accordingly",
+      "Finance — they own revenue decisions including pricing",
+      "RD Team — they own the product roadmap including tiers, features, pricing, and market expansion"
+    ],
+    correct: 3,
+    explanation: "RD Team owns all product decisions: tier features, pricing per market, and market launch decisions. IT Infrastructure implements and maintains the technical systems. Sales & CS should escalate any pricing or market requests to RD, not act unilaterally."
+  }
+];
+
+let currentQ = 0;
+let score = 0;
+let answers = [];
+let userName = "";
+let userDept = "";
+let answered = false;
+
+function startQuiz() {
+  userName = document.getElementById("user-name").value.trim();
+  userDept = document.getElementById("user-dept").value;
+  if (!userName) {
+    document.getElementById("user-name").focus();
+    document.getElementById("user-name").style.borderColor = "var(--red)";
+    return;
+  }
+  currentQ = 0; score = 0; answers = []; answered = false;
+  document.getElementById("name-screen").style.display = "none";
+  document.getElementById("quiz-screen").style.display = "block";
+  renderQuestion();
+}
+
+function renderQuestion() {
+  answered = false;
+  const q = QUESTIONS[currentQ];
+  const fill = Math.round((currentQ / QUESTIONS.length) * 100);
+
+  document.getElementById("progress-fill").style.width = fill + "%";
+  document.getElementById("progress-text").textContent = `Question ${currentQ + 1} of ${QUESTIONS.length}`;
+  document.getElementById("score-tally").textContent = `Score: ${score}`;
+  document.getElementById("q-stage").textContent = q.stage;
+  document.getElementById("q-text").textContent = q.text;
+  document.getElementById("q-feedback").style.display = "none";
+  document.getElementById("q-feedback").className = "feedback-msg";
+  document.getElementById("answered-hint").textContent = "Select an answer to continue";
+
+  const nextBtn = document.getElementById("next-btn");
+  nextBtn.disabled = true;
+  nextBtn.textContent = currentQ === QUESTIONS.length - 1 ? "See results →" : "Next →";
+
+  const opts = document.getElementById("q-options");
+  opts.innerHTML = "";
+  const letters = ["A", "B", "C", "D"];
+  q.options.forEach((opt, i) => {
+    const div = document.createElement("div");
+    div.className = "option";
+    div.innerHTML = `<div class="option-letter">${letters[i]}</div><div class="option-text">${opt}</div>`;
+    div.onclick = () => selectAnswer(i);
+    opts.appendChild(div);
+  });
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+
+  const q = QUESTIONS[currentQ];
+  const opts = document.getElementById("q-options").children;
+  const feedback = document.getElementById("q-feedback");
+
+  answers.push({ q: currentQ, chosen: idx, correct: q.correct });
+
+  for (let i = 0; i < opts.length; i++) {
+    opts[i].onclick = null;
+    if (i === q.correct) {
+      opts[i].classList.add(idx === q.correct ? "correct" : "show-correct");
+    }
+    if (i === idx && idx !== q.correct) {
+      opts[i].classList.add("wrong");
+    }
+  }
+
+  if (idx === q.correct) {
+    score++;
+    feedback.className = "feedback-msg correct-msg";
+    feedback.textContent = "✓ Correct! " + q.explanation;
+  } else {
+    feedback.className = "feedback-msg wrong-msg";
+    feedback.textContent = "✗ Not quite. " + q.explanation;
+  }
+  feedback.style.display = "block";
+
+  document.getElementById("score-tally").textContent = `Score: ${score}`;
+  document.getElementById("answered-hint").style.display = "none";
+  document.getElementById("next-btn").disabled = false;
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= QUESTIONS.length) {
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showResults() {
+  document.getElementById("quiz-screen").style.display = "none";
+  document.getElementById("results-screen").style.display = "block";
+
+  const pct = Math.round((score / QUESTIONS.length) * 100);
+  const pass = pct >= 80;
+
+  document.getElementById("score-pct-text").textContent = pct + "%";
+  document.getElementById("score-ring").className = "score-ring " + (pass ? "pass" : "fail");
+  document.getElementById("result-title").textContent = pass
+    ? "🎉 Congratulations, " + userName.split(" ")[0] + "!"
+    : "Keep studying, " + userName.split(" ")[0] + "!";
+  document.getElementById("result-sub").textContent = pass
+    ? "You've passed the Exotic Online University certification."
+    : "You scored " + pct + "%. A score of 80% is required to pass. Review the stages below and try again.";
+  document.getElementById("res-correct").textContent = score;
+  document.getElementById("res-wrong").textContent = QUESTIONS.length - score;
+
+  if (pass) {
+    document.getElementById("cert-btn").style.display = "inline-block";
+  }
+
+  // Build review
+  const wrong = answers.filter(a => a.chosen !== a.correct);
+  const reviewSection = document.getElementById("review-section");
+  if (wrong.length > 0) {
+    let html = `<h3>Questions to review (${wrong.length})</h3>`;
+    wrong.forEach(a => {
+      const q = QUESTIONS[a.q];
+      html += `<div class="review-item wrong">
+        <div class="q-text">${q.text}</div>
+        <div class="your-ans">Your answer: <span class="wrong-ans">${q.options[a.chosen]}</span></div>
+        <div class="correct-ans">✓ Correct answer: ${q.options[q.correct]}</div>
+      </div>`;
+    });
+    reviewSection.innerHTML = html;
+  } else {
+    reviewSection.innerHTML = `<div class="review-item correct" style="text-align:center; padding:20px;"><strong>Perfect score — no questions to review!</strong></div>`;
+  }
+}
+
+function showCertificate() {
+  const pct = Math.round((score / QUESTIONS.length) * 100);
+  const now = new Date();
+  const dateStr = now.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+
+  document.getElementById("cert-name-display").textContent = userName;
+  document.getElementById("cert-score-display").textContent = pct + "% — Distinction";
+  if (pct < 90) document.getElementById("cert-score-display").textContent = pct + "% — Pass";
+  document.getElementById("cert-date-display").textContent = dateStr;
+  document.getElementById("cert-dept-display").textContent = userDept || "—";
+
+  document.getElementById("certificate").style.display = "block";
+  document.getElementById("certificate").scrollIntoView({ behavior: "smooth" });
+}
+
+function retakeQuiz() {
+  document.getElementById("results-screen").style.display = "none";
+  document.getElementById("certificate").style.display = "none";
+  document.getElementById("name-screen").style.display = "block";
+}
+</script>
+
+</body>
+</html>

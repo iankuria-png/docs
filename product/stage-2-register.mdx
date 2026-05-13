@@ -1,13 +1,15 @@
 ---
 title: "Stage 2 — Register & account creation"
-description: "How an escort creates a WordPress account and becomes a client record in the CRM."
+description: "How an escort creates their WordPress account and becomes a client record in the CRM — across all African markets."
 ---
 
 ## What the customer sees
 
-Once an escort decides to join Exotic, they register on the public WordPress site. They fill in a registration form with their display name, phone number, email address, and city. A WordPress account is created for them, along with a profile post (initially in `private` status). They receive login credentials — either by email or via SMS from a staff member.
+After expressing interest in listing on Exotic, the escort registers on the public Exotic site. The registration form collects their display name, phone number, email address, and city. On submission, a WordPress user account is created and a draft profile post is generated — in `private` status, not yet visible to the public.
 
-The escort is now a registered user but not yet listed publicly. Their profile exists but needs photos, bio, and subscription payment before it goes live.
+The escort receives their login credentials via SMS or WhatsApp from a sales agent. They can now log in and start completing their profile. They are registered but not yet live.
+
+This is also the moment a **Lead** in the CRM becomes a **Client**. The sales agent either guides the escort through the form or, in many markets, completes the registration on the escort's behalf during the same call.
 
 ---
 
@@ -15,23 +17,195 @@ The escort is now a registered user but not yet listed publicly. Their profile e
 
 | What happens | Code reference |
 |---|---|
-| Escort's lead record converted to a client in CRM | `LeadConversionService::convert()` — `app/Services/LeadConversionService.php:61` — creates WP user + post, then creates Client row |
-| Client record created with `profile_status = 'private'` | `app/Models/Client.php` |
-| Automatic sync from WordPress → CRM | `ClientSyncService::fullSync()` / `deltaSync()` — `app/Services/ClientSyncService.php:14` |
+| Lead record converted to Client | `LeadConversionService::convert()` — `app/Services/LeadConversionService.php:61` — creates WP user + post, then inserts `clients` row |
+| WordPress user + profile post created | Via `WpSyncService` — POSTs to `POST /exotic-crm-sync/v1/clients` on the market's WordPress site |
+| Client created with `profile_status = 'private'` | `app/Models/Client.php` — default status until profile is complete and subscription is active |
+| CRM client record fields | name, phone (normalised), email, market, assigned agent, `profile_status`, `verified` (default `false`) |
+| Phone deduplication on conversion | System checks for existing client with same normalised phone; prevents duplicate records |
+| CRM auto-sync pulls self-service registrations | `ClientSyncService::fullSync()` / `deltaSync()` — `app/Services/ClientSyncService.php:14` — picks up escorts who registered via the site without staff help |
 | WordPress sync plugin REST endpoint | `class-client-sync-endpoint.php` in `exotic-crm-sync` plugin |
-| Phone deduplication on conversion | Prevents duplicate clients with same phone number |
+
+**Self-service vs. agent-assisted registration:**
+- **Agent-assisted:** The agent uses Lead Conversion in the CRM. WordPress account + CRM client record created immediately.
+- **Self-service (SEO organic):** The escort registered on the site themselves. They appear in the CRM after the next sync run. Check CRM → Settings → Integrations → [market] → Sync clients to trigger manually.
 
 ---
 
-<Note>
-  **Interview pending — content to be added:** Step-by-step SOP, department notes, FAQs, troubleshooting, and certification questions for this stage require input from the Sales & CS team, particularly around credential delivery, common registration errors, and the handoff from lead to client.
-</Note>
+## Step-by-step SOP
 
-<CardGroup cols={2}>
-  <Card title="Next: Profile setup & media →" icon="arrow-right" href="/product/stage-3-media">
-    Uploading photos and completing the profile
-  </Card>
-  <Card title="Client profiles (CRM guide)" icon="user" href="/clients/overview">
-    Managing client records in the CRM
-  </Card>
-</CardGroup>
+<Steps>
+  <Step title="Confirm the escort is ready to register">
+    Before beginning registration, confirm:
+    - Lead is qualified (Stage 1 complete) — interest confirmed, mobile money access confirmed
+    - Phone number is valid and on the correct country prefix for the market
+    - They have an email address (required for the WordPress account)
+    - They are in a market Exotic currently operates in
+
+    If the market is not yet configured, do **not** attempt registration — escalate to your manager for RD Team to review. Opening a new market is RD's decision.
+  </Step>
+  <Step title="Create the client via Lead Conversion">
+    **Agent-assisted (most common):**
+    1. Open the Lead record: CRM → Leads → [lead name]
+    2. Click **Convert Lead**
+    3. Confirm name, phone, email, and market are correct — phone should be in local format (CRM normalises it)
+    4. Submit — WordPress account creation and CRM client record creation happen simultaneously
+
+    **Self-service (escort registered on the site themselves):**
+    1. Search CRM → Clients by phone or name — they may already have synced
+    2. If not found: CRM → Settings → Integrations → [market] → Sync clients (run manual sync)
+    3. After sync, the client will appear in CRM → Clients with `profile_status = 'private'`
+
+    **Duplicate check:** Always search by phone number first. Never create two client records for the same person.
+
+    **Screenshot slot:** *CRM Lead detail showing the "Convert Lead" action and resulting client record*
+  </Step>
+  <Step title="Deliver login credentials">
+    The escort needs their WordPress login details to access their profile and start filling it in. Send these immediately via **WhatsApp** or **SMS** — do not rely on email, as many escorts use their phone as their primary device.
+
+    Message template:
+    > *"Hi [Name]! Your Exotic account is ready. Log in at [site URL] with: Username: [username] | Password: [password]. I'll guide you through completing your profile — takes about 10 minutes and we'll make it look great."*
+
+    Confirm they can log in before ending the call or WhatsApp session.
+
+    **Screenshot slot:** *WhatsApp message showing credential delivery*
+  </Step>
+  <Step title="Walk the escort through their dashboard">
+    Once logged in, the escort sees their profile dashboard. Guide them through:
+    - Where to find "Edit My Profile"
+    - What fields to fill in (bio, rates, city, available services)
+    - Where to upload photos
+
+    **Do not push the escort to pay at this step.** A complete, compelling profile performs far better than an incomplete one. Set the expectation: "Let's get your profile looking great first, then we'll activate it."
+
+    The journey continues at Stage 3 — Profile setup & media upload.
+  </Step>
+  <Step title="Update the CRM record">
+    After registration:
+    - Confirm the lead status has updated to `converted`
+    - Open the client record and confirm `wp_post_id` is populated (confirms the WordPress profile exists)
+    - Add a timeline note: "Account created. Credentials delivered via [channel]. Guiding through profile setup."
+
+    If `wp_post_id` is missing, the WordPress creation step may have failed — escalate to IT Infrastructure.
+  </Step>
+</Steps>
+
+---
+
+## Department notes
+
+<AccordionGroup>
+  <Accordion title="Sales & CS">
+    **Always deliver credentials yourself — don't rely on email.** Escorts may have a minimal email address or rarely check it. Send login details via WhatsApp or SMS and confirm they can log in before you move on.
+
+    **Handling "Do I have to pay now?":**
+    > *"Not at all — registration is completely free. You only pay when you're ready to go live. Right now, let's get your profile set up so it looks great and starts attracting clients from day one."*
+
+    **Handling a login issue after registration:**
+    1. Confirm they're on the correct market site URL (e.g. `exotic.ke` for Kenya — not a different country's site)
+    2. Confirm the username format — some markets use phone numbers, others use the display name
+    3. If still stuck: reset the password via WordPress Admin → Users → [user] → Set new password; resend via WhatsApp
+
+    **Pan-African note:** Registration works identically across all 54 markets. The market determines which WordPress site the account is created on and which payment options appear at subscription time.
+  </Accordion>
+
+  <Accordion title="RD Team">
+    RD Team owns the decision to open new markets. A market cannot accept registrations until it has:
+    - A configured WordPress site with the `exotic-crm-sync` plugin installed and credentials set up in the CRM
+    - A Platform record in the CRM with country code, currency, phone prefix, and timezone
+    - At least one payment provider configured
+
+    If a prospect is in an unconfigured country, log the lead with a note, escalate to your manager, and do **not** promise a launch date. RD will assess market viability and prioritise accordingly.
+  </Accordion>
+
+  <Accordion title="SEO & IT Infrastructure">
+    **SEO:** The WordPress profile URL slug is generated from the escort's display name at registration. A descriptive display name ("Amara Nairobi" rather than "xgirl99") produces a cleaner URL and better SEO. Advise escorts on choosing a display name that reflects their city and persona.
+
+    **IT Infrastructure:** Registration failures — where a client record is created in the CRM but the `wp_post_id` is missing — indicate the WordPress API call failed. Check `laravel.log` for `WpSyncService` exceptions around the time of registration. Run a manual sync (CRM → Settings → Integrations → [market] → Sync clients) or re-trigger the WordPress profile creation manually.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Frequently asked questions
+
+<AccordionGroup>
+  <Accordion title="Can an escort register themselves, or does a staff member have to do it?">
+    Both are supported. Most outbound-sourced prospects are registered by an agent during the conversion call. Organic/SEO arrivals can register themselves via the website — they appear in the CRM after the next sync. CS should proactively reach out to self-registered escorts, as they often need help through the next steps and are at risk of dropping off at the payment stage without guidance.
+  </Accordion>
+
+  <Accordion title="The escort says they registered on the site but I can't find them in the CRM — what do I check?">
+    1. CRM → Clients → search by phone number and by name
+    2. If not found: CRM → Settings → Integrations → [market] → Sync clients (run manual sync)
+    3. Still missing after sync? Check `laravel.log` for WordPress sync errors — the registration may have failed on the WordPress side. Escalate to IT Infrastructure with the escort's name and registration timestamp.
+  </Accordion>
+
+  <Accordion title="What if two agents accidentally register the same escort twice?">
+    The CRM checks for duplicate phone numbers on lead conversion and will warn or block the creation. If duplicates do exist (e.g. one from manual creation and one from sync), identify which has more complete data, archive the other, and link the lead record to the correct client.
+  </Accordion>
+
+  <Accordion title="Does the escort need to verify their email address?">
+    No — email verification is not required and is not enforced in the current platform. The email is stored for communication purposes. The escort's primary channel is phone/WhatsApp.
+  </Accordion>
+
+  <Accordion title="What if the escort doesn't have an email address?">
+    A valid email is required to create a WordPress account. Help the escort create a basic Gmail account, or check with your manager for the approved placeholder format used in your market. Never create multiple WordPress accounts using the same email address.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+| Symptom | Likely cause | Where to look | Fix |
+|---|---|---|---|
+| Client in CRM but `wp_post_id` is missing | WordPress profile creation failed during Lead Conversion | `laravel.log` for WpSyncService errors | Re-run sync from Settings → Integrations → [market]; or manually re-trigger client creation |
+| Escort registered on site but not in CRM | Auto-sync hasn't run since registration | CRM → Settings → Integrations → [market] → Sync clients | Run manual sync; check sync status |
+| "Duplicate phone" error on lead conversion | Client with same normalised phone already exists | CRM → Clients → search by phone | Open existing client; confirm it's the same person; archive duplicate if needed |
+| Escort can't log in after registration | Wrong site URL, username format, or credentials not delivered | Check market site URL; try password reset | Confirm URL; reset password in WP Admin; resend via WhatsApp |
+| Lead status not updated to `converted` | Lead not linked to new client record | CRM → Leads → [lead] → check Client link field | Manually link lead to the correct client record |
+
+---
+
+## Certification — MCQ
+
+<AccordionGroup>
+  <Accordion title="Q1: At the moment of successful registration, what is the default profile_status for a new client?">
+    **A.** `active`
+
+    **B.** `private` ✅
+
+    **C.** `pending_review`
+
+    **D.** `draft`
+  </Accordion>
+
+  <Accordion title="Q2: An escort registered on the website themselves (organic arrival) but does not appear in the CRM. What is the FIRST action you take?">
+    **A.** Create a new client record manually in the CRM
+
+    **B.** Run a manual sync from CRM → Settings → Integrations → [market] → Sync clients ✅
+
+    **C.** Ask the escort to register again
+
+    **D.** Escalate to IT Infrastructure immediately
+  </Accordion>
+
+  <Accordion title="Q3: How should login credentials be delivered to a newly registered escort?">
+    **A.** Email only — it creates a record trail
+
+    **B.** Via WhatsApp or SMS, confirmed working before ending the conversation ✅
+
+    **C.** Post them on the CRM timeline and tell the escort to contact support
+
+    **D.** Display them on screen during a video call
+  </Accordion>
+
+  <Accordion title="Q4: A client record was created but the wp_post_id field is empty. What does this mean and who should you escalate to?">
+    **A.** The escort has not uploaded photos yet — no action needed
+
+    **B.** The WordPress profile post was not created — escalate to IT Infrastructure ✅
+
+    **C.** The escort is not verified — escalate to the verification team
+
+    **D.** The subscription has not been paid — remind the escort to pay
+  </Accordion>
+</AccordionGroup>

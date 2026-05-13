@@ -1,20 +1,20 @@
 ---
 title: "Stage 4 — Verification"
-description: "How staff verify an escort's identity and age before their profile can be activated."
+description: "How staff verify an escort's identity and confirm they are of legal adult age before their profile can be activated."
 ---
 
 ## What the customer sees
 
-Before an escort's profile can go live for the first time, they must complete identity and age verification. A member of the Exotic team contacts the escort and asks them to send a photo of a government-issued ID (national ID card, passport, or driver's licence) via WhatsApp.
+Before an escort's profile can go live for the first time, they must pass identity and age verification. A member of the Exotic team contacts them and explains what is needed: a photo of a government-issued ID document (national ID card, passport, or driver's licence) sent via **WhatsApp**.
 
-Staff review the ID to confirm:
-1. The person in the photo matches the profile photos uploaded
-2. The date of birth confirms the escort is of legal adult age
+The escort photographs their ID and sends it via WhatsApp to the assigned verification number. A staff member reviews the document — they are checking that:
+1. The photo on the ID matches the profile photos uploaded in Stage 3
+2. The date of birth on the ID confirms the escort is a legal adult
 
-Once verified, the escort receives confirmation that their account is approved and they can proceed to subscription.
+Once verified, the escort receives a WhatsApp confirmation message. They are cleared to proceed to subscription.
 
 <Warning>
-  Verification is a **mandatory step** for all first-time subscriptions. An escort cannot purchase a subscription and have their profile go live until the `verified` flag is set on their CRM client record. This is a legal and platform compliance requirement.
+  Verification is **mandatory for all first-time subscriptions** across every market. An escort cannot purchase a subscription and have their profile go live until the `verified` flag is set on their CRM client record. This is a legal compliance and platform safety requirement — no exceptions.
 </Warning>
 
 ---
@@ -24,21 +24,185 @@ Once verified, the escort receives confirmation that their account is approved a
 | What happens | Code reference |
 |---|---|
 | Verified flag on client record | `clients.verified` (boolean, default `false`) — `app/Models/Client.php:57` |
-| Staff sets verified toggle in CRM | CRM → Clients → [client] → Overview → Verified toggle |
-| High-risk flagging (if needed) | `clients.is_high_risk`, `clients.risk_reason_code`, `clients.risk_marked_at`, `clients.risk_marked_by` |
-| No automated ID document processing | Verification is entirely manual — no ID upload system or automated age-check service exists in the current codebase |
+| Staff sets verified toggle in CRM | CRM → Clients → [client] → Overview tab → Verified toggle |
+| Verification timestamp | `clients.verified_at` — set when the toggle is switched to `true` |
+| High-risk flagging (if applicable) | `clients.is_high_risk`, `clients.risk_reason_code`, `clients.risk_marked_at`, `clients.risk_marked_by` |
+| No automated ID processing | Verification is **entirely manual** — there is no OCR, ID upload system, or automated age-check service in the current platform |
+| Verification blocks subscription activation | If `clients.verified = false`, the subscription checkout will not allow the deal to be activated |
+
+**Verification is a human process.** All ID checks are performed by a trained staff member. The platform does not store the ID document itself — staff review it during the WhatsApp exchange and confirm the outcome in the CRM toggle.
 
 ---
 
-<Note>
-  **Interview pending — content to be added:** The full SOP for the verification WhatsApp workflow (which number escorts send the ID to, who reviews it, turnaround time SLA, escalation if ID is rejected or unclear), department notes, FAQs ("How long does verification take?", "What ID types are accepted?"), troubleshooting, and certification questions. This section requires input from the Sales & CS team who own this process.
-</Note>
+## Step-by-step SOP
 
-<CardGroup cols={2}>
-  <Card title="Next: Subscription selection →" icon="arrow-right" href="/product/stage-5a-subscription-selection">
-    Choosing a package after verification is complete
-  </Card>
-  <Card title="Client high-risk flagging" icon="flag" href="/clients/managing-profiles">
-    How to flag and manage high-risk profiles in the CRM
-  </Card>
-</CardGroup>
+<Steps>
+  <Step title="Notify the escort that verification is required">
+    After the escort has completed their profile setup (Stage 3), contact them via WhatsApp or call:
+
+    > *"Great — your profile looks good! Before we can activate it, we need to do a quick identity check. This is a one-time step required for all new accounts. Could you send me a photo of your national ID card, passport, or driver's licence via WhatsApp? It just takes a minute."*
+
+    Set expectations:
+    - It's a one-time step — not required on future renewals
+    - Turnaround is same-day if they send the ID promptly
+    - Their ID information is not stored — it's only used to confirm they are who they say they are
+  </Step>
+  <Step title="Receive the ID document via WhatsApp">
+    The escort sends a photo of their ID to the designated verification WhatsApp number for their market. Each market has a dedicated WhatsApp number used for verification — do not use personal numbers.
+
+    **What to accept:**
+    - National ID card (both sides if required by the country)
+    - Passport (photo page)
+    - Driver's licence (front face with photo and date of birth visible)
+
+    **What makes an ID unacceptable:**
+    - Photo is blurry, cut off, or too dark to read the name and DOB clearly
+    - ID is expired (check expiry date — most countries accept expired IDs if DOB is readable, but follow your market's policy)
+    - The name/face on the ID doesn't match the profile
+
+    **Screenshot slot:** *WhatsApp chat showing an escort sending an ID photo (with personal details blurred)*
+  </Step>
+  <Step title="Review the ID">
+    Check two things only:
+    1. **Face match:** Does the person in the ID photo match the face in the escort's profile photos? If profile photos are taken from an angle or in dim lighting, you may need to ask for a clearer profile photo.
+    2. **Age check:** Is the date of birth on the ID confirming the escort is 18 years or older? Calculate from the current date.
+
+    **If both checks pass:** proceed to Step 4.
+    **If the face doesn't match or the age check fails:** see the Department Notes section for the escalation process.
+  </Step>
+  <Step title="Set the Verified flag in the CRM">
+    Once the ID review passes:
+    1. CRM → Clients → [client name] → Overview tab
+    2. Find the **Verified** toggle — switch it to `true`
+    3. The `verified_at` timestamp is automatically recorded
+    4. Add a brief timeline note: "ID verified via WhatsApp — national ID / passport / driver's licence (specify). Face match confirmed. Age confirmed."
+
+    **Screenshot slot:** *CRM client Overview tab showing the Verified toggle being switched on*
+  </Step>
+  <Step title="Confirm with the escort and guide to subscription">
+    Send the escort a WhatsApp confirmation:
+
+    > *"You're verified! Your account is now approved and ready to activate. When you're ready to go live, we'll set you up with a subscription package. Shall I walk you through the options now?"*
+
+    The journey continues at Stage 5a — Subscription selection.
+  </Step>
+</Steps>
+
+---
+
+## Department notes
+
+<AccordionGroup>
+  <Accordion title="Sales & CS">
+    **Handling escort reluctance about sending ID:**
+    Some escorts are hesitant to send a photo of their ID — privacy concerns are legitimate. Reassure them:
+    > *"Completely understandable. We don't store the image — our team reviews it to confirm your age and that the account belongs to you, then we're done. It's the same check any reputable listing platform does. The alternative is that we can't publish your profile — it's a one-time step that protects everyone on the platform, including you."*
+
+    **Turnaround time SLA:** Same-day verification is the standard. If verification takes longer than 24 hours, the escort is at risk of dropping off. Prioritise the verification queue at the start of each shift.
+
+    **If face match is unclear:** Ask the escort to send a short selfie video or a clearer photo of their face. Do not approve verification if the match cannot be confirmed.
+
+    **Age failure:** If the ID shows the escort is under 18, the account must be declined. Mark the client record `is_high_risk = true` with `risk_reason_code = 'underage'` and escalate to your supervisor immediately. Do not activate under any circumstances.
+  </Accordion>
+
+  <Accordion title="RD Team">
+    RD Team owns any changes to the verification policy — what ID types are accepted, whether the one-time verification policy should change (e.g. requiring re-verification after a market compliance update), and whether automated ID tools should be introduced in a future product sprint.
+
+    Do not accept new ID types or change verification thresholds without RD approval.
+  </Accordion>
+
+  <Accordion title="SEO & IT Infrastructure">
+    **IT Infrastructure:** No technical system is involved in the verification step itself — it is entirely a human process handled via WhatsApp and the CRM toggle. If the `verified` toggle is not saving in the CRM (the button appears to click but the value doesn't persist), this is a bug — escalate to IT Infrastructure with the client ID and the browser console error.
+
+    **SEO:** No direct SEO impact at this stage. However, verification helps maintain overall platform quality — profiles that pass verification tend to have more complete and accurate content, which indirectly improves the platform's average quality signals.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Frequently asked questions
+
+<AccordionGroup>
+  <Accordion title="How long does verification take?">
+    Same-day verification is the target SLA. If the escort sends their ID during business hours, they should receive confirmation within a few hours. Verification requests received outside business hours are processed at the start of the next shift. If the escort is waiting more than 24 hours, they should contact their assigned agent or CS directly.
+  </Accordion>
+
+  <Accordion title="What ID types does Exotic accept?">
+    Across all markets:
+    - National ID card (the standard government-issued card in most African countries)
+    - Passport (international or domestic)
+    - Driver's licence
+
+    The ID must show a photo of the person and a date of birth. A clear, readable image is required — blurry or incomplete images are not accepted.
+  </Accordion>
+
+  <Accordion title="Does Exotic store the escort's ID document?">
+    No. The ID image is reviewed by a staff member during the WhatsApp exchange to confirm face match and age. The image is not uploaded to or stored in any Exotic system. It is the escort's responsibility to delete the WhatsApp message from their phone if they wish.
+  </Accordion>
+
+  <Accordion title="Can a re-subscribing escort skip verification?">
+    Yes. The `verified` flag on the client record persists after the first verification — it does not need to be re-done at renewal. Verification is a one-time step per account. However, if a supervisor suspects profile takeover (someone else operating the account), re-verification can be requested — escalate to your manager.
+  </Accordion>
+
+  <Accordion title="What if the escort says they don't have a government ID?">
+    A government-issued ID is required without exception. If an escort says they don't have one, explain that it is a platform requirement and assist them in understanding what local ID options are available in their country. Do not activate the account without confirmed age verification.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+| Symptom | Likely cause | Where to look | Fix |
+|---|---|---|---|
+| Escort says they sent the ID but agent hasn't reviewed it | ID sitting in WhatsApp queue, not yet actioned | Check the market verification WhatsApp number | Review and process pending verification queue |
+| `verified` toggle won't save in CRM | Browser issue or frontend bug | Browser console for errors | Try a different browser; if persistent, escalate to IT Infrastructure |
+| Escort subscribed but profile didn't activate — verification was thought to be done | `clients.verified = false` — toggle was never set | CRM → Clients → [client] → Overview → Verified field | Set verified = true, then re-trigger deal activation |
+| Face match is ambiguous — profile photos and ID photo don't clearly match | Low-quality profile photos or ID photo | Request a clearer selfie from the escort for comparison | Do not approve if match cannot be confirmed — ask for additional photo |
+| ID shows age just under 18 | Under-age applicant | `clients` record | Mark `is_high_risk = true`, `risk_reason_code = 'underage'`; escalate to supervisor; do not activate |
+
+---
+
+## Certification — MCQ
+
+<AccordionGroup>
+  <Accordion title="Q1: Verification must be completed before which step?">
+    **A.** Before the escort uploads their photos
+
+    **B.** Before the escort's first subscription can be activated ✅
+
+    **C.** Before the escort can register on the WordPress site
+
+    **D.** Before the escort's profile appears in Google Search
+  </Accordion>
+
+  <Accordion title="Q2: Where in the CRM do you mark an escort as verified?">
+    **A.** CRM → Payments → confirm payment
+
+    **B.** CRM → Leads → [lead] → Status dropdown
+
+    **C.** CRM → Clients → [client] → Overview tab → Verified toggle ✅
+
+    **D.** CRM → Settings → Verification queue
+  </Accordion>
+
+  <Accordion title="Q3: An escort's ID photo shows a date of birth that makes them 17 years old. What is the correct action?">
+    **A.** Approve verification — one year off is close enough
+
+    **B.** Ask the escort to send a different ID that shows a different date of birth
+
+    **C.** Decline the account, mark is_high_risk with reason 'underage', and escalate to supervisor immediately ✅
+
+    **D.** Delay the verification until the escort's 18th birthday
+  </Accordion>
+
+  <Accordion title="Q4: A re-subscribing escort's profile expired. Do they need to be re-verified before their new subscription can be activated?">
+    **A.** Yes — verification must be done again at each renewal
+
+    **B.** No — the verified flag persists on the client record; re-verification is only required if profile takeover is suspected ✅
+
+    **C.** Yes — but only if more than 6 months have passed since the last verification
+
+    **D.** No — verification is only for Premium and VIP tiers
+  </Accordion>
+</AccordionGroup>
