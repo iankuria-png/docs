@@ -131,22 +131,21 @@ When the escort renews, their profile goes live again immediately — the same f
     **Lapsed escorts:** Escorts in the `lapsed` bucket represent lost revenue. Finance tracks the conversion rate from `lapsed → renewed` as a churn recovery metric.
   </Accordion>
 
-  <Accordion title="RD Team">
-    RD Team owns decisions about:
-
+  <Accordion title="RD Team & IT Infrastructure">
+    RD owns decisions about:
     - Renewal pricing (any changes to package prices at renewal)
     - Any loyalty or long-tenure pricing programmes
     - New renewal campaign types (e.g. annual subscription options, multi-period discounts)
 
-    If sales agents are fielding frequent requests for annual subscriptions or long-term discounts that aren't currently available, escalate that feedback to RD as a product request.
+    If sales agents are fielding frequent requests for annual subscriptions or long-term discounts that aren't currently available, escalate that feedback here as a product request.
+
+    The expiry job that sets deals to `expired` and profiles to `private` runs on a scheduled cron task. If profiles are not going private after expiry, check the Laravel scheduler health. If profiles are going private prematurely (before the `expires_at` date), check for timezone mismatch between the CRM server timezone and `deals.expires_at` storage.
   </Accordion>
 
-  <Accordion title="SEO & IT Infrastructure">
-    **SEO:** When a profile is set to `private` at expiry, it is immediately de-indexed from internal search. Google and other external search engines may take 1–7 days to de-index the URL from their crawl cache. This means a lapsed profile may still briefly appear in Google after expiry — this is normal and not a bug.
+  <Accordion title="SEO & Marketing">
+    When a profile is set to `private` at expiry, it is immediately de-indexed from internal search. Google and other external search engines may take 1–7 days to de-index the URL from their crawl cache. This means a lapsed profile may still briefly appear in Google after expiry — this is normal and not a bug.
 
     When a profile is renewed and re-activated, internal search ranking restores immediately. External Google ranking may take a few days to rebuild after a gap.
-
-    **IT Infrastructure:** The expiry job that sets deals to `expired` and profiles to `private` runs on a scheduled cron task. If profiles are not going private after expiry, check the Laravel scheduler health. If profiles are going private prematurely (before the `expires_at` date), check for timezone mismatch between the CRM server timezone and `deals.expires_at` storage.
   </Accordion>
 </AccordionGroup>
 
@@ -168,7 +167,7 @@ When the escort renews, their profile goes live again immediately — the same f
   </Accordion>
 
   <Accordion title="An escort renewed but their profile is still private — what happened?">
-    Check the deal status: CRM → Clients → \[client\] → active deal. If the deal shows `active` but the profile is still private, the WordPress sync failed — escalate to IT Infrastructure (same as Stage 5d profile activation failures). If the deal is `pending`, the payment may not have confirmed yet — check the payment record.
+    Check the deal status: CRM → Clients → [client] → active deal. If the deal shows `active` but the profile is still private, the WordPress sync failed — escalate to RD Team & IT Infrastructure (same as Stage 5d profile activation failures). If the deal is `pending`, the payment may not have confirmed yet — check the payment record.
   </Accordion>
 
   <Accordion title="Can a lapsed escort use the same profile, photos, and contact details?">

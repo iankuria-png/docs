@@ -49,7 +49,7 @@ This exam consolidates knowledge from all stages of the Exotic escort lifecycle.
   </Accordion>
 
   <Accordion title="Q5: What contact channels can a visitor use to reach an escort on the Exotic site?">
-    **Answer:** WhatsApp (primary), phone call/reveal, SMS, Viber. **Exotic Chat** (native in-app messaging) is coming soon. Telegram is also planned.
+    **Answer:** WhatsApp (primary), phone call/reveal, SMS, and Viber. **Exotic Chat** is separate from the public profile contact buttons — it is being built to help Exotic maintain more consistent communication with escorts.
   </Accordion>
 </AccordionGroup>
 
@@ -70,15 +70,15 @@ This exam consolidates knowledge from all stages of the Exotic escort lifecycle.
     **Answer:** The payment amount received differs from the expected subscription price by more than 5%. The CRM holds the payment for Finance to manually review. Finance checks whether the difference is acceptable (e.g. due to a discount), then confirms or rejects the match. If confirmed, provisioning proceeds automatically.
   </Accordion>
 
-  <Accordion title="Q8 (RD Team): Who owns package tiers, pricing, and the decision to open new markets?">
-    **Answer:** **RD Team** owns all of these. Package tier features, pricing per market, and the decision to launch in a new African country are all RD decisions. IT Infrastructure maintains the technical systems; Sales & CS should never create markets or change package pricing without RD approval.
+  <Accordion title="Q8 (RD Team & IT Infrastructure): Who owns package tiers, pricing, and the decision to open new markets?">
+    **Answer:** **RD owns all of these within the combined RD Team & IT Infrastructure function.** Package tier features, pricing per market, and the decision to launch in a new African country are RD decisions. IT Infrastructure executes the technical setup after that decision is made; Sales & CS should never create markets or change package pricing without RD approval.
   </Accordion>
 
-  <Accordion title="Q9 (IT Infrastructure): A batch of webhook callbacks is being rejected with status 401. What is the cause and fix?">
-    **Answer:** **Cause:** HMAC signature mismatch — the webhook secret in the CRM doesn't match the secret configured in KopoKopo. **Fix:** Log into KopoKopo dashboard → copy current webhook secret → CRM → Settings → Integrations → \[market\] → update KopoKopo webhook secret. Then manually re-activate any deals that missed activation during the failure window.
+  <Accordion title="Q9 (RD Team & IT Infrastructure): A batch of webhook callbacks is being rejected with status 401. What is the cause and fix?">
+    **Answer:** **Cause:** HMAC signature mismatch — the webhook secret in the CRM doesn't match the secret configured in KopoKopo. **Fix:** Log into KopoKopo dashboard → copy current webhook secret → CRM → Settings → Integrations → [market] → update KopoKopo webhook secret. Then manually re-activate any deals that missed activation during the failure window.
   </Accordion>
 
-  <Accordion title="Q10 (SEO & IT Infrastructure): What determines which package tier position an escort appears at in search results?">
+  <Accordion title="Q10 (SEO & Marketing): What determines which package tier position an escort appears at in search results?">
     **Answer:** The `products.tier` field on the deal's linked product. Higher tiers (VIP, VVIP) appear above lower tiers (Featured, Basic) in all search results. Tier is configured per market in CRM → Settings → Integrations → Packages — this is owned by RD Team.
   </Accordion>
 </AccordionGroup>
@@ -98,12 +98,12 @@ This exam consolidates knowledge from all stages of the Exotic escort lifecycle.
     1. Note the transaction code: `QWE9876543`
     2. CRM → Payments → search `QWE9876543`
     3. Diagnose based on what you find:
-       - **Payment not found:** Escalate to IT Infrastructure — webhook may not have arrived. Ask escort to wait and call back in 15 minutes.
-       - **`initiated` or `pending`:** Payment not confirmed yet. Ask her to check her M-Pesa messages — did she receive a confirmation SMS? If yes, escalate to IT Infrastructure (callback delayed). If no, she may not have completed PIN entry — retry via payment link.
-       - **`completed` \+ deal `active`:** Her profile should be live. Ask her to hard-refresh her browser and search for her name directly on the site.
-       - **`completed` \+ deal `pending`:** Provisioning is stuck. Escalate to IT Infrastructure with deal ID and payment ID.
-       - **`manual_review`:** Finance needs to confirm the payment match — inform Finance, give escort ETA of 2–4 hours.
-       - **`reversed`:** M-Pesa reversed her payment. Inform her clearly and empathetically — she needs to pay again.
+       - **Payment not found:** Escalate to RD Team & IT Infrastructure — webhook may not have arrived. Ask escort to wait and call back in 15 minutes.
+       - **`initiated` or `pending`:** Payment not confirmed yet. Ask her to check her M-Pesa messages — did she receive a confirmation SMS? If yes, escalate to RD Team & IT Infrastructure (callback delayed). If no, she may not have completed PIN entry — retry via payment link.
+       - **`completed` + deal `active`:** Her profile should be live. Ask her to hard-refresh her browser and search for her name directly on the site.
+       - **`completed` + deal `pending`:** Provisioning is stuck. Escalate to RD Team & IT Infrastructure with deal ID and payment ID.
+        - **`manual_review`:** Finance needs to confirm the payment match — inform Finance, give escort ETA of 2–4 hours.
+        - **`reversed`:** M-Pesa reversed her payment. Inform her clearly and empathetically — she needs to pay again.
     4. Whatever the outcome: create a timeline note on her CRM record documenting the complaint and your action.
   </Accordion>
 
@@ -135,7 +135,7 @@ This exam consolidates knowledge from all stages of the Exotic escort lifecycle.
     3. If a match is found: Finance confirms the payment match → provisioning triggers automatically → profile goes live
     4. If no match: check if the escort registered with a different number; create the client record if needed; then match
     5. Contact each affected escort to confirm their profile is now live and apologise for the delay
-    6. Flag the batch to IT Infrastructure — a spike of 12 `client_unresolved` payments over a weekend warrants investigation into the auto-matching logic
+    6. Flag the batch to RD Team & IT Infrastructure — a spike of 12 `client_unresolved` payments over a weekend warrants investigation into the auto-matching logic
   </Accordion>
 </AccordionGroup>
 
@@ -187,7 +187,8 @@ This section tests whether you can describe a complete working shift as a Sales 
 
     - Prioritising the verification queue every morning — an escort waiting for verification is on the edge of dropping off
     - Outbound sales - users who signed up by themselves are halfway through the pipeline - reach out and convert
-    - Knowing which payment failures to fix yourself (F2, F3) vs. escalating to IT Infrastructure (F5, F6, F10) vs. handing to Finance (F7, F8, F9)
+    - Not pushing for payment before a profile is complete — a disappointed escort who goes live with bad photos churns within a week
+    - Knowing which payment failures to fix yourself (F2, F3) vs. escalating to RD Team & IT Infrastructure (F5, F6, F10) vs. handing to Finance (F7, F8, F9)
     - Treating renewal calls as relationship calls, not sales calls — asking "how's it going?" before pitching renewal
 
     Note: This is a theoretical cover - it is not meant to restrict you to doing this tasks step by step - it is meant to give you a mental guide/map (Operational check → Outbound Sales →Inbound Support→Profile Activation Work) on what needs to be covered during a usual sales operation day to ensure we are moving the needle across. (As we say, kwa ground vitu ni different - optimize and adapt this mental models to help guide your workflow not restrict you)

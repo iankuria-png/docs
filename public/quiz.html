@@ -356,9 +356,8 @@
           <option value="">Select department…</option>
           <option>Sales & CS</option>
           <option>Finance</option>
-          <option>RD Team</option>
-          <option>SEO</option>
-          <option>IT Infrastructure</option>
+          <option>RD Team & IT Infrastructure</option>
+          <option>SEO & Marketing</option>
         </select>
       </div>
     </div>
@@ -485,7 +484,7 @@ const QUESTIONS = [
       "Create a new client record manually in the CRM",
       "Ask the escort to register again using a different email",
       "Run a manual sync from CRM → Settings → Integrations → [market] → Sync clients",
-      "Escalate to IT Infrastructure immediately"
+      "Escalate to RD Team & IT Infrastructure immediately"
     ],
     correct: 2,
     explanation: "Self-service registrations are pulled into the CRM by the sync process. Run a manual sync first — the client record likely exists in WordPress and just needs to be synced across."
@@ -508,7 +507,7 @@ const QUESTIONS = [
     options: [
       "Upgrade their subscription tier",
       "Guide them to complete missing profile fields — target 80%+ before expecting results",
-      "Escalate to IT Infrastructure to investigate the completeness calculation",
+      "Escalate to RD Team & IT Infrastructure to investigate the completeness calculation",
       "Advise them to wait — it takes time for new profiles to get traction"
     ],
     correct: 1,
@@ -640,11 +639,11 @@ const QUESTIONS = [
     options: [
       "A CRM tool for staff to message escorts internally",
       "A bulk WhatsApp messaging tool for renewal campaigns",
-      "A native in-app messaging channel allowing website visitors to contact escorts without needing WhatsApp or any third-party app",
+      "A future Exotic-to-escort communication channel that helps maintain consistent support, renewal, and platform communication",
       "A replacement for the SupportBoard live chat widget on the Exotic website"
     ],
     correct: 2,
-    explanation: "Exotic Chat is a pan-African native messaging app built into the Exotic platform. It removes the dependency on WhatsApp or any third-party app — visitors can message escorts directly within Exotic. Launch timeline is owned by RD Team."
+    explanation: "Exotic Chat is being built to help Exotic maintain consistent communication with escorts across onboarding, support, renewals, and important updates. It is not the public visitor contact method on profile pages."
   },
   {
     stage: "Stage 7 — Renewal",
@@ -674,13 +673,13 @@ const QUESTIONS = [
     stage: "Cross-stage — Departments",
     text: "Which department owns package tiers, pricing, and the decision to open new African markets?",
     options: [
-      "IT Infrastructure — they configure the technical setup for each market",
+      "RD Team & IT Infrastructure — RD owns the product decisions and IT Infrastructure executes the technical rollout",
       "Sales & CS — they understand what escorts need and set pricing accordingly",
       "Finance — they own revenue decisions including pricing",
-      "RD Team — they own the product roadmap including tiers, features, pricing, and market expansion"
+      "SEO & Marketing — they shape positioning and campaign messaging for each market"
     ],
-    correct: 3,
-    explanation: "RD Team owns all product decisions: tier features, pricing per market, and market launch decisions. IT Infrastructure implements and maintains the technical systems. Sales & CS should escalate any pricing or market requests to RD, not act unilaterally."
+    correct: 0,
+    explanation: "Within the combined RD Team & IT Infrastructure function, RD owns tier features, pricing per market, and market launch decisions, while IT Infrastructure executes the technical setup. Sales & CS should escalate pricing or market requests there rather than acting unilaterally."
   }
 ];
 

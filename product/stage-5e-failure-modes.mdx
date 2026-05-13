@@ -6,7 +6,7 @@ icon: "triangle-exclamation"
 ---
 
 <Card title="Stage 5e — Failures & recovery" icon="triangle-exclamation" horizontal>
-  10 documented failure modes (F1–F10) covering the full payment flow. The single fastest fix: **always get the M-Pesa transaction code first.** CS, Finance, and IT Infrastructure each own distinct failure types.
+  10 documented failure modes (F1–F10) covering the full payment flow. The single fastest fix: **always get the M-Pesa transaction code first.** CS, Finance, and RD Team & IT Infrastructure each own distinct failure types.
 </Card>
 
 ## Overview
@@ -22,17 +22,17 @@ The Subscription → Payment → Activation flow has nine documented failure mod
 ## Master failure reference
 
 | # | Symptom | Stage | Owner | Severity |
-| --- | --- | --- | --- | --- |
-| F1 | Provider not configured — no payment options shown | 5a | RD | High |
+|---|---|---|---|---|
+| F1 | Provider not configured — no payment options shown | 5a | RD Team & IT Infrastructure | High |
 | F2 | STK Push never arrives on escort's phone | 5b | CS | Medium |
 | F3 | Escort dismissed STK prompt / insufficient funds | 5b | CS | Low |
-| F4 | Hosted checkout page doesn't load | 5b | RD | Medium |
-| F5 | Webhook signature invalid — callback rejected | 5c | RD | High |
-| F6 | Webhook missing `payment_id` — callback not matched | 5c | RD | High |
-| F7 | M-Pesa reversal after payment confirmed | 5c | Finance \+ CS | High |
-| F8 | Amount mismatch — payment in settlement review | 5c | CS | Medium |
-| F9 | Profile not activated — `client_unresolved` | 5c/5d | RD | High |
-| F10 | WordPress activation endpoint unreachable | 5d | RD | High |
+| F4 | Hosted checkout page doesn't load | 5b | RD Team & IT Infrastructure | Medium |
+| F5 | Webhook signature invalid — callback rejected | 5c | RD Team & IT Infrastructure | High |
+| F6 | Webhook missing `payment_id` — callback not matched | 5c | RD Team & IT Infrastructure | High |
+| F7 | M-Pesa reversal after payment confirmed | 5c | Finance + CS | High |
+| F8 | Amount mismatch — payment in settlement review | 5c | Finance | Medium |
+| F9 | Profile not activated — `client_unresolved` | 5c/5d | Finance + RD Team & IT Infrastructure | High |
+| F10 | WordPress activation endpoint unreachable | 5d | RD Team & IT Infrastructure | High |
 
 ---
 
@@ -51,7 +51,7 @@ The Subscription → Payment → Activation flow has nine documented failure mod
     3. If no binding exists, create one — select provider (KopoKopo / Daraja / Paystack), set type to `subscription_push`, toggle Active
     4. Test the checkout page after saving
 
-    **Owner:** RD / Admin
+    **Owner:** RD Team & IT Infrastructure
   </Accordion>
 
   <Accordion title="F2 — STK Push never arrives">
@@ -102,9 +102,9 @@ The Subscription → Payment → Activation flow has nine documented failure mod
     1. Ask escort to try Chrome browser on their phone
     2. Check the provider's status page for outages
     3. If provider is down, switch the escort to M-Pesa STK Push if available for the market
-    4. If persistent, escalate to IT — check provider callback URL in Settings → Integrations
+    4. If persistent, escalate to RD Team & IT Infrastructure — check provider callback URL in Settings → Integrations
 
-    **Owner:** CS → RD escalation
+    **Owner:** CS → RD Team & IT Infrastructure escalation
   </Accordion>
 
   <Accordion title="F5 — Webhook signature invalid (401)">
@@ -119,7 +119,7 @@ The Subscription → Payment → Activation flow has nine documented failure mod
     3. CRM → Settings → Integrations → \[market\] → update KopoKopo webhook secret
     4. For payments already received but not processed: manually re-trigger from KopoKopo dashboard if supported, or manually activate the deal in CRM with the confirmed M-Pesa reference
 
-    **Owner:** RD
+    **Owner:** RD Team & IT Infrastructure
   </Accordion>
 
   <Accordion title="F6 — Webhook missing payment_id (422)">
@@ -134,7 +134,7 @@ The Subscription → Payment → Activation flow has nine documented failure mod
     3. Find the corresponding CRM payment record by amount, phone, and timestamp
     4. Finance manually matches and confirms the payment in the recovery queue
 
-    **Owner:** RD
+    **Owner:** RD Team & IT Infrastructure + Finance
   </Accordion>
 
   <Accordion title="F7 — M-Pesa reversal after activation">
@@ -166,7 +166,7 @@ The Subscription → Payment → Activation flow has nine documented failure mod
     3. If acceptable: Finance confirms the match → provisioning proceeds automatically
     4. If not acceptable: reject and contact the escort to pay the correct amount
 
-    **Owner:** RD CS
+    **Owner:** Finance
   </Accordion>
 
   <Accordion title="F9 — Profile not activated — client_unresolved">
@@ -182,7 +182,7 @@ The Subscription → Payment → Activation flow has nine documented failure mod
     4. If found: CS manually links the payment to the client via the recovery queue → confirm match
     5. If not found: check if the escort registered with a different number; create the client if needed; then match
 
-    **Owner:** RD \+ CS
+    **Owner:** Finance + CS
   </Accordion>
 
   <Accordion title="F10 — WordPress activation endpoint unreachable">
@@ -198,7 +198,7 @@ The Subscription → Payment → Activation flow has nine documented failure mod
     4. Once connection is restored: re-trigger activation from CRM → Deals → \[deal\] → Activate manually
     5. For bulk failures during an outage: IT runs a recovery script to re-activate all deals that activated during the outage window
 
-    **Owner:** RD
+    **Owner:** RD Team & IT Infrastructure
   </Accordion>
 </AccordionGroup>
 
@@ -217,7 +217,7 @@ The Subscription → Payment → Activation flow has nine documented failure mod
     **Escalation path:**
 
     - CS resolves F2, F3 independently
-    - CS escalates F4, F5, F6, F9, F10 to IT
+    - CS escalates F4, F5, F6, F9, F10 to RD Team & IT Infrastructure
     - CS hands F7, F8 to Finance for reconciliation, then contacts the escort
   </Accordion>
 
@@ -235,7 +235,7 @@ The Subscription → Payment → Activation flow has nine documented failure mod
     - Paystack / Pesapal / PawaPay: per your provider agreement
   </Accordion>
 
-  <Accordion title="IT — Monitoring checklist">
+  <Accordion title="RD Team & IT Infrastructure — Monitoring checklist">
     Check weekly (or after any escort payment complaints spike):
 
     1. `laravel.log` for `webhook_verification_failed`, `webhook_invalid_payload`, WpSyncService errors
@@ -259,16 +259,16 @@ The Subscription → Payment → Activation flow has nine documented failure mod
     1. Ask for the full M-Pesa SMS — confirm the recipient name matches "Exotic Kenya" (or the relevant market name)
     2. Check the exact phone number they paid from — it may differ from their registered number
     3. Ask for the M-Pesa transaction code and check the KopoKopo dashboard directly (IT access required)
-    4. If the transaction exists in KopoKopo but not in the CRM, the webhook was likely lost — escalate to IT to manually process the callback
+    4. If the transaction exists in KopoKopo but not in the CRM, the webhook was likely lost — escalate to RD Team & IT Infrastructure to manually process the callback
     5. If no transaction exists anywhere, the escort may have received a fake M-Pesa message — advise them to contact M-Pesa
   </Accordion>
 
-  <Accordion title="How many failures can be self-resolved by CS vs. needing IT?">
+  <Accordion title="How many failures can be self-resolved by CS vs. needing RD Team & IT Infrastructure?">
     CS can self-resolve: F2 (STK Push not received), F3 (dismissed/insufficient funds)
 
     CS needs Finance: F7 (reversal), F8 (amount mismatch), F9 (client unresolved)
 
-    CS needs IT: F1 (no provider), F4 (hosted checkout), F5 (webhook signature), F6 (missing payment\_id), F10 (WordPress down)
+    CS needs RD Team & IT Infrastructure: F1 (no provider), F4 (hosted checkout), F5 (webhook signature), F6 (missing payment_id), F10 (WordPress down)
   </Accordion>
 </AccordionGroup>
 
@@ -321,11 +321,11 @@ The Subscription → Payment → Activation flow has nine documented failure mod
     1. Ask her to send you the M-Pesa SMS to confirm the transaction details
     2. CRM → Payments → search for `ABC1234567`
     3. Check payment status:
-       - If `completed` \+ deal `active` → profile should be live; ask her to hard-refresh her browser; check the profile URL directly
-       - If `completed` \+ deal `pending` → provisioning stuck; escalate to IT
+       - If `completed` + deal `active` → profile should be live; ask her to hard-refresh her browser; check the profile URL directly
+       - If `completed` + deal `pending` → provisioning stuck; escalate to RD Team & IT Infrastructure
        - If `manual_review` → Finance needs to confirm the payment match first
        - If `reversed` → M-Pesa reversed it; she needs to pay again; inform her clearly and apologetically
-       - If not found → escalate to IT to check KopoKopo dashboard for the transaction
+       - If not found → escalate to RD Team & IT Infrastructure to check KopoKopo dashboard for the transaction
     4. Document the outcome in the client's CRM timeline note
   </Accordion>
 

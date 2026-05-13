@@ -11,7 +11,7 @@ icon: "house"
 
 ## What this is and why it exists
 
-No one can effectively sell, support, market, or improve a product they don't fully understand. The Exotic Online University gives every team member — Sales, CS, Finance, RD Team, SEO, and IT Infrastructure — a shared, accurate view of how the platform works from the **escort's perspective**.
+No one can effectively sell, support, market, or improve a product they don't fully understand. The Exotic Online University gives every team member — Sales & CS, Finance, RD Team & IT Infrastructure, and SEO & Marketing — a shared, accurate view of how the platform works from the **escort's perspective**.
 
 Every stage is documented with real system behaviour, department-specific guidance, SOPs, troubleshooting, and certification questions.
 
@@ -53,7 +53,7 @@ The complete lifecycle from first contact to repeat subscriber.
   </Card>
 
   <Card title="6 — Customer contact" icon="message" href="/product/stage-6-contact">
-    Visitors contact the escort via WhatsApp, phone, Viber, or Exotic Chat (coming soon)
+    Visitors contact the escort via WhatsApp, phone, SMS, or Viber; Exotic Chat will support ongoing Exotic-to-escort communication
   </Card>
 
   <Card title="7 — Renewal" icon="rotate-right" href="/product/stage-7-renewal">
@@ -124,7 +124,7 @@ All tiers are defined and priced by the **RD Team** per market. Sales staff do n
 | **Basic** | Standard | New escorts testing the platform |
 
 <Warning>
-  Package tiers, features, and pricing are **owned by the CS Team**. If an escort asks you to change a price, create a new tier, or grant a discount beyond the approved threshold — escalate to your manager. Do not contact IT Infrastructure for pricing changes.
+  Package tiers, features, and pricing are **owned by RD** within the combined RD Team & IT Infrastructure function. If an escort asks you to change a price, create a new tier, or grant a discount beyond the approved threshold — escalate to your manager. Do not treat pricing as an SEO & Marketing or Sales decision.
 </Warning>
 
 ---
@@ -155,21 +155,28 @@ All tiers are defined and priced by the **RD Team** per market. Sales staff do n
     | Discounts | Review deals and flag any suspicious payment that needs review |
   </Accordion>
 
-  <Accordion title="RD Team — what you own" icon="lightbulb">
+  <Accordion title="RD Team & IT Infrastructure — what you own" icon="lightbulb">
     | Area | Responsibility |
-    | --- | --- |
-    | Product Maintenance | Maintain, Update and Upgrade Plattforms |
-    | Exotic Chat | Product roadmap and launch timeline for native messaging app |
+    |---|---|
+    | Package tiers | Define tier features, names, and search position logic |
+    | Pricing | Set and update `ProductPrice` records per market |
+    | Market expansion | Decide which African countries to launch in and when |
+    | Verification policy | Set ID types accepted, age threshold, re-verification rules |
+    | Exotic Chat | Product roadmap for Exotic-to-escort communication, plus rollout planning and technical delivery |
+    | Contact channels | Add, remove, or change public contact channel types on profiles |
+    | Payment infrastructure | Provider routing, webhooks, gateway health, and `BillingMarketProviderBinding` config |
+    | WordPress sync | `WpSyncService` health, activation endpoint, plugin maintenance |
+    | Tracking setup | Google Analytics tag setup, contact-tap instrumentation, and platform event wiring |
+    | Monitoring | `laravel.log`, webhook dashboards, scheduled tasks, and activation recovery |
   </Accordion>
 
-  <Accordion title="SEO, RD & IT Infrastructure — what you own" icon="server">
+  <Accordion title="SEO & Marketing — what you own" icon="chart-line">
     | Area | Responsibility |
-    | --- | --- |
-    | SEO | Organic search ranking, landing page quality, profile SEO signals |
-    | Payment infrastructure | Webhook health, provider routing, `BillingMarketProviderBinding` config |
-    | WordPress sync | `WpSyncService` health, activation endpoint, plugin maintenance |
-    | Failure recovery | F1, F4, F5, F6, F10 failure modes — escalate from CS |
-    | Monitoring | `laravel.log`, webhook delivery dashboard, scheduled tasks |
+    |---|---|
+    | SEO | Organic search ranking, landing page quality, and profile SEO signals |
+    | Marketing | Campaign messaging, market-facing positioning, and conversion support content |
+    | Analytics reporting | Google Analytics traffic, landing-page conversion, and funnel reporting |
+    | Performance monitoring | Flag drop-offs in registrations, payments, and contact engagement back to RD Team & IT Infrastructure |
   </Accordion>
 </AccordionGroup>
 
@@ -187,13 +194,11 @@ Choose the path that matches your role:
   <Card title="Finance team" icon="calculator" href="/product/stage-5c-payment-confirmation">
     Start at Stage 5c — Payment confirmation. Then read 5e — Failures, then Stage 7 — Renewal for revenue context.
   </Card>
-
-  <Card title="RD Team" icon="lightbulb" href="/product/stage-5a-subscription-selection">
-    Start at Stage 5a — Subscription selection to understand the customer checkout experience, then Stage 6 — Contact for the Exotic Chat context.
+  <Card title="RD Team & IT Infrastructure" icon="lightbulb" href="/product/stage-5a-subscription-selection">
+    Start at Stage 5a — Subscription selection, then 5b, 5c, 5d, and 5e to understand pricing, routing, activation, and failure recovery.
   </Card>
-
-  <Card title="SEO & IT Infrastructure" icon="server" href="/product/stage-5b-payment-initiation">
-    Start at Stage 5b — Payment initiation. Then 5c, 5d, and 5e. These cover the systems you own.
+  <Card title="SEO & Marketing" icon="chart-line" href="/product/stage-1-discover">
+    Start at Stage 1 — Discover, then Stages 3 and 6 to understand SEO signals, organic conversion, contact behaviour, and analytics reporting.
   </Card>
 </CardGroup>
 

@@ -6,7 +6,7 @@ icon: "list-check"
 ---
 
 <Card title="Stage 5a of 8 — Subscription selection" icon="list-check" horizontal>
-  Escort picks Basic → VVIP and a billing period on the self-checkout page. A `Payment` record is created with status `initiated`. **Owner: Sales & CS (guidance); RD Team (pricing).**
+  Escort picks Basic → VVIP and a billing period on the self-checkout page. A `Payment` record is created with status `initiated`. **Owner: Sales & CS (guidance); RD Team & IT Infrastructure (tiers, pricing, market config).**
 </Card>
 
 ## What the customer sees
@@ -86,16 +86,16 @@ The `payment_data` field captures the product ID, duration, and any FX overrides
     Pricing is configured per market under Settings → Integrations → Packages. If an escort reports a price they were quoted doesn't match the checkout price, check whether the market's `ProductPrice` records have been updated recently.
   </Accordion>
 
-  <Accordion title="RD Team">
-    **RD Team owns all package tiers and pricing.** If an escort or manager requests a new package, a price change, or a new tier, this must be escalated to RD — not handled by Sales or IT Infrastructure.
+  <Accordion title="RD Team & IT Infrastructure">
+    **RD owns all package tiers and pricing.** If an escort or manager requests a new package, a price change, or a new tier, this must be escalated here — not handled by Sales or SEO & Marketing.
 
-    Package changes take effect immediately once RD updates the `ProductPrice` records. If escorts are reporting prices that don't match what was communicated, flag this to RD first — they may have updated pricing without a communication broadcast.
+    Package changes take effect immediately once RD updates the `ProductPrice` records. If escorts are reporting prices that don't match what was communicated, flag this here first — they may have updated pricing without a communication broadcast.
+
+    If the checkout page doesn't load available packages, the likely cause is `BillingMarketProviderBinding` misconfiguration — no active `subscription_push` binding exists for the market. Check the bindings table and confirm at least one provider is enabled with status `active`.
   </Accordion>
 
-  <Accordion title="SEO & IT Infrastructure">
-    **SEO:** Package tier directly affects profile placement in search results across all Exotic markets. Higher tiers (VIP, VVIP) appear above lower tiers. This is a key selling point for escorts asking about visibility.
-
-    **IT Infrastructure:** If the checkout page doesn't load available packages, the likely cause is `BillingMarketProviderBinding` misconfiguration — no active `subscription_push` binding exists for the market. Check the bindings table and confirm at least one provider is enabled with status `active`.
+  <Accordion title="SEO & Marketing">
+    Package tier directly affects profile placement in search results across all Exotic markets. Higher tiers (VIP, VVIP) appear above lower tiers. This is a key selling point for escorts asking about visibility, and SEO & Marketing should reflect that clearly in campaign and landing-page messaging.
   </Accordion>
 </AccordionGroup>
 
@@ -136,7 +136,7 @@ The `payment_data` field captures the product ID, duration, and any FX overrides
 | Checkout page loads but shows no packages | No active `subscription_push` provider binding for this market | CRM → Settings → Integrations → market → payment providers | Enable at least one provider; check `BillingMarketProviderBinding` |
 | Checkout page shows wrong currency | Market `currency_code` misconfigured | CRM → Settings → Integrations → market settings | Update `currency_code` to correct ISO code |
 | Escort reports price doesn't match what they were quoted | `ProductPrice` records were recently changed | CRM → Settings → Integrations → market → Packages | Confirm current prices; inform escort of correct pricing |
-| "Proceed to payment" button does nothing | JavaScript error on checkout page; or browser issue | Browser console (F12) → errors tab | Ask escort to try a different browser or clear cache; escalate to IT if persistent |
+| "Proceed to payment" button does nothing | JavaScript error on checkout page; or browser issue | Browser console (F12) → errors tab | Ask escort to try a different browser or clear cache; escalate to RD Team & IT Infrastructure if persistent |
 | Escort cannot find the subscription page | Profile in draft status or link not visible | CRM → Clients → find client → check `profile_status` | If draft: guide through profile completion and submission |
 
 ---

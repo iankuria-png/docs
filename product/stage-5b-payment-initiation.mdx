@@ -6,7 +6,7 @@ icon: "mobile-screen-button"
 ---
 
 <Card title="Stage 5b of 8 — Payment initiation" icon="mobile-screen-button" horizontal>
-  M-Pesa STK Push sends a PIN prompt to the escort's phone. Hosted checkout (Paystack / Pesapal / PawaPay) opens a third-party page. **Owner: IT Infrastructure for gateway health; CS for retry/link.**
+  M-Pesa STK Push sends a PIN prompt to the escort's phone. Hosted checkout (Paystack / Pesapal / PawaPay) opens a third-party page. **Owner: RD Team & IT Infrastructure for gateway health and provider routing; CS for retry/link.**
 </Card>
 
 ## What the customer sees
@@ -102,7 +102,7 @@ The `BillingMarketProviderBinding` table controls which providers are available 
     - Over 72 hours: escalate and follow up manually
   </Accordion>
 
-  <Accordion title="SEO & IT">
+  <Accordion title="RD Team & IT Infrastructure">
     **Provider routing:** The payment provider used for each market is configured in `BillingMarketProviderBinding`. If escorts on a specific market report that payment options aren't showing or the STK Push never arrives, check this table for active `subscription_push` bindings.
 
     **STK Push failure diagnostic:**
@@ -110,6 +110,10 @@ The `BillingMarketProviderBinding` table controls which providers are available 
     2. Check `raw_payload` on the attempt for the provider error code
     3. Common codes: insufficient balance (M-Pesa), phone not M-Pesa registered, network timeout
     4. KopoKopo dashboard → check webhook delivery logs for the payment reference
+  </Accordion>
+
+  <Accordion title="SEO & Marketing">
+    Payment initiation sits inside the conversion funnel. SEO & Marketing should monitor checkout-step drop-off, payment-click conversion, and market-level conversion changes in Google Analytics, then flag abnormal movement to RD Team & IT Infrastructure for investigation.
   </Accordion>
 </AccordionGroup>
 
@@ -138,7 +142,7 @@ The `BillingMarketProviderBinding` table controls which providers are available 
   </Accordion>
 
   <Accordion title="What if the escort is redirected to a hosted checkout page but it doesn't load?">
-    This is likely a browser compatibility issue with the provider (Paystack/Pesapal). Ask the escort to try Chrome on their phone. If the issue persists, escalate to IT — the provider integration may need a callback URL check.
+    This is likely a browser compatibility issue with the provider (Paystack/Pesapal). Ask the escort to try Chrome on their phone. If the issue persists, escalate to RD Team & IT Infrastructure — the provider integration may need a callback URL check.
   </Accordion>
 </AccordionGroup>
 
@@ -151,7 +155,7 @@ The `BillingMarketProviderBinding` table controls which providers are available 
 | STK Push never arrives on escort's phone | Phone off / no signal / wrong number | CRM → Payments → find the payment → `PaymentAttempt.status` | Send payment link via CRM instead |
 | Escort entered PIN but got "insufficient funds" | Low M-Pesa balance | M-Pesa message on escort's phone | Ask escort to top up and send new STK Push from CRM |
 | STK Push prompt was dismissed without entering PIN | Escort dismissed by mistake | Payment status = `initiated` (still waiting) | Trigger new STK Push from CRM; original attempt will expire |
-| Hosted checkout page doesn't load | Browser/provider compatibility issue | Try Chrome browser; check provider status | Switch to payment link method; escalate to IT if provider down |
+| Hosted checkout page doesn't load | Browser/provider compatibility issue | Try Chrome browser; check provider status | Switch to payment link method; escalate to RD Team & IT Infrastructure if provider down |
 | Payment stuck in `initiated` for over 1 hour | Escort did not complete payment | CRM → Payments → filter: Status = initiated | Send payment link via CRM |
 | Wrong phone number on STK Push | Escort mis-typed number | `PaymentAttempt.raw_payload` shows the number used | Send new payment link to the correct number |
 

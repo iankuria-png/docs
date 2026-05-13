@@ -6,7 +6,7 @@ icon: "circle-check"
 ---
 
 <Card title="Stage 5c of 8 — Payment confirmation" icon="circle-check" horizontal>
-  Provider webhook fires into the CRM, payment is matched to the client record, and subscription provisioning is triggered. **Owner: IT Infrastructure (webhooks); Finance (reconciliation & manual review).**
+  Provider webhook fires into the CRM, payment is matched to the client record, and subscription provisioning is triggered. **Owner: RD Team & IT Infrastructure (webhooks and provisioning); Finance (reconciliation & manual review).**
 </Card>
 
 ## What the customer sees
@@ -82,7 +82,7 @@ This is the most technically complex stage. A webhook (callback) fires from the 
     2. In the CRM, go to **Payments** → search by transaction reference or phone number.
     3. Check the payment status:
        - `completed` + deal `active` → profile should be live; check WordPress directly. If not live, see Stage 5d troubleshooting.
-       - `completed` + deal `pending` → provisioning is stuck. Escalate to IT.
+       - `completed` + deal `pending` → provisioning is stuck. Escalate to RD Team & IT Infrastructure.
        - `pending` or `initiated` → payment not confirmed yet. Ask escort to wait 5–10 minutes; check M-Pesa message again.
        - No record found → the payment may not have been made yet, or the phone number was different. Ask for the full M-Pesa SMS.
        - `reversed` → M-Pesa reversed the transaction. Inform escort; they need to pay again.
@@ -109,7 +109,7 @@ This is the most technically complex stage. A webhook (callback) fires from the 
     If the amount received differs from the expected amount by more than 5%, the payment enters `wallet_funding_settlement_review` state and requires manual Finance approval before provisioning. Check the CRM manual review queue daily.
   </Accordion>
 
-  <Accordion title="SEO & IT">
+  <Accordion title="RD Team & IT Infrastructure">
     **Webhook health monitoring:**
     If escorts start reporting payment confirmations but profiles not activating, check:
     1. `BillingWebhookEvent` table — are callbacks being received?
@@ -122,6 +122,10 @@ This is the most technically complex stage. A webhook (callback) fires from the 
     | `webhook_verification_failed` (401) | HMAC secret mismatch | Update KopoKopo webhook secret in Settings → Integrations |
     | `webhook_invalid_payload` (422) | `payment_id` missing from webhook metadata | Check if checkout flow is setting metadata correctly |
     | Duplicate webhook | Provider retrying a callback | Handled automatically by `BillingWebhookEvent` dedup; no action needed |
+  </Accordion>
+
+  <Accordion title="SEO & Marketing">
+    SEO & Marketing do not own webhook operations, but they should watch for sudden drops in successful payment completion by market or campaign source. If payment confirmations fall while traffic holds steady, escalate that signal to RD Team & IT Infrastructure quickly.
   </Accordion>
 </AccordionGroup>
 

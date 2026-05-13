@@ -111,16 +111,16 @@ Once verified, the escort receives a WhatsApp confirmation message. They are cle
     **Age failure:** If the ID shows the escort is under 18, the account must be declined. Mark the client record `is_high_risk = true` with `risk_reason_code = 'underage'` and escalate to your supervisor immediately. Do not activate under any circumstances.
   </Accordion>
 
-  <Accordion title="RD Team">
-    RD Team owns any changes to the verification policy — what ID types are accepted, whether the one-time verification policy should change (e.g. requiring re-verification after a market compliance update), and whether automated ID tools should be introduced in a future product sprint.
+  <Accordion title="RD Team & IT Infrastructure">
+    RD owns any changes to the verification policy — what ID types are accepted, whether the one-time verification policy should change (e.g. requiring re-verification after a market compliance update), and whether automated ID tools should be introduced in a future product sprint.
 
     Do not accept new ID types or change verification thresholds without RD approval.
+
+    If the `verified` toggle is not saving in the CRM (the button appears to click but the value doesn't persist), this is a platform bug — escalate to RD Team & IT Infrastructure with the client ID and the browser console error.
   </Accordion>
 
-  <Accordion title="SEO & IT Infrastructure">
-    **IT Infrastructure:** No technical system is involved in the verification step itself — it is entirely a human process handled via WhatsApp and the CRM toggle. If the `verified` toggle is not saving in the CRM (the button appears to click but the value doesn't persist), this is a bug — escalate to IT Infrastructure with the client ID and the browser console error.
-
-    **SEO:** No direct SEO impact at this stage. However, verification helps maintain overall platform quality — profiles that pass verification tend to have more complete and accurate content, which indirectly improves the platform's average quality signals.
+  <Accordion title="SEO & Marketing">
+    No direct SEO or marketing ownership exists at this stage. However, verification helps maintain overall platform quality — profiles that pass verification tend to have more complete and accurate content, which indirectly improves the platform's average quality signals and trust.
   </Accordion>
 </AccordionGroup>
 
@@ -162,7 +162,7 @@ Once verified, the escort receives a WhatsApp confirmation message. They are cle
 | Symptom | Likely cause | Where to look | Fix |
 |---|---|---|---|
 | Escort says they sent the ID but agent hasn't reviewed it | ID sitting in WhatsApp queue, not yet actioned | Check the market verification WhatsApp number | Review and process pending verification queue |
-| `verified` toggle won't save in CRM | Browser issue or frontend bug | Browser console for errors | Try a different browser; if persistent, escalate to IT Infrastructure |
+| `verified` toggle won't save in CRM | Browser issue or frontend bug | Browser console for errors | Try a different browser; if persistent, escalate to RD Team & IT Infrastructure |
 | Escort subscribed but profile didn't activate — verification was thought to be done | `clients.verified = false` — toggle was never set | CRM → Clients → [client] → Overview → Verified field | Set verified = true, then re-trigger deal activation |
 | Face match is ambiguous — profile photos and ID photo don't clearly match | Low-quality profile photos or ID photo | Request a clearer selfie from the escort for comparison | Do not approve if match cannot be confirmed — ask for additional photo |
 | ID shows age just under 18 | Under-age applicant | `clients` record | Mark `is_high_risk = true`, `risk_reason_code = 'underage'`; escalate to supervisor; do not activate |

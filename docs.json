@@ -64,7 +64,8 @@
             "group": "Certification",
             "icon": "medal",
             "pages": [
-              "product/certification"
+              "product/certification",
+              "quiz.html"
             ]
           }
         ]
