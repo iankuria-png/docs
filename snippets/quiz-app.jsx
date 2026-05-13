@@ -9,236 +9,195 @@ export const QuizApp = () => {
     "SEO & Marketing",
   ]
 
-  const questions = [
+  const scoredQuestions = [
     {
-      stage: "Stage 1 - Discover",
-      text: "Which discovery channel typically produces the highest conversion rate for new escorts?",
+      stage: "Sales fundamentals",
+      text: "An escort says, 'Why should I pay for Exotic when there are free listing sites?' Which answer is strongest?",
       options: [
-        "Organic SEO arrivals who found Exotic on Google",
-        "Outbound cold calls made by the sales team",
-        "Referrals from existing escorts on the platform",
-        "Social media advertising",
+        "Because Exotic looks more premium than free sites",
+        "Because paid profiles get better visibility, higher-quality leads, and dedicated support",
+        "Because all free sites are scams",
+        "Because Exotic is the cheapest platform in every market",
+      ],
+      correct: 1,
+      explanation: "The strongest answer ties together visibility, lead quality, and ongoing support.",
+    },
+    {
+      stage: "Discount judgment",
+      text: "A customer asks for a discount immediately. What should the agent do first?",
+      options: [
+        "Give the discount quickly to avoid losing them",
+        "Refuse all discounts because it creates bad habits",
+        "Understand the reason, solve the real objection, then decide if a discount is commercially justified",
+        "Escalate every discount request to Finance",
       ],
       correct: 2,
-      explanation: "Referrals convert fastest because trust already exists before the first call.",
+      explanation: "Discounting should support a real commercial purpose, not replace diagnosis or relationship management.",
     },
     {
-      stage: "Stage 1 - Discover",
-      text: "After how many failed contact attempts should you mark a prospect as lost?",
+      stage: "Lead quality",
+      text: "An escort says they are getting low-quality leads. What is the best first response?",
       options: [
-        "After 1 attempt with no response",
-        "After 3 attempts over 7 days",
-        "After 10 attempts over a month",
-        "Only when they explicitly say they are not interested",
+        "Promise a refund immediately",
+        "Check profile quality, tier, market context, and traffic signals before deciding the root cause",
+        "Tell them all leads are the same everywhere",
+        "Escalate directly to IT Infrastructure",
       ],
       correct: 1,
-      explanation: "Standard practice is 3 contact attempts over 7 days before marking a lead as lost.",
+      explanation: "Low-quality-lead complaints need diagnosis first: profile quality, tier, visibility, and market context matter.",
     },
     {
-      stage: "Stage 2 - Register",
-      text: "What is the default `profile_status` immediately after registration?",
-      options: ["active", "pending_review", "private", "draft"],
-      correct: 2,
-      explanation: "New profiles remain private until verification and subscription activation are complete.",
-    },
-    {
-      stage: "Stage 2 - Register",
-      text: "An escort self-registered on the website but does not appear in the CRM. What is your first action?",
+      stage: "Retention",
+      text: "A customer says they want to leave Exotic for a competitor. What is the strongest sales response?",
       options: [
-        "Create a new client record manually",
-        "Ask them to register again with a different email",
-        "Run a manual sync from CRM -> Settings -> Integrations -> [market] -> Sync clients",
-        "Escalate to R&D/Product immediately",
+        "Let them go immediately so you can focus on other customers",
+        "Argue that the competitor is worse and end the call",
+        "Understand why they want to leave, reinforce retained value, and work on the real issue before offering any concession",
+        "Transfer the case to Finance because churn is a revenue problem",
       ],
       correct: 2,
-      explanation: "Run the sync first. The record often exists in WordPress and just has not synced across yet.",
+      explanation: "The best retention response is curious, calm, and issue-focused rather than defensive or transactional.",
     },
     {
-      stage: "Stage 3 - Media",
-      text: "What is the maximum upload limit for profile photos?",
+      stage: "Market diagnosis",
+      text: "Sales suddenly drop in your market. What should you check first?",
       options: [
-        "10 photos, 10 MB each",
-        "20 photos, 5 MB each",
-        "15 photos, 8 MB each",
-        "Unlimited photos, 2 MB each",
+        "Only ask agents to make more calls",
+        "Traffic, indexation, contact-tap trends, payment failures, new sign-ups, expired subscriptions, and renewal activity",
+        "Whether every customer needs a discount",
+        "Only the Finance reconciliation report",
       ],
       correct: 1,
-      explanation: "The current limit is 20 images at up to 5 MB each.",
+      explanation: "A market drop needs a full funnel diagnosis before deciding where the issue sits.",
     },
     {
-      stage: "Stage 3 - Media",
-      text: "A newly activated escort has a profile completeness score of 35%. What should you do first?",
+      stage: "Escalation discipline",
+      text: "If multiple escorts in one market complain at the same time that they are not getting calls, what is the best next move?",
       options: [
-        "Upgrade their subscription tier immediately",
-        "Guide them to complete missing profile fields and target 80%+",
-        "Escalate to R&D/Product to inspect the completeness calculation",
-        "Tell them to wait because all new profiles take time",
+        "Treat every complaint as unrelated and answer one by one only",
+        "Check whether it is a market-wide pattern and compare traffic, visibility, and conversion data with SEO & Marketing",
+        "Tell everyone to upgrade immediately",
+        "Assume WhatsApp is broken and blame IT Infrastructure",
       ],
       correct: 1,
-      explanation: "Low completeness is a performance problem before it is a systems problem.",
+      explanation: "A cluster of similar complaints usually needs a market-level diagnosis, not only one-to-one replies.",
     },
     {
-      stage: "Stage 4 - Verification",
-      text: "When must verification be completed?",
+      stage: "Renewal mindset",
+      text: "Which activity usually gives the highest ROI for Sales & CS?",
       options: [
-        "Before profile photos are uploaded",
-        "Before the first subscription can be activated",
-        "Before WordPress registration",
-        "Before the profile appears in Google Search",
+        "Cold outbound only",
+        "Renewals and retention conversations",
+        "Giving all customers discounts",
+        "Waiting for self-service sign-ups",
       ],
       correct: 1,
-      explanation: "Verification is mandatory before first activation and is not repeated at renewal.",
+      explanation: "Renewals are high ROI because the relationship, profile, and trust already exist.",
     },
     {
-      stage: "Stage 4 - Verification",
-      text: "An escort's ID shows they are 17 years old. What is the correct action?",
+      stage: "Self-service conversion",
+      text: "A new escort registered by themselves overnight. What should the agent do?",
       options: [
-        "Approve anyway because they are close to 18",
-        "Ask for a different ID",
-        "Delay verification until they turn 18",
-        "Decline the account, mark high risk, and escalate to a supervisor immediately",
-      ],
-      correct: 3,
-      explanation: "Under-age applicants must be declined with no exceptions.",
-    },
-    {
-      stage: "Stage 5a - Subscription",
-      text: "An escort sees no packages on checkout. What should you check first?",
-      options: [
-        "Their payment history",
-        "Whether the market has at least one active provider binding",
-        "Their profile completeness score",
-        "The WordPress sync status",
+        "Wait and see if they subscribe without support",
+        "Reach out proactively, guide them, and help convert them while intent is still warm",
+        "Mark them as lost if they did not pay immediately",
+        "Escalate them to R&D/Product",
       ],
       correct: 1,
-      explanation: "No packages usually means there is no active `subscription_push` provider binding for that market.",
+      explanation: "Warm self-service sign-ups are already halfway down the funnel and should be worked proactively.",
     },
     {
-      stage: "Stage 5b - Payment",
-      text: "An escort wants to pay from a different phone number. Which method should CS suggest?",
+      stage: "Customer experience",
+      text: "What is the healthiest way to think about discounts?",
       options: [
-        "Update the registered phone number first",
-        "Use STK Push because it works from any number",
-        "Use a payment link",
-        "Tell them to pay cash at an agent",
+        "As a cure for every objection",
+        "As something Finance owns completely",
+        "As a commercial tool that can prevent churn when used well, but create dependency when used badly",
+        "As proof that the platform is overpriced",
       ],
       correct: 2,
-      explanation: "A payment link can be opened and completed from another supported device or phone number.",
+      explanation: "Discounts should protect customer experience and revenue, but poor discipline creates long-term damage.",
     },
     {
-      stage: "Stage 5c - Confirmation",
-      text: "A payment shows `completed` but the deal is still `pending`. What is the most likely cause?",
+      stage: "Low visibility",
+      text: "An escort says, 'My profile is not visible.' What should you do first?",
       options: [
-        "The escort cancelled after paying",
-        "M-Pesa reversed the payment",
-        "Provisioning is stuck",
-        "The payment is not actually confirmed yet",
+        "Check the public site yourself, confirm the profile is live, and verify city/category/tier before escalating",
+        "Tell them Google is probably delayed",
+        "Issue a free trial immediately",
+        "Ask Finance to inspect the deal",
+      ],
+      correct: 0,
+      explanation: "Always verify the live experience first before promising a fix or blaming another team.",
+    },
+    {
+      stage: "Commercial ownership",
+      text: "Who owns package tiers and pricing decisions?",
+      options: [
+        "Finance",
+        "R&D/Product",
+        "The CS head for each market or region, with Head of CS/Sales approval",
+        "SEO & Marketing",
       ],
       correct: 2,
-      explanation: "Completed payment plus a pending deal usually means provisioning failed or stalled.",
+      explanation: "Commercial ownership sits with CS leadership, not the technical or finance teams.",
     },
     {
-      stage: "Stage 5c - Confirmation",
-      text: "What does `wallet_funding_settlement_review` mean?",
+      stage: "Cross-functional response",
+      text: "If traffic is healthy but payment completion suddenly falls, who should Sales & CS involve fastest?",
       options: [
-        "The escort had insufficient balance",
-        "The payment amount differs from the expected amount by more than 5% and Finance must review it",
-        "The provider has not settled funds to Exotic yet",
-        "The CRM is waiting for a second callback",
+        "R&D/Product and IT Infrastructure, because the problem may be in payment flow or environment health",
+        "Only SEO & Marketing",
+        "Only Finance",
+        "No one - just wait 24 hours",
       ],
-      correct: 1,
-      explanation: "Amount mismatches beyond tolerance move the payment into Finance review.",
+      correct: 0,
+      explanation: "A drop after traffic but before activation points to checkout, callback, or environment issues.",
+    },
+  ]
+
+  const reflectionQuestions = [
+    {
+      id: "discount_call",
+      stage: "Sales scenario",
+      title: "A customer is asking for a discount. How do you decide whether to give one?",
+      placeholder: "Explain how you would diagnose the reason, protect customer experience, and stay within market discount guardrails.",
+      maxLength: 400,
     },
     {
-      stage: "Stage 5d - Activation",
-      text: "Under normal conditions, how long does profile activation take after payment is confirmed?",
-      options: ["Under 1 second", "30-60 seconds", "5-10 minutes", "Up to 24 hours"],
-      correct: 1,
-      explanation: "Normal activation time is roughly 30-60 seconds.",
+      id: "low_quality_leads",
+      stage: "Sales scenario",
+      title: "A customer is complaining about low-quality leads. How do you respond and what do you check first?",
+      placeholder: "Describe your response, what you would inspect, and when you would escalate.",
+      maxLength: 450,
     },
     {
-      stage: "Stage 5e - Failures",
-      text: "What does `client_unresolved` mean on a completed payment?",
-      options: [
-        "M-Pesa reversed the payment",
-        "The escort chose the wrong package",
-        "The payment could not be automatically linked to a CRM client",
-        "The WordPress site was offline",
-      ],
-      correct: 2,
-      explanation: "The payment reached the CRM but could not be matched automatically to a client record, so Sales & CS market operations need to confirm the correct client before provisioning can complete.",
+      id: "wants_to_leave",
+      stage: "Retention scenario",
+      title: "A customer wants to leave Exotic. Walk through your retention approach.",
+      placeholder: "Explain how you would understand the issue, retain value, and decide whether an offer is justified.",
+      maxLength: 450,
     },
     {
-      stage: "Stage 5e - Failures",
-      text: "Logs show `webhook_verification_failed` errors during a 90-minute window. What is the root cause?",
-      options: [
-        "The WordPress site was down",
-        "The webhook secret is mismatched",
-        "The escorts paid the wrong amount",
-        "The payment provider is offline",
-      ],
-      correct: 1,
-      explanation: "A 401 verification failure points to a webhook secret mismatch.",
+      id: "market_drop",
+      stage: "Market diagnosis",
+      title: "Sales have dropped in your market. How would you diagnose the issue and who would you escalate to?",
+      placeholder: "Cover traffic, visibility, conversion, payments, renewals, and the cross-functional teams you would involve.",
+      maxLength: 500,
     },
     {
-      stage: "Stage 6 - Contact",
-      text: "An escort has been live for 2 weeks and reports no WhatsApp messages. What is the most likely cause?",
-      options: [
-        "The WhatsApp integration is broken",
-        "The profile quality, completeness, or tier is too weak to generate visibility",
-        "The escort's number is not on WhatsApp",
-        "The escort needs re-verification",
-      ],
-      correct: 1,
-      explanation: "This is usually a visibility or profile-quality issue, not a contact-channel failure.",
+      id: "biggest_blocker",
+      stage: "Your view",
+      title: "In your own opinion, what is the biggest blocker to Customers and Revenue in your market right now?",
+      placeholder: "Share your honest assessment and why you believe it matters most.",
+      maxLength: 350,
     },
     {
-      stage: "Stage 6 - Contact",
-      text: "What is Exotic Chat and what problem does it solve?",
-      options: [
-        "A CRM tool for staff to message escorts internally",
-        "A bulk WhatsApp tool for renewal campaigns",
-        "A future Exotic-to-escort communication channel for more consistent support, renewals, and updates",
-        "A replacement for the SupportBoard live chat widget",
-      ],
-      correct: 2,
-      explanation: "Exotic Chat is being built to help Exotic maintain more consistent communication with escorts. It is not the public visitor contact method on profile pages.",
-    },
-    {
-      stage: "Stage 7 - Renewal",
-      text: "What happens to profile data when a subscription expires?",
-      options: [
-        "The profile and photos are deleted",
-        "The profile is set to private but the data is preserved",
-        "The profile becomes a free listing",
-        "The profile stays live for 7 more days automatically",
-      ],
-      correct: 1,
-      explanation: "Expiry hides the profile but preserves the data for faster renewal recovery.",
-    },
-    {
-      stage: "Stage 8 - Upgrades",
-      text: "How are package upgrades processed on Exotic?",
-      options: [
-        "The escort upgrades themselves from a dashboard",
-        "Staff process upgrades through the CRM deal flow",
-        "Upgrades are automatic once enquiries increase",
-        "The escort emails support and waits 24 hours",
-      ],
-      correct: 1,
-      explanation: "Upgrades are staff-assisted and flow through CRM deal updates plus payment confirmation.",
-    },
-    {
-      stage: "Cross-stage - Ownership",
-      text: "Who owns package tiers and pricing, and who makes the final decision to open a new market?",
-      options: [
-        "Finance owns tiers and pricing, while R&D/Product decides new markets",
-        "The CS head for each market or region owns tiers and pricing with Head of CS/Sales approval, while the CEO decides on market expansion",
-        "SEO & Marketing owns tiers and pricing, while Sales & CS decides on market expansion",
-        "R&D/Product owns tiers, pricing, and market expansion",
-      ],
-      correct: 1,
-      explanation: "Commercial ownership sits with market or regional CS leadership, with Head of CS/Sales approval. The CEO makes the final market-expansion decision, guided by Sales, RD, and market research.",
+      id: "typical_day",
+      stage: "Take me through your day",
+      title: "Take me through your typical day as a Sales & CS agent.",
+      placeholder: "Describe how you work the day: operations checks, outbound sales, renewals, payment recovery, support, visibility complaints, and wrap-up.",
+      maxLength: 700,
     },
   ]
 
@@ -258,24 +217,31 @@ export const QuizApp = () => {
 
   const [started, setStarted] = useState(false)
   const [name, setName] = useState("")
-  const [department, setDepartment] = useState("")
+  const [email, setEmail] = useState("")
+  const [department, setDepartment] = useState("Sales & CS")
   const [index, setIndex] = useState(0)
-  const [answers, setAnswers] = useState([])
   const [selected, setSelected] = useState(null)
+  const [mcqAnswers, setMcqAnswers] = useState([])
+  const [reflections, setReflections] = useState({})
   const [finished, setFinished] = useState(false)
+  const [copied, setCopied] = useState(false)
 
-  const currentQuestion = questions[index]
-  const score = answers.reduce((total, answer, answerIndex) => {
-    return total + (answer === questions[answerIndex].correct ? 1 : 0)
+  const totalQuestions = scoredQuestions.length + reflectionQuestions.length
+  const isReflectionStage = index >= scoredQuestions.length
+  const currentScoredQuestion = !isReflectionStage ? scoredQuestions[index] : null
+  const currentReflection = isReflectionStage ? reflectionQuestions[index - scoredQuestions.length] : null
+  const currentReflectionValue = currentReflection ? reflections[currentReflection.id] || "" : ""
+  const score = mcqAnswers.reduce((total, answer, answerIndex) => {
+    return total + (answer === scoredQuestions[answerIndex].correct ? 1 : 0)
   }, 0)
-  const percentage = Math.round((score / questions.length) * 100)
-  const passed = percentage >= 80
-  const wrongAnswers = answers
-    .map((answer, answerIndex) => ({ answer, question: questions[answerIndex] }))
+  const percentage = Math.round((score / scoredQuestions.length) * 100)
+  const passed = percentage >= 80 && reflectionQuestions.every((question) => (reflections[question.id] || "").trim())
+  const wrongAnswers = mcqAnswers
+    .map((answer, answerIndex) => ({ answer, question: scoredQuestions[answerIndex] }))
     .filter((item) => item.answer !== item.question.correct)
 
   const beginQuiz = () => {
-    if (!name.trim()) {
+    if (!name.trim() || !email.trim()) {
       return
     }
 
@@ -290,12 +256,21 @@ export const QuizApp = () => {
     setSelected(choice)
   }
 
-  const goNext = () => {
-    const nextAnswers = [...answers, selected]
-    setAnswers(nextAnswers)
-    setSelected(null)
+  const updateReflection = (questionId, value) => {
+    setReflections((current) => ({
+      ...current,
+      [questionId]: value,
+    }))
+  }
 
-    if (index === questions.length - 1) {
+  const goNext = () => {
+    if (!isReflectionStage) {
+      const nextAnswers = [...mcqAnswers, selected]
+      setMcqAnswers(nextAnswers)
+      setSelected(null)
+    }
+
+    if (index === totalQuestions - 1) {
       setFinished(true)
       return
     }
@@ -306,9 +281,11 @@ export const QuizApp = () => {
   const resetQuiz = () => {
     setStarted(false)
     setIndex(0)
-    setAnswers([])
     setSelected(null)
+    setMcqAnswers([])
+    setReflections({})
     setFinished(false)
+    setCopied(false)
   }
 
   const certificateDate = () => {
@@ -319,12 +296,67 @@ export const QuizApp = () => {
     }).format(new Date())
   }
 
+  const buildSummary = () => {
+    const scoredSection = scoredQuestions.map((question, questionIndex) => {
+      const chosenIndex = mcqAnswers[questionIndex]
+      const chosenAnswer = chosenIndex === undefined ? "Not answered" : question.options[chosenIndex]
+      const correctAnswer = question.options[question.correct]
+
+      return [
+        `${questionIndex + 1}. ${question.text}`,
+        `Chosen answer: ${chosenAnswer}`,
+        `Correct answer: ${correctAnswer}`,
+        `Explanation: ${question.explanation}`,
+      ].join("\n")
+    }).join("\n\n")
+
+    const reflectionSection = reflectionQuestions.map((question, questionIndex) => {
+      return [
+        `${questionIndex + 1}. ${question.title}`,
+        `Response: ${(reflections[question.id] || "").trim() || "No response provided"}`,
+      ].join("\n")
+    }).join("\n\n")
+
+    return [
+      "Exotic Online University - Sales Quiz Submission",
+      `Name: ${name}`,
+      `Email: ${email}`,
+      `Department: ${department || "Not provided"}`,
+      `Date: ${certificateDate()}`,
+      `Score: ${percentage}% (${score}/${scoredQuestions.length})`,
+      `Status: ${passed ? "Passed" : "Review needed"}`,
+      "",
+      "Scored sales questions",
+      scoredSection,
+      "",
+      "Written responses",
+      reflectionSection,
+    ].join("\n")
+  }
+
+  const emailSummary = () => {
+    const recipients = [email.trim(), "ian@exotic-online.com", "ceo@exotic-online.com"].filter(Boolean).join(",")
+    const subject = `Exotic Online University Sales Quiz - ${name}`
+    const body = buildSummary()
+
+    return `mailto:${recipients}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+  }
+
+  const copySummary = async () => {
+    try {
+      await navigator.clipboard.writeText(buildSummary())
+      setCopied(true)
+    } catch {
+      setCopied(false)
+    }
+  }
+
   if (!started) {
     return (
       <div className="not-prose" style={cardStyle}>
-        <h2 style={{ marginTop: 0, marginBottom: "8px" }}>Certification Quiz</h2>
+        <h2 style={{ marginTop: 0, marginBottom: "8px" }}>Sales Readiness Quiz</h2>
         <p style={{ marginTop: 0, color: "#4b5563" }}>
-          20 questions across the full escort lifecycle. Score 80% or above to pass.
+          Sales-focused certification with scored questions plus written responses on discounting, lead quality, churn risk, and market diagnosis.
         </p>
         <div style={{ display: "grid", gap: "12px", marginTop: "20px" }}>
           <label>
@@ -337,13 +369,22 @@ export const QuizApp = () => {
             />
           </label>
           <label>
+            <div style={{ fontWeight: 600, marginBottom: "6px" }}>Your email</div>
+            <input
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="e.g. amara@exotic-online.com"
+              type="email"
+              style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "1px solid #d1d5db" }}
+            />
+          </label>
+          <label>
             <div style={{ fontWeight: 600, marginBottom: "6px" }}>Department</div>
             <select
               value={department}
               onChange={(event) => setDepartment(event.target.value)}
               style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "1px solid #d1d5db" }}
             >
-              <option value="">Select department</option>
               {departments.map((item) => (
                 <option key={item} value={item}>
                   {item}
@@ -353,20 +394,23 @@ export const QuizApp = () => {
           </label>
         </div>
         <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "18px", color: "#6b7280" }}>
-          <span><strong>20</strong> questions</span>
+          <span><strong>{scoredQuestions.length}</strong> scored sales questions</span>
+          <span><strong>{reflectionQuestions.length}</strong> written responses</span>
           <span><strong>80%</strong> pass mark</span>
-          <span><strong>All 54 African markets</strong> scope</span>
+        </div>
+        <div style={{ marginTop: "16px", padding: "14px 16px", borderRadius: "12px", background: "#f9fafb", color: "#4b5563" }}>
+          Responses are compiled into an email draft addressed to you, <strong>ian@exotic-online.com</strong>, and <strong>ceo@exotic-online.com</strong> when you finish.
         </div>
         <button
           onClick={beginQuiz}
-          disabled={!name.trim()}
+          disabled={!name.trim() || !email.trim()}
           style={{
             ...buttonStyle,
             marginTop: "18px",
             background: "#fc2c24",
             color: "#ffffff",
-            cursor: !name.trim() ? "not-allowed" : "pointer",
-            opacity: !name.trim() ? 0.5 : 1,
+            cursor: !name.trim() || !email.trim() ? "not-allowed" : "pointer",
+            opacity: !name.trim() || !email.trim() ? 0.5 : 1,
           }}
         >
           Start quiz
@@ -375,35 +419,35 @@ export const QuizApp = () => {
     )
   }
 
-  if (!finished) {
-    const isCorrect = selected === currentQuestion.correct
+  if (!finished && !isReflectionStage) {
+    const isCorrect = selected === currentScoredQuestion.correct
 
     return (
       <div className="not-prose" style={cardStyle}>
         <div style={{ fontSize: "12px", fontWeight: 700, color: "#fc2c24", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-          {currentQuestion.stage}
+          {currentScoredQuestion.stage}
         </div>
         <div style={{ marginTop: "10px", marginBottom: "6px", fontSize: "14px", color: "#6b7280" }}>
-          Question {index + 1} of {questions.length}
+          Question {index + 1} of {totalQuestions}
         </div>
         <div style={{ height: "8px", borderRadius: "999px", background: "#e5e7eb", overflow: "hidden", marginTop: "10px" }}>
           <div
             style={{
-              width: `${((index + 1) / questions.length) * 100}%`,
+              width: `${((index + 1) / totalQuestions) * 100}%`,
               height: "100%",
               background: "#fc2c24",
             }}
           />
         </div>
-        <h2 style={{ marginTop: "18px", marginBottom: "16px" }}>{currentQuestion.text}</h2>
+        <h2 style={{ marginTop: "18px", marginBottom: "16px" }}>{currentScoredQuestion.text}</h2>
 
         <div style={{ display: "grid", gap: "10px" }}>
-          {currentQuestion.options.map((option, optionIndex) => {
+          {currentScoredQuestion.options.map((option, optionIndex) => {
             const showState = selected !== null
             const background =
               !showState
                 ? "#ffffff"
-                : optionIndex === currentQuestion.correct
+                : optionIndex === currentScoredQuestion.correct
                   ? "#dcfce7"
                   : optionIndex === selected
                     ? "#fee2e2"
@@ -411,7 +455,7 @@ export const QuizApp = () => {
             const border =
               !showState
                 ? "1px solid #d1d5db"
-                : optionIndex === currentQuestion.correct
+                : optionIndex === currentScoredQuestion.correct
                   ? "1px solid #16a34a"
                   : optionIndex === selected
                     ? "1px solid #dc2626"
@@ -447,7 +491,7 @@ export const QuizApp = () => {
               background: isCorrect ? "#dcfce7" : "#fef3c7",
             }}
           >
-            <strong>{isCorrect ? "Correct." : "Not quite."}</strong> {currentQuestion.explanation}
+            <strong>{isCorrect ? "Correct." : "Not quite."}</strong> {currentScoredQuestion.explanation}
           </div>
         )}
 
@@ -463,7 +507,66 @@ export const QuizApp = () => {
             opacity: selected === null ? 0.5 : 1,
           }}
         >
-          {index === questions.length - 1 ? "See results" : "Next question"}
+          {index === scoredQuestions.length - 1 ? "Move to written responses" : "Next question"}
+        </button>
+      </div>
+    )
+  }
+
+  if (!finished && isReflectionStage) {
+    return (
+      <div className="not-prose" style={cardStyle}>
+        <div style={{ fontSize: "12px", fontWeight: 700, color: "#fc2c24", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          {currentReflection.stage}
+        </div>
+        <div style={{ marginTop: "10px", marginBottom: "6px", fontSize: "14px", color: "#6b7280" }}>
+          Question {index + 1} of {totalQuestions}
+        </div>
+        <div style={{ height: "8px", borderRadius: "999px", background: "#e5e7eb", overflow: "hidden", marginTop: "10px" }}>
+          <div
+            style={{
+              width: `${((index + 1) / totalQuestions) * 100}%`,
+              height: "100%",
+              background: "#fc2c24",
+            }}
+          />
+        </div>
+        <h2 style={{ marginTop: "18px", marginBottom: "12px" }}>{currentReflection.title}</h2>
+        <p style={{ marginTop: 0, marginBottom: "14px", color: "#6b7280" }}>
+          Keep it practical and specific. Your response is included in the submission email summary.
+        </p>
+        <textarea
+          value={currentReflectionValue}
+          onChange={(event) => updateReflection(currentReflection.id, event.target.value)}
+          placeholder={currentReflection.placeholder}
+          maxLength={currentReflection.maxLength}
+          style={{
+            width: "100%",
+            minHeight: "220px",
+            padding: "14px 16px",
+            borderRadius: "12px",
+            border: "1px solid #d1d5db",
+            resize: "vertical",
+            font: "inherit",
+            lineHeight: 1.6,
+          }}
+        />
+        <div style={{ marginTop: "10px", color: "#6b7280", fontSize: "13px" }}>
+          {currentReflectionValue.length}/{currentReflection.maxLength} characters
+        </div>
+        <button
+          onClick={goNext}
+          disabled={!currentReflectionValue.trim()}
+          style={{
+            ...buttonStyle,
+            marginTop: "18px",
+            background: "#111827",
+            color: "#ffffff",
+            cursor: !currentReflectionValue.trim() ? "not-allowed" : "pointer",
+            opacity: !currentReflectionValue.trim() ? 0.5 : 1,
+          }}
+        >
+          {index === totalQuestions - 1 ? "Finish quiz" : "Next response"}
         </button>
       </div>
     )
@@ -474,12 +577,12 @@ export const QuizApp = () => {
       <div style={cardStyle}>
         <h2 style={{ marginTop: 0 }}>Quiz Results</h2>
         <p>
-          {name}, you scored <strong>{percentage}%</strong> ({score}/{questions.length}).
+          {name}, you scored <strong>{percentage}%</strong> ({score}/{scoredQuestions.length}) on the scored sales questions.
         </p>
         <p>
           {passed
-            ? "You passed the certification quiz."
-            : "You need 80% or above to pass. Review the answers below and try again."}
+            ? "You passed the scored section and completed all written responses."
+            : "Review the scored questions below and refine your written answers if needed."}
         </p>
         <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "16px" }}>
           {passed && (
@@ -490,12 +593,35 @@ export const QuizApp = () => {
               Print certificate
             </button>
           )}
+          <a
+            href={emailSummary()}
+            style={{
+              ...buttonStyle,
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "#111827",
+              color: "#ffffff",
+              textDecoration: "none",
+            }}
+          >
+            Open email draft
+          </a>
+          <button
+            onClick={copySummary}
+            style={{ ...buttonStyle, background: "#f3f4f6", color: "#111827", cursor: "pointer" }}
+          >
+            {copied ? "Copied summary" : "Copy summary"}
+          </button>
           <button
             onClick={resetQuiz}
-            style={{ ...buttonStyle, background: "#111827", color: "#ffffff", cursor: "pointer" }}
+            style={{ ...buttonStyle, background: "#ffffff", color: "#111827", border: "1px solid #d1d5db", cursor: "pointer" }}
           >
             Retake quiz
           </button>
+        </div>
+        <div style={{ marginTop: "16px", padding: "14px 16px", borderRadius: "12px", background: "#f9fafb", color: "#4b5563" }}>
+          This docs site is static, so the quiz prepares a full email draft with your answers addressed to you, <strong>ian@exotic-online.com</strong>, and <strong>ceo@exotic-online.com</strong>. Use <strong>Copy summary</strong> as a backup if your email client trims long responses.
         </div>
       </div>
 
@@ -506,38 +632,50 @@ export const QuizApp = () => {
           </div>
           <h2 style={{ marginBottom: "8px" }}>{name}</h2>
           <p style={{ marginTop: 0 }}>
-            has successfully completed the Exotic Online University certification with a score of <strong>{percentage}%</strong>.
+            has successfully completed the Exotic Online University sales readiness quiz with a scored result of <strong>{percentage}%</strong>.
           </p>
           <div style={{ display: "grid", gap: "6px", marginTop: "18px" }}>
+            <div><strong>Email:</strong> {email}</div>
             <div><strong>Department:</strong> {department || "Not provided"}</div>
             <div><strong>Date issued:</strong> {certificateDate()}</div>
-            <div><strong>Scope:</strong> All 54 African markets</div>
+            <div><strong>Scope:</strong> Sales judgment, retention, discounts, market diagnosis, and customer experience</div>
           </div>
         </div>
       )}
 
       {wrongAnswers.length > 0 && (
         <div style={cardStyle}>
-          <h2 style={{ marginTop: 0 }}>Questions To Review</h2>
-          <div style={{ display: "grid", gap: "14px" }}>
-            {wrongAnswers.map((item, reviewIndex) => (
-              <div
-                key={`${item.question.text}-${reviewIndex}`}
-                style={{ padding: "14px 16px", borderRadius: "12px", background: "#f9fafb" }}
-              >
-                <div style={{ fontWeight: 700 }}>{item.question.text}</div>
-                <div style={{ marginTop: "6px" }}>
-                  <strong>Your answer:</strong> {item.question.options[item.answer]}
+          <h3 style={{ marginTop: 0 }}>Scored questions to review</h3>
+          <div style={{ display: "grid", gap: "16px" }}>
+            {wrongAnswers.map(({ answer, question }) => (
+              <div key={question.text} style={{ paddingTop: "12px", borderTop: "1px solid #e5e7eb" }}>
+                <div style={{ fontWeight: 700 }}>{question.text}</div>
+                <div style={{ marginTop: "8px", color: "#b91c1c" }}>
+                  <strong>Your answer:</strong> {question.options[answer] || "Not answered"}
                 </div>
-                <div>
-                  <strong>Correct answer:</strong> {item.question.options[item.question.correct]}
+                <div style={{ marginTop: "6px", color: "#166534" }}>
+                  <strong>Best answer:</strong> {question.options[question.correct]}
                 </div>
-                <div style={{ marginTop: "6px", color: "#4b5563" }}>{item.question.explanation}</div>
+                <div style={{ marginTop: "6px", color: "#4b5563" }}>{question.explanation}</div>
               </div>
             ))}
           </div>
         </div>
       )}
+
+      <div style={cardStyle}>
+        <h3 style={{ marginTop: 0 }}>Written response summary</h3>
+        <div style={{ display: "grid", gap: "16px" }}>
+          {reflectionQuestions.map((question) => (
+            <div key={question.id} style={{ paddingTop: "12px", borderTop: "1px solid #e5e7eb" }}>
+              <div style={{ fontWeight: 700 }}>{question.title}</div>
+              <div style={{ marginTop: "8px", whiteSpace: "pre-wrap", color: "#374151" }}>
+                {(reflections[question.id] || "").trim() || "No response provided"}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
