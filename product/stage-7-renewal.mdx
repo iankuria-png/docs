@@ -1,0 +1,41 @@
+---
+title: "Stage 7 — Renewal"
+description: "How subscriptions expire, how the CRM sends reminders, and how escorts renew."
+---
+
+## What the customer sees
+
+As an escort's subscription approaches expiry, they begin receiving SMS or WhatsApp reminder messages from Exotic. These messages are sent on a cadence configured by the sales team (e.g. 14 days before, 7 days before, 3 days before, day of expiry).
+
+The message typically says something like:
+
+> *"Your Exotic listing expires in 7 days. Renew now to keep your profile live and continue receiving clients. Reply or call us on [number]."*
+
+If the escort doesn't renew, their profile goes private on expiry and they stop receiving client enquiries. This is the primary driver for renewal — the direct revenue impact.
+
+---
+
+## Under the hood
+
+| What happens | Code reference |
+|---|---|
+| Renewal overview (buckets: active, risk, pending, expired, lapsed) | `RenewalService::buildOverview()` — `app/Services/RenewalService.php:38` |
+| Running a renewal campaign | `RenewalController::run()` — `app/Http/Controllers/CRM/RenewalController.php:23` — dispatches SMS/email reminders |
+| Campaign configuration | `RenewalCampaign` model — trigger days, product, template, channel |
+| Run history | `RenewalRun` model — records every execution with targets reached, sent, failed, skipped |
+| Expiry detection | `deals.expires_at`; legacy: `clients.escort_expire`, `clients.premium_expire`, `clients.featured_expire` |
+
+---
+
+<Note>
+  **Interview pending — content to be added:** SOP for the renewal call workflow (who calls, when, what to say), renewal objection handling scripts, what happens if an escort wants to downgrade on renewal, bulk campaign run cadence, Finance notes on renewal revenue tracking, and certification questions.
+</Note>
+
+<CardGroup cols={2}>
+  <Card title="Next: Upgrades →" icon="arrow-right" href="/product/stage-8-upgrades">
+    Moving to a higher subscription tier
+  </Card>
+  <Card title="Renewal campaigns (CRM guide)" icon="bell" href="/campaigns/renewal-campaigns">
+    How to configure and run renewal campaigns
+  </Card>
+</CardGroup>

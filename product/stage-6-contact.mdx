@@ -1,0 +1,48 @@
+---
+title: "Stage 6 — Customer contact"
+description: "How website visitors contact active escorts, and what staff should know about each channel."
+---
+
+## What the customer sees
+
+Once an escort's profile is live, website visitors can contact them through multiple channels displayed on the profile page. The visitor chooses the method that suits them:
+
+| Channel | How it works | Status |
+|---|---|---|
+| **WhatsApp** | Tap the WhatsApp button → opens a pre-filled WhatsApp message to the escort's number | Live |
+| **Phone call** | Tap to reveal the phone number → dial directly | Live |
+| **SMS** | Tap to reveal and send an SMS to the escort | Live |
+| **Viber** | Viber deep link opens a Viber message | Live |
+| **Telegram** | Telegram contact button | Coming soon |
+
+WhatsApp is the highest-volume contact channel. Most escorts prefer it because it provides message history and read receipts.
+
+<Info>
+  From the CRM's perspective, when a visitor contacts an escort via the SupportBoard chat widget, a **Lead** is created automatically. Phone and WhatsApp contacts are not tracked in the CRM — they happen directly between the visitor and the escort.
+</Info>
+
+---
+
+## Under the hood
+
+| What happens | Code reference |
+|---|---|
+| SupportBoard chat contacts auto-imported as leads | `SupportBoardLeadImportService` — `app/Services/SupportBoardLeadImportService.php` |
+| Lead stores SupportBoard references | `leads.sb_user_id`, `leads.sb_conversation_id`, `leads.sb_last_activity_at` |
+| Analytics tracker on WordPress | `class-analytics-tracker.php` in `exotic-crm-sync` plugin — tracks contact events |
+| Phone/WhatsApp/Viber contacts | Not tracked in CRM — direct device-to-device communication |
+
+---
+
+<Note>
+  **Interview pending — content to be added:** How WhatsApp links are formatted per market (country code prefix), whether phone-reveal is gated (counted, logged, or limited), how Viber links work, SupportBoard chat widget configuration, SEO implications of each contact method (indexed vs. hidden numbers), and certification questions.
+</Note>
+
+<CardGroup cols={2}>
+  <Card title="Next: Renewal →" icon="arrow-right" href="/product/stage-7-renewal">
+    What happens when a subscription nears expiry
+  </Card>
+  <Card title="Lead pipeline (CRM guide)" icon="funnel" href="/leads/overview">
+    Managing SupportBoard-imported leads in the CRM
+  </Card>
+</CardGroup>

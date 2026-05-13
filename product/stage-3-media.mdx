@@ -1,0 +1,37 @@
+---
+title: "Stage 3 — Profile setup & media upload"
+description: "How an escort completes their profile and uploads photos and videos."
+---
+
+## What the customer sees
+
+After registration, the escort logs into their WordPress account and fills in their profile. This includes their bio, rates, city, available services, and contact preferences. They then upload photos and — optionally — videos. The quality and completeness of this step directly affects how many enquiries they receive once the profile goes live.
+
+Photos are uploaded through the WordPress profile editor. Up to **20 images** (max 5MB each) and **5 videos** are supported. Accepted formats: JPEG, PNG, WebP, GIF, AVIF. One photo must be designated as the main (cover) image — this appears in search result cards.
+
+---
+
+## Under the hood
+
+| What happens | Code reference |
+|---|---|
+| Photo upload handled by WordPress plugin | `class-media-endpoint.php` in `exotic-crm-sync` — endpoints: `GET/POST/DELETE /clients/{post_id}/media` |
+| Upload limits | 5MB per image, 20 images max, 5 videos max (configurable via WP options) |
+| CRM display image selection | `ClientProfileImageService::normalise()` — `app/Services/ClientProfileImageService.php:10` |
+| Non-blocking upload queue | Recent commits made uploads non-blocking + added retry controls — slow uploads don't block form submission |
+| Profile completeness score | Computed from weighted profile fields; shown in CRM → client detail → Overview tab |
+
+---
+
+<Note>
+  **Interview pending — content to be added:** SOP for what staff should check on a new profile (completeness thresholds, common photo rejection reasons, content policy guidance), department notes (SEO: which fields most affect ranking; CS: how to help an escort who can't upload photos), FAQs, troubleshooting, and certification questions.
+</Note>
+
+<CardGroup cols={2}>
+  <Card title="Next: Verification →" icon="arrow-right" href="/product/stage-4-verification">
+    How staff verify the escort's identity and age
+  </Card>
+  <Card title="Profile completeness (CRM guide)" icon="chart-bar" href="/clients/subscriptions">
+    Completeness score and profile health
+  </Card>
+</CardGroup>

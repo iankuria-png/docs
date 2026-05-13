@@ -1,0 +1,196 @@
+---
+title: "Stage 5b — Payment initiation"
+description: "How payment is initiated — M-Pesa STK Push and hosted checkout — and what the escort experiences at each step."
+---
+
+## What the customer sees
+
+After selecting their package, the escort reaches the **payment screen**. What they see depends on which payment provider is active for their market:
+
+**M-Pesa STK Push (most common in Kenya)**
+The escort enters their M-Pesa phone number and clicks Pay. Within seconds, an M-Pesa prompt appears on their phone asking them to enter their PIN to authorise the payment. The checkout page shows a "Waiting for payment..." message.
+
+**Hosted checkout (Paystack / Pesapal / PawaPay)**
+The escort is redirected to a hosted payment page — a page on the provider's website where they enter card details or complete a mobile money authorisation. On completion they are redirected back to the Exotic site.
+
+In both cases, the escort should **not close the browser tab** while payment is processing. They wait for a confirmation message before assuming the payment succeeded.
+
+<Warning>
+  The most common reason an escort reports "I paid but my profile isn't live" is that they closed the app or lost connectivity after entering their PIN but before the confirmation callback reached the system. The payment may have gone through on M-Pesa's side but the CRM hasn't received the webhook yet. See Stage 5e for recovery steps.
+</Warning>
+
+---
+
+## Under the hood
+
+| What happens | Code reference |
+|---|---|
+| Payment screen requests available payment methods for the market | `PlatformController::self_service_payment_options()` — `app/Http/Controllers/API/PlatformController.php:311` |
+| STK Push request sent to KopoKopo/Daraja with escort's phone number | `BillingGatewayService::initiateMpesaStk()` — `app/Services/BillingGatewayService.php:173` |
+| Hosted checkout URL generated and returned to browser | `BillingGatewayService::initiateHostedCheckoutForRouting()` — `app/Services/BillingGatewayService.php:185` |
+| Payment attempt recorded | `PaymentAttempt` record created with `attempt_type = 'stk_push'` or `'hosted_checkout_init'` |
+| Payment status set to `initiated` → `pending` | `payments` table updated as provider acknowledgement is received |
+| Escort's browser navigates to `/billing/complete?payment={id}` | Checkout polling page — shows "Waiting for confirmation..." until callback arrives |
+
+The `BillingMarketProviderBinding` table controls which providers are available for each market. Provider selection (e.g. KopoKopo vs. Daraja for M-Pesa) is determined by this routing config — the escort sees only the options enabled for their market.
+
+---
+
+## Step-by-step SOP
+
+<Steps>
+  <Step title="Escort reaches the payment screen">
+    After package selection, the checkout redirects to the payment screen. Available payment methods are shown (e.g. M-Pesa, card). 
+
+    **Screenshot slot:** *Payment screen showing M-Pesa phone input and Pay button*
+  </Step>
+  <Step title="M-Pesa path: Escort enters phone number and clicks Pay">
+    The system sends an STK Push request to M-Pesa via KopoKopo or Daraja. The escort's phone rings/vibrates with an M-Pesa prompt within 5–10 seconds.
+
+    **Screenshot slot:** *M-Pesa STK Push notification on phone screen*
+  </Step>
+  <Step title="M-Pesa path: Escort enters their PIN">
+    The escort opens the M-Pesa prompt and enters their PIN. M-Pesa processes the payment. The browser shows "Waiting for confirmation…"
+
+    **⚠ Critical:** The escort must NOT close the browser at this point. The page is polling for the callback. If they close it, the payment may still succeed, but they'll need CS to confirm activation.
+  </Step>
+  <Step title="Hosted checkout path: Escort is redirected to provider page">
+    For Paystack, Pesapal, or PawaPay, the escort is redirected to the provider's hosted page. They complete payment there and are redirected back to the Exotic site on success.
+
+    **Screenshot slot:** *Paystack hosted checkout page (or Pesapal)*
+  </Step>
+  <Step title="Browser shows 'Waiting for payment confirmation'">
+    Regardless of provider, the Exotic site polls for a webhook callback. Once received, it automatically advances to Stage 5c. Average wait: 5–30 seconds for STK Push; up to 60 seconds for hosted checkout.
+  </Step>
+</Steps>
+
+---
+
+## Department notes
+
+<AccordionGroup>
+  <Accordion title="Sales & CS">
+    **Helping an escort through payment:**
+    - If the escort's STK Push doesn't arrive within 30 seconds, ask them to check their M-Pesa network signal. STK Pushes sometimes fail if the phone is on 2G or in low-signal area. Ask them to move to better signal and retry.
+    - If they entered the wrong phone number, the STK Push will go to the wrong number. Have them use the "Send payment link" feature in the CRM instead — this lets them pay from any phone.
+    - If they dismissed the M-Pesa prompt without entering their PIN, they can request a new STK Push. The original payment will expire automatically.
+
+    **Sending a payment link from the CRM:**
+    1. CRM → Deals → find the escort's pending deal
+    2. Action menu → Activate → choose `link` as the payment method
+    3. Confirm the phone number and click Send
+    4. The escort receives an SMS with a direct payment link they can open on any device
+  </Accordion>
+
+  <Accordion title="Finance">
+    **What "initiated" and "pending" mean in the payment queue:**
+    - `initiated` — the STK Push or checkout request was sent; waiting for the escort to act
+    - `pending` — the provider has acknowledged the request and is processing it
+
+    Payments stuck in `initiated` for more than 1 hour should be reviewed. The escort either didn't receive the prompt, dismissed it, or had insufficient M-Pesa balance. Action: send a fresh payment link.
+
+    **Recovery queue aging buckets (guidance):**
+    - Under 1 hour: wait for the callback
+    - 1–24 hours: send a payment link now
+    - 1–3 days: retry STK Push, then follow up by phone
+    - Over 72 hours: escalate and follow up manually
+  </Accordion>
+
+  <Accordion title="SEO & IT">
+    **Provider routing:** The payment provider used for each market is configured in `BillingMarketProviderBinding`. If escorts on a specific market report that payment options aren't showing or the STK Push never arrives, check this table for active `subscription_push` bindings.
+
+    **STK Push failure diagnostic:**
+    1. Check `PaymentAttempt` records for the payment ID — `attempt_type = 'stk_push'`, `status = 'failed'`
+    2. Check `raw_payload` on the attempt for the provider error code
+    3. Common codes: insufficient balance (M-Pesa), phone not M-Pesa registered, network timeout
+    4. KopoKopo dashboard → check webhook delivery logs for the payment reference
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Frequently asked questions
+
+<AccordionGroup>
+  <Accordion title="The escort says they didn't receive the M-Pesa prompt — what do I tell them?">
+    1. Ask them to check their phone signal — STK Push requires a stable data/voice connection.
+    2. Confirm they entered the correct M-Pesa registered phone number.
+    3. Ask them to wait 60 seconds and try again. If still no prompt, send them a payment link via CRM instead.
+    4. If using an M-Pesa agent line or Bonga Points account, STK Push may not be supported — payment link or Till number payment is the alternative.
+  </Accordion>
+
+  <Accordion title="The escort entered their PIN but got an 'insufficient funds' error — what now?">
+    The payment attempt is marked `failed`. The escort needs to top up their M-Pesa balance and retry. From the CRM, send a new STK Push from the deal's action menu, or send a payment link they can use when they have funds.
+  </Accordion>
+
+  <Accordion title="Can an escort pay using a different phone from their registered M-Pesa number?">
+    Yes — use the **payment link** method instead of STK Push. The link can be opened and paid from any M-Pesa number or card. Send it from CRM → Deals → Activate → payment method = `link`.
+  </Accordion>
+
+  <Accordion title="How long does the escort have to complete payment after the checkout starts?">
+    STK Push prompts expire after approximately **5 minutes** if the PIN is not entered. Hosted checkout sessions typically expire after **30 minutes**. After expiry, the payment status moves to `expired` and a new payment initiation is required.
+  </Accordion>
+
+  <Accordion title="What if the escort is redirected to a hosted checkout page but it doesn't load?">
+    This is likely a browser compatibility issue with the provider (Paystack/Pesapal). Ask the escort to try Chrome on their phone. If the issue persists, escalate to IT — the provider integration may need a callback URL check.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+| Symptom | Likely cause | Where to look | Fix |
+|---|---|---|---|
+| STK Push never arrives on escort's phone | Phone off / no signal / wrong number | CRM → Payments → find the payment → `PaymentAttempt.status` | Send payment link via CRM instead |
+| Escort entered PIN but got "insufficient funds" | Low M-Pesa balance | M-Pesa message on escort's phone | Ask escort to top up and send new STK Push from CRM |
+| STK Push prompt was dismissed without entering PIN | Escort dismissed by mistake | Payment status = `initiated` (still waiting) | Trigger new STK Push from CRM; original attempt will expire |
+| Hosted checkout page doesn't load | Browser/provider compatibility issue | Try Chrome browser; check provider status | Switch to payment link method; escalate to IT if provider down |
+| Payment stuck in `initiated` for over 1 hour | Escort did not complete payment | CRM → Payments → filter: Status = initiated | Send payment link via CRM |
+| Wrong phone number on STK Push | Escort mis-typed number | `PaymentAttempt.raw_payload` shows the number used | Send new payment link to the correct number |
+
+---
+
+## Certification — MCQ
+
+<AccordionGroup>
+  <Accordion title="Q1: An escort says their M-Pesa prompt never arrived. What is the FIRST action you take?">
+    **A.** Mark the payment as failed and ask them to start a new payment
+
+    **B.** Tell them to wait 24 hours for the prompt to arrive
+
+    **C.** Ask them to check their phone signal, confirm their M-Pesa number, wait 60 seconds, then offer a payment link if still no prompt ✅
+
+    **D.** Cancel the deal and create a new one
+  </Accordion>
+
+  <Accordion title="Q2: What does a payment status of 'initiated' mean?">
+    **A.** The payment has been confirmed and funds received
+
+    **B.** The STK Push or checkout request was sent, but the escort has not yet completed payment ✅
+
+    **C.** The payment was reversed by M-Pesa
+
+    **D.** The payment is awaiting Finance approval
+  </Accordion>
+
+  <Accordion title="Q3: An escort wants to pay using a different phone number from their registered M-Pesa. What is the correct method?">
+    **A.** STK Push — enter the alternative number
+
+    **B.** Ask them to transfer to their registered number first, then pay
+
+    **C.** Payment link — which can be opened and paid from any M-Pesa number or card ✅
+
+    **D.** This is not possible; they must use their registered number
+  </Accordion>
+
+  <Accordion title="Q4: How long does an M-Pesa STK Push prompt remain active before expiring?">
+    **A.** 30 seconds
+
+    **B.** Approximately 5 minutes ✅
+
+    **C.** 1 hour
+
+    **D.** 24 hours
+  </Accordion>
+</AccordionGroup>

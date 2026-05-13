@@ -1,0 +1,44 @@
+---
+title: "Stage 4 — Verification"
+description: "How staff verify an escort's identity and age before their profile can be activated."
+---
+
+## What the customer sees
+
+Before an escort's profile can go live for the first time, they must complete identity and age verification. A member of the Exotic team contacts the escort and asks them to send a photo of a government-issued ID (national ID card, passport, or driver's licence) via WhatsApp.
+
+Staff review the ID to confirm:
+1. The person in the photo matches the profile photos uploaded
+2. The date of birth confirms the escort is of legal adult age
+
+Once verified, the escort receives confirmation that their account is approved and they can proceed to subscription.
+
+<Warning>
+  Verification is a **mandatory step** for all first-time subscriptions. An escort cannot purchase a subscription and have their profile go live until the `verified` flag is set on their CRM client record. This is a legal and platform compliance requirement.
+</Warning>
+
+---
+
+## Under the hood
+
+| What happens | Code reference |
+|---|---|
+| Verified flag on client record | `clients.verified` (boolean, default `false`) — `app/Models/Client.php:57` |
+| Staff sets verified toggle in CRM | CRM → Clients → [client] → Overview → Verified toggle |
+| High-risk flagging (if needed) | `clients.is_high_risk`, `clients.risk_reason_code`, `clients.risk_marked_at`, `clients.risk_marked_by` |
+| No automated ID document processing | Verification is entirely manual — no ID upload system or automated age-check service exists in the current codebase |
+
+---
+
+<Note>
+  **Interview pending — content to be added:** The full SOP for the verification WhatsApp workflow (which number escorts send the ID to, who reviews it, turnaround time SLA, escalation if ID is rejected or unclear), department notes, FAQs ("How long does verification take?", "What ID types are accepted?"), troubleshooting, and certification questions. This section requires input from the Sales & CS team who own this process.
+</Note>
+
+<CardGroup cols={2}>
+  <Card title="Next: Subscription selection →" icon="arrow-right" href="/product/stage-5a-subscription-selection">
+    Choosing a package after verification is complete
+  </Card>
+  <Card title="Client high-risk flagging" icon="flag" href="/clients/managing-profiles">
+    How to flag and manage high-risk profiles in the CRM
+  </Card>
+</CardGroup>

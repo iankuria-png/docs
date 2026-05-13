@@ -1,0 +1,37 @@
+---
+title: "Stage 8 — Upgrades"
+description: "How an escort moves to a higher subscription package tier."
+---
+
+## What the customer sees
+
+An escort on a lower tier (e.g. Basic or Featured) may want to upgrade to a higher-visibility package (e.g. Premium or VIP) after seeing the difference in client enquiry volume. Upgrades are not self-service — the escort contacts their sales agent or the Exotic CS team, who process the upgrade through the CRM.
+
+Once an upgrade is processed, the escort's profile re-provisions at the new tier on WordPress — their listing moves to the higher position in search results and gains any additional features of the new package.
+
+---
+
+## Under the hood
+
+| What happens | Code reference |
+|---|---|
+| Staff updates the deal's product and/or duration | `DealController::update()` — `app/Http/Controllers/CRM/DealController.php:87` — updates `product_id`, `duration`, `status` |
+| Lifecycle re-classification triggered | `SubscriptionLifecycleService::resolveForDeal()` — determines if this is a new subscription or renewal |
+| Profile reprovisioned at new tier on WordPress | `SubscriptionProvisioningService` — same activation path as Stage 5d |
+| Discount support | `deals.discount_percentage`, `deals.discount_approved_by` — discounts above threshold require approval |
+| Product tiers | `products.tier` — links to `ProductPrice` (weekly / bi-weekly / monthly pricing) |
+
+---
+
+<Note>
+  **Interview pending — content to be added:** SOP for processing an upgrade (does the escort pay the difference or a full new fee?), pricing policy for mid-period upgrades, the approval workflow for discount-assisted upgrades, Finance notes on upgrade revenue, and certification questions.
+</Note>
+
+<CardGroup cols={2}>
+  <Card title="Back to Overview →" icon="arrow-left" href="/product/overview">
+    Return to the full journey map
+  </Card>
+  <Card title="Deals & subscriptions (CRM guide)" icon="file-contract" href="/deals/overview">
+    Managing deals and package changes in the CRM
+  </Card>
+</CardGroup>

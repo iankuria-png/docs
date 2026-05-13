@@ -1,0 +1,135 @@
+---
+title: "Certification — Exotic Online University"
+description: "The final knowledge check. Complete all questions to demonstrate readiness to support, sell, and explain the Exotic platform."
+---
+
+# Exotic Online University — Final Exam
+
+This exam consolidates knowledge from all fully-written stages. Pass it by answering all questions correctly. Answers are in the collapsible blocks below each question.
+
+<Info>
+  **Before you start:** Make sure you have read Stages 5a through 5e completely. The scenarios in Part 3 require you to apply knowledge from multiple stages.
+</Info>
+
+---
+
+## Part 1 — Customer journey knowledge
+
+<AccordionGroup>
+  <Accordion title="Q1: List the nine stages of the Exotic escort lifecycle in order.">
+    **Answer:**
+    1. Discover
+    2. Register & account creation
+    3. Profile setup & media upload
+    4. Verification
+    5a. Subscription selection
+    5b. Payment initiation
+    5c. Payment confirmation
+    5d. Profile activation
+    6. Customer contact
+    7. Renewal
+    8. Upgrades
+  </Accordion>
+
+  <Accordion title="Q2: What is the SINGLE fastest way to locate a payment record in the CRM?">
+    **Answer:** Search by the **M-Pesa transaction code** (e.g. `RFX4K2T8W5`) from the escort's confirmation SMS. CRM → Payments → search bar → paste the code.
+  </Accordion>
+
+  <Accordion title="Q3: An escort's profile was live yesterday but is private today and they didn't request deactivation. Name THREE possible causes.">
+    **Answer (any three):**
+    - Subscription expired (`deals.expires_at` passed)
+    - M-Pesa payment was reversed (`payments.status = 'reversed'`)
+    - Staff manually deactivated the subscription
+    - Amount mismatch placed the payment in review and provisioning was not completed
+    - WordPress sync failure left the profile in a stale state
+  </Accordion>
+
+  <Accordion title="Q4: Which payment method should CS suggest when an escort wants to pay from a phone number different from their registered M-Pesa number?">
+    **Answer:** **Payment link** (method = `link` in CRM → Deals → Activate). The link can be opened and paid from any M-Pesa number or card, not just the registered one.
+  </Accordion>
+
+  <Accordion title="Q5: What three contact channels can a visitor use to contact an escort on the public Exotic site?">
+    **Answer:** WhatsApp (primary), phone call/reveal, SMS, Viber. Telegram is coming soon.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Part 2 — Department knowledge
+
+<AccordionGroup>
+  <Accordion title="Q6 (Sales & CS): Name the three key points used to handle the objection 'Why should I pay — there are free listing sites?'">
+    **Answer:**
+    1. **Lead quality** — Exotic attracts serious, paying clients. Free sites are full of time-wasters.
+    2. **Visibility** — Paid profiles rank higher on Google and within the site. Free listings are buried.
+    3. **Support** — Dedicated CS, renewal reminders, and account management that free sites don't offer.
+  </Accordion>
+
+  <Accordion title="Q7 (Finance): What does 'wallet_funding_settlement_review' mean, and what action does Finance take?">
+    **Answer:** The payment amount received differs from the expected subscription price by more than 5%. The CRM holds the payment for Finance to manually review. Finance checks whether the difference is acceptable (e.g. due to a discount), then confirms or rejects the match. If confirmed, provisioning proceeds automatically.
+  </Accordion>
+
+  <Accordion title="Q8 (Finance): Name the three CS complaints identified as most common, in any order.">
+    **Answer:**
+    1. "I paid but my profile isn't live"
+    2. "I can't log in to my account"
+    3. "I'm not getting any client contacts"
+  </Accordion>
+
+  <Accordion title="Q9 (IT): A batch of webhook callbacks is being rejected with status 401. What is the cause and fix?">
+    **Answer:** **Cause:** HMAC signature mismatch — the webhook secret in the CRM doesn't match the secret configured in KopoKopo. **Fix:** Log into KopoKopo dashboard, copy the current webhook secret, update it in CRM → Settings → Integrations → [market] → KopoKopo webhook secret. Then manually re-activate any deals that missed activation during the failure window.
+  </Accordion>
+
+  <Accordion title="Q10 (SEO & IT): What determines which package tier position an escort appears at in search results?">
+    **Answer:** The `products.tier` field on the deal's linked product. Higher tiers (VIP, VVIP) appear above lower tiers (Featured, Basic) in search results. This is configured per market in Settings → Integrations → Packages.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Part 3 — Scenario test
+
+<AccordionGroup>
+  <Accordion title="Scenario A: The 'I paid but nothing happened' call">
+    **Situation:** An escort calls in. She paid KES 5,000 via M-Pesa 2 hours ago. She has the M-Pesa SMS with code `QWE9876543`. Her profile is still private.
+
+    **Write your exact step-by-step response:**
+
+    **Model answer:**
+    1. Note the transaction code: `QWE9876543`
+    2. CRM → Payments → search `QWE9876543`
+    3. Diagnose based on what you find:
+       - **Payment not found:** Escalate to IT — webhook may not have arrived. Ask escort to wait and call back in 15 minutes.
+       - **`initiated` or `pending`:** Payment not confirmed yet. Ask her to check her M-Pesa messages — did she receive a confirmation? If yes, escalate to IT (callback may be delayed). If no, she may not have completed the PIN entry — retry via payment link.
+       - **`completed` + deal `active`:** Her profile should be live. Ask her to hard-refresh her browser and search for her name on the site directly.
+       - **`completed` + deal `pending`:** Provisioning is stuck. Escalate to IT with deal ID and payment ID.
+       - **`manual_review`:** Finance needs to confirm the payment match first — inform Finance and give the escort an ETA of 2–4 hours.
+       - **`reversed`:** M-Pesa reversed her payment. Inform her clearly and empathetically; she needs to pay again. Check if there's a system issue causing reversals.
+    4. Whatever the outcome: create a note in her CRM timeline documenting the complaint and your action.
+  </Accordion>
+
+  <Accordion title="Scenario B: New team member onboarding quiz">
+    **Situation:** A new sales agent joins the team. They ask you: "Walk me through what happens from the moment a new escort decides to pay, to the moment their profile is live."
+
+    **Give the answer in plain language (no jargon):**
+
+    **Model answer:**
+    "The escort goes to the Exotic website and clicks the Subscribe button on their profile. They see the available packages — Basic, Featured, Premium, VIP, VVIP — and pick the one they want along with how long they want to subscribe for (weekly or monthly).
+
+    They click Pay. If they're using M-Pesa, they enter their phone number and get a prompt on their phone asking for their M-Pesa PIN. They enter the PIN and get an M-Pesa confirmation SMS — that's their proof the payment went through.
+
+    Meanwhile, our system receives a notification from M-Pesa confirming the payment. It matches the payment to the escort's account, creates a subscription deal, and tells our WordPress site to publish their profile. The whole thing takes about 30 to 60 seconds.
+
+    The escort's checkout page updates to say 'Your profile is now live!' and they can click through to see their listing on the site.
+
+    If anything goes wrong at any of those steps — payment not confirmed, profile not activated, wrong phone number — that's when CS steps in using the CRM and the M-Pesa transaction code to diagnose and fix the issue."
+  </Accordion>
+</AccordionGroup>
+
+---
+
+<Info>
+  **Certification complete.** Once you can answer all questions in Parts 1–3 without looking at the answers, you are ready to support, sell, and explain the Exotic platform confidently.
+
+  Return to the [overview](/product/overview) to review any stage, or proceed to the CRM User Guide for tool-specific training.
+</Info>

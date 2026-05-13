@@ -1,0 +1,212 @@
+---
+title: "Stage 5c — Payment confirmation"
+description: "How the payment provider notifies the CRM, how the payment is matched to the escort's account, and what triggers subscription provisioning."
+---
+
+## What the customer sees
+
+Once the escort enters their M-Pesa PIN (or completes hosted checkout), M-Pesa or the payment provider sends them a **confirmation SMS** — this arrives within seconds. It reads something like:
+
+> *"KES 3,500.00 paid to EXOTIC KENYA. M-Pesa code: RFX4K2T8W5. Balance: KES 1,234.56."*
+
+At the same time, the checkout page on the Exotic site detects the payment and updates to show **"Payment received — activating your profile…"**
+
+The escort does not need to do anything at this stage. The system handles everything automatically: matching the payment to their account, creating the subscription deal, and triggering profile activation (Stage 5d).
+
+<Info>
+  The M-Pesa confirmation SMS is the escort's proof of payment. If they contact CS claiming they paid but their profile isn't live, ask them to share this SMS. The M-Pesa transaction code (e.g. `RFX4K2T8W5`) is used to look up the payment in the CRM.
+</Info>
+
+---
+
+## Under the hood
+
+This is the most technically complex stage. A webhook (callback) fires from the payment provider into the CRM, triggering a chain of events.
+
+| What happens | Code reference |
+|---|---|
+| Payment provider posts callback to CRM | `POST /billing/mpesa/callback` → `BillingController::mpesaCallback()` — `app/Http/Controllers/API/BillingController.php:169` |
+| CRM verifies the webhook signature (HMAC check) | `KopoKopoCompatibilityAdapter` — signature mismatch returns 401 |
+| `payment_id` extracted from webhook metadata | Used to locate the CRM payment record |
+| Payment status updated to `completed` | `payments.status`, `payments.transaction_reference`, `payments.completed_at` set |
+| Payment matched to client | `payments.client_id` linked; `match_confidence` scored |
+| Subscription provisioning triggered | `PaymentCompletionService::completeSubscriptionPayment()` — `app/Services/PaymentCompletionService.php:194` |
+| M-Pesa reversal handling (if applicable) | `BillingGatewayService::failPayment()` — sets `payments.status = 'reversed'` |
+| Late/duplicate webhooks de-duplicated | `BillingWebhookEvent` table tracks received callbacks; prevents double-processing |
+
+**For hosted checkout providers (Paystack / Pesapal / PawaPay):** The same pattern applies but the callback routes hit different endpoints (`/billing/paystack/webhook`, `/billing/pesapal/ipn`, `/billing/pawapay/callback`) and use provider-specific signature verification before calling `PaymentCompletionService::complete()`.
+
+---
+
+## Step-by-step SOP
+
+<Steps>
+  <Step title="Provider sends webhook callback to CRM">
+    Within seconds of the escort entering their PIN, M-Pesa/KopoKopo POSTs a webhook to the CRM. The CRM's billing controller receives it and verifies the signature. This happens automatically — no staff action required.
+
+    **Screenshot slot:** *CRM Payments page showing a payment transitioning from "pending" to "completed"*
+  </Step>
+  <Step title="CRM matches payment to client">
+    The system uses the `payment_id` embedded in the webhook metadata to locate the CRM payment record and link it to the correct client. Match confidence is scored (high / medium / low).
+
+    If the match confidence is **low**, the payment enters the **manual review queue**. Finance must confirm the match before provisioning proceeds.
+  </Step>
+  <Step title="Payment status updates to 'completed'">
+    The payment record is updated: status → `completed`, transaction reference (M-Pesa code) stored, timestamps set. This is what Finance uses for reconciliation.
+  </Step>
+  <Step title="Subscription provisioning triggered automatically">
+    `PaymentCompletionService` hands off to `SubscriptionProvisioningService` to create the deal and activate the subscription. See Stage 5d for what happens next.
+  </Step>
+  <Step title="Escort's checkout page updates">
+    The browser polling detects the completed state and shows the confirmation message. The escort is directed to their now-active profile.
+
+    **Screenshot slot:** *"Payment confirmed — your profile is now live!" confirmation screen*
+  </Step>
+</Steps>
+
+---
+
+## Department notes
+
+<AccordionGroup>
+  <Accordion title="Sales & CS">
+    **"I paid but my profile isn't live" — first response script:**
+
+    1. Ask the escort to share the M-Pesa confirmation SMS with the transaction code (e.g. `RFX4K2T8W5`).
+    2. In the CRM, go to **Payments** → search by transaction reference or phone number.
+    3. Check the payment status:
+       - `completed` + deal `active` → profile should be live; check WordPress directly. If not live, see Stage 5d troubleshooting.
+       - `completed` + deal `pending` → provisioning is stuck. Escalate to IT.
+       - `pending` or `initiated` → payment not confirmed yet. Ask escort to wait 5–10 minutes; check M-Pesa message again.
+       - No record found → the payment may not have been made yet, or the phone number was different. Ask for the full M-Pesa SMS.
+       - `reversed` → M-Pesa reversed the transaction. Inform escort; they need to pay again.
+    4. If `manual_review` badge is showing, Finance needs to confirm the match before the profile activates.
+
+    **Key rule:** Always ask for the M-Pesa transaction code before investigating. It is the single fastest way to locate a payment.
+  </Accordion>
+
+  <Accordion title="Finance">
+    **Reconciliation:**
+    Each `completed` payment record stores the M-Pesa transaction reference (`payments.transaction_reference`), amount, currency, and timestamp. For daily reconciliation:
+    - CRM → Payments → filter: Status = completed, Date range = today → Export to XLSX
+    - Cross-reference with your KopoKopo/M-Pesa settlement report using the transaction reference
+
+    **Reversals:**
+    If M-Pesa reverses a transaction after completion, the CRM receives a reversal callback and sets `payments.status = 'reversed'`. The associated deal is automatically deactivated. The escort's profile goes private. Finance should note the reversal in the reconciliation log.
+
+    **Settlement timing by provider:**
+    - KopoKopo: typically same day or next business day
+    - M-Pesa Daraja: next business day
+    - Paystack / Pesapal / PawaPay: varies by agreement — check your provider dashboard for settlement dates
+
+    **Settlement tolerance (±5% mismatch):**
+    If the amount received differs from the expected amount by more than 5%, the payment enters `wallet_funding_settlement_review` state and requires manual Finance approval before provisioning. Check the CRM manual review queue daily.
+  </Accordion>
+
+  <Accordion title="SEO & IT">
+    **Webhook health monitoring:**
+    If escorts start reporting payment confirmations but profiles not activating, check:
+    1. `BillingWebhookEvent` table — are callbacks being received?
+    2. `app/logs/laravel.log` — look for signature verification failures (401 `webhook_verification_failed`)
+    3. KopoKopo dashboard → Webhook delivery logs — look for failed delivery attempts
+
+    **Common webhook failure modes:**
+    | Error | Cause | Fix |
+    |---|---|---|
+    | `webhook_verification_failed` (401) | HMAC secret mismatch | Update KopoKopo webhook secret in Settings → Integrations |
+    | `webhook_invalid_payload` (422) | `payment_id` missing from webhook metadata | Check if checkout flow is setting metadata correctly |
+    | Duplicate webhook | Provider retrying a callback | Handled automatically by `BillingWebhookEvent` dedup; no action needed |
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Frequently asked questions
+
+<AccordionGroup>
+  <Accordion title="The escort got the M-Pesa confirmation SMS but the website didn't update — what happened?">
+    The payment is confirmed on M-Pesa's side, but the CRM may not have received the webhook yet (network delay) or the webhook failed (signature error, server issue). 
+
+    Check the payment in CRM by transaction reference. If `status = completed`, the webhook was received — the issue is in Stage 5d (activation). If `status = pending`, the callback hasn't arrived yet — wait a few minutes or check webhook logs.
+  </Accordion>
+
+  <Accordion title="How do I find a payment using the M-Pesa transaction code?">
+    CRM → Payments → search bar → paste the M-Pesa code (e.g. `RFX4K2T8W5`). The payment record will appear if it has been received. You can also search by the escort's phone number or name.
+  </Accordion>
+
+  <Accordion title="What is 'match confidence' and when does low confidence require manual review?">
+    When a payment arrives, the CRM attempts to automatically match it to a client record using phone number, payment ID, and other signals. Confidence levels:
+    - **High**: Phone number and payment ID both matched — auto-approved
+    - **Medium**: One signal matched — review recommended
+    - **Low**: Weak or ambiguous match — manual review required before provisioning
+    
+    Finance reviews low-confidence payments in the recovery queue.
+  </Accordion>
+
+  <Accordion title="What happens if M-Pesa reverses a payment after the profile was already activated?">
+    The CRM receives a reversal callback and automatically deactivates the deal and sets the profile to private on WordPress. The escort will see their profile disappear. CS should contact them immediately to explain the reversal and arrange repayment.
+  </Accordion>
+
+  <Accordion title="Can a payment be matched to a client manually if auto-match fails?">
+    Yes. Finance can manually match a payment in the CRM recovery queue by selecting the unmatched payment and confirming the correct client. This is recorded in the audit log with the Finance agent's identity.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+| Symptom | Likely cause | Where to look | Fix |
+|---|---|---|---|
+| Escort has M-Pesa SMS but CRM shows no record | Webhook not received | `BillingWebhookEvent` table; KopoKopo webhook delivery logs | Check provider dashboard; re-trigger delivery if available |
+| Payment shows `completed` but provisioning not triggered | `client_unresolved` — payment matched to no client | `payments.provisioning_status` | Finance manually matches payment in recovery queue |
+| `webhook_verification_failed` in logs | HMAC secret mismatch | `laravel.log`; KopoKopo settings | Update KopoKopo webhook secret in CRM Settings → Integrations |
+| Payment in `manual_review` | Amount mismatch (±5%) or low match confidence | CRM → Payments → filter: Review state = manual review | Finance reviews and confirms or rejects the match |
+| Payment reversed after activation | M-Pesa reversal received | `payments.status = 'reversed'`; deal deactivated | Contact escort; arrange repayment; re-activate deal when paid |
+| Duplicate payment record | Provider retried the webhook | `BillingWebhookEvent` dedup | System handles automatically; no action needed |
+
+---
+
+## Certification — MCQ
+
+<AccordionGroup>
+  <Accordion title="Q1: An escort shares an M-Pesa confirmation code and says their profile isn't live. What is your FIRST step in the CRM?">
+    **A.** Create a new deal for the escort
+
+    **B.** Search for the payment by the M-Pesa transaction code in CRM → Payments ✅
+
+    **C.** Ask the escort to pay again
+
+    **D.** Check the escort's WordPress profile directly
+  </Accordion>
+
+  <Accordion title="Q2: A payment shows status 'completed' but the deal is still 'pending'. What is the most likely cause?">
+    **A.** The escort cancelled their subscription
+
+    **B.** M-Pesa reversed the payment
+
+    **C.** Provisioning is stuck — likely `client_unresolved` or a WordPress sync failure ✅
+
+    **D.** The payment hasn't been confirmed yet
+  </Accordion>
+
+  <Accordion title="Q3: What does 'wallet_funding_settlement_review' mean?">
+    **A.** The escort's M-Pesa balance was too low
+
+    **B.** The payment amount differs from the expected amount by more than 5% — Finance must review before provisioning proceeds ✅
+
+    **C.** The payment provider has not yet settled funds to Exotic's account
+
+    **D.** The CRM is waiting for a second payment to confirm the subscription
+  </Accordion>
+
+  <Accordion title="Q4: If an escort's profile is deactivated unexpectedly after it was already live, what should you check first?">
+    **A.** Whether the escort deleted their own profile
+
+    **B.** Whether M-Pesa reversed the original payment — check payments.status for 'reversed' ✅
+
+    **C.** Whether the subscription package was changed
+
+    **D.** Whether the WordPress site is down
+  </Accordion>
+</AccordionGroup>

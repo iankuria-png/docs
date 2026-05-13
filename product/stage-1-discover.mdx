@@ -1,0 +1,39 @@
+---
+title: "Stage 1 — Discover"
+description: "How escorts first learn about Exotic Online and enter the sales pipeline."
+---
+
+## What the customer sees
+
+An escort discovers Exotic through one of three channels — a referral from a friend or colleague already on the platform, an outbound call from a member of the Exotic sales team, or an organic Google search for escort listing sites. In all cases, their first impression is either the public Exotic website or a direct conversation with a sales agent.
+
+Referrals are the highest-converting channel: an escort who hears "I'm on Exotic and I'm getting good clients" from a trusted colleague arrives with strong intent. Outbound calls from agents are the highest-volume channel. Organic SEO arrivals are self-service and require the least sales effort but may need guidance through registration.
+
+---
+
+## Under the hood
+
+When a prospective escort is identified by the sales team, they are created as a **Lead** in the CRM.
+
+| What happens | Code reference |
+|---|---|
+| Lead created manually by sales agent | `LeadController` — `app/Http/Controllers/CRM/LeadController.php` |
+| Lead imported via CSV or web scraper | `app/Services/SupportBoardLeadImportService.php`; Scraper sources in Settings |
+| Lead record fields | `app/Models/Lead.php` — stores name, phone (normalised), email, source, status, assigned agent |
+| Lead status lifecycle | `new` → `contacted` → `qualified` → `converted` → `lost` |
+| Phone normalised automatically | Local format (e.g. `0712...`) → international format (e.g. `254712...`) |
+
+---
+
+<Note>
+  **Interview pending — content to be added:** The following sections require input from the Sales & CS team on actual scripts, objection handling at discovery stage, and SEO-specific notes on how organic arrivals differ in behaviour from referred/outbound leads.
+</Note>
+
+<CardGroup cols={2}>
+  <Card title="Next: Register & profile setup →" icon="arrow-right" href="/product/stage-2-register">
+    What happens when the escort decides to sign up
+  </Card>
+  <Card title="Lead pipeline (CRM guide)" icon="funnel" href="/leads/overview">
+    How to manage leads in the CRM
+  </Card>
+</CardGroup>

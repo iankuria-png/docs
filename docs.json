@@ -21,7 +21,51 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "User Guide",
+        "tab": "The Product",
+        "groups": [
+          {
+            "group": "Exotic Online University",
+            "pages": [
+              "product/overview"
+            ]
+          },
+          {
+            "group": "Customer Lifecycle",
+            "pages": [
+              "product/stage-1-discover",
+              "product/stage-2-register",
+              "product/stage-3-media",
+              "product/stage-4-verification"
+            ]
+          },
+          {
+            "group": "Stage 5 — Subscription, Payment & Activation",
+            "pages": [
+              "product/stage-5a-subscription-selection",
+              "product/stage-5b-payment-initiation",
+              "product/stage-5c-payment-confirmation",
+              "product/stage-5d-profile-activation",
+              "product/stage-5e-failure-modes"
+            ]
+          },
+          {
+            "group": "Post-Activation",
+            "pages": [
+              "product/stage-6-contact",
+              "product/stage-7-renewal",
+              "product/stage-8-upgrades"
+            ]
+          },
+          {
+            "group": "Certification",
+            "pages": [
+              "product/certification"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "The CRM",
         "groups": [
           {
             "group": "Get Started",

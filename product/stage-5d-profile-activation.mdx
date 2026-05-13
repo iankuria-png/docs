@@ -1,0 +1,191 @@
+---
+title: "Stage 5d — Profile activation"
+description: "How the CRM provisions the subscription, syncs with WordPress, and makes the escort's profile publicly visible."
+---
+
+## What the customer sees
+
+After payment is confirmed, the escort's profile goes live within **30–60 seconds**. The checkout page updates to show:
+
+> *"Your profile is now live! Click here to view your listing."*
+
+The escort can click through to see their profile appearing on the public Exotic site — visible in search results, in the correct package tier, and with their contact details showing. They also typically receive a confirmation SMS.
+
+This is the moment they've been working towards. A smooth activation here sets the tone for the entire customer relationship. If this step fails, it is the primary source of the "I paid but my profile isn't live" complaint.
+
+---
+
+## Under the hood
+
+Activation is a multi-step automated sequence: the CRM creates a deal, calls WordPress to publish the profile, and syncs the result back.
+
+| What happens | Code reference |
+|---|---|
+| `SubscriptionProvisioningService::provisionCompletedPayment()` called | `app/Services/SubscriptionProvisioningService.php:154` — creates Deal record with `status = 'pending'` |
+| `SubscriptionProvisioningService::activateDeal()` called | `app/Services/SubscriptionProvisioningService.php:24` — the core activation sequence |
+| CRM calls WordPress activation endpoint | `WpSyncService::activateClient($wpPostId, $planType, $durationDays, $dealId)` — `app/Services/WpSyncService.php:181` |
+| WordPress REST call: `POST /clients/{postId}/activate` | Payload: `{ product_type, duration_days, crm_deal_id }` — WordPress sets `post_status = 'publish'` and stores activation dates as post meta |
+| Deal status updated | `deals.status = 'active'`, `deals.activated_at`, `deals.expires_at` set — `app/Services/SubscriptionProvisioningService.php:71` |
+| Client profile synced back from WordPress | `ClientSyncService` pulls updated publish status to confirm — `app/Services/SubscriptionProvisioningService.php:87` |
+| Timeline events created | `TimelineEvent` records for `payment_received` and `deal_activated` — `app/Services/SubscriptionProvisioningService.php:97` |
+
+**Free trial path:** If `deals.is_free_trial = true`, the deal was activated at zero cost. The approver's CRM user ID is stored in `deals.free_trial_approved_by`. Free trial deals follow the same activation sequence but without a linked payment.
+
+---
+
+## Step-by-step SOP
+
+<Steps>
+  <Step title="CRM creates the Deal record">
+    A new Deal is created in `pending` status, linked to the client, the selected product, the payment, and the market. The deal captures the agreed price, duration, and subscription dates.
+
+    **In the CRM:** CRM → Deals → find the new deal (status: pending, then active within seconds)
+  </Step>
+  <Step title="CRM calls WordPress to activate the profile">
+    The CRM's `WpSyncService` calls the WordPress REST API (`POST /clients/{postId}/activate`) with the product type, duration, and deal ID. WordPress sets the profile's `post_status` to `publish` and writes activation date metadata.
+
+    **Screenshot slot:** *CRM Deals list showing a deal moving from "pending" to "active"*
+  </Step>
+  <Step title="Profile goes live on the public site">
+    WordPress publishes the profile. It appears in search results at the correct tier position. The escort's subscription is now live.
+
+    **Screenshot slot:** *Public Exotic site showing the escort's profile card in search results*
+  </Step>
+  <Step title="CRM syncs back from WordPress">
+    The CRM fetches the updated profile status from WordPress to confirm the activation succeeded. The client's `profile_status` in the CRM updates to `Active`.
+  </Step>
+  <Step title="Timeline events recorded">
+    Two timeline events are created on the client's profile: `payment_received` and `deal_activated`. These are visible in CRM → Clients → [client name] → Timeline.
+
+    **Screenshot slot:** *Client timeline showing payment_received and deal_activated events*
+  </Step>
+</Steps>
+
+---
+
+## Department notes
+
+<AccordionGroup>
+  <Accordion title="Sales & CS">
+    **Confirming a profile is live:**
+    1. CRM → Clients → find the client → Overview tab
+    2. Check the subscription badge — should show **Active**
+    3. The `expires_at` date is the subscription end date; share this with the escort so they know when to renew
+    4. Click the profile URL on the client record to open their live listing on the public site
+
+    **"My profile is active in the CRM but I can't find it on the site":**
+    - Check the profile's WordPress `post_status` — if it's `publish` but the escort can't find it, it may take up to 60 seconds for caching to clear
+    - Ask them to search by their profile name (not URL) — newly activated profiles sometimes take a moment to appear in search index
+    - If `post_status` is NOT `publish` in the CRM, the WordPress sync may have failed — escalate to IT
+
+    **Setting renewal expectations:**
+    At activation, always tell the escort (or note in their CRM timeline) when their subscription expires. This sets a clear renewal expectation and reduces "why was my profile deactivated?" surprises later.
+  </Accordion>
+
+  <Accordion title="Finance">
+    At this point, the deal is active and the payment is confirmed. The subscription period (`deals.activated_at` → `deals.expires_at`) is the billing period. Finance can use deal activation dates to validate subscription revenue for the billing cycle.
+
+    **Free trials:** Deals with `is_free_trial = true` represent zero-revenue activations. Finance reports should separate trial activations from paid activations. The `free_trial_approved_by` field identifies who approved the trial for audit purposes.
+  </Accordion>
+
+  <Accordion title="SEO & IT">
+    **Profile activation failure diagnostic:**
+    If a deal shows `pending` status after payment is confirmed and several minutes have passed:
+
+    1. Check `laravel.log` for WordPress connection errors — `WpSyncService` exceptions will appear here
+    2. Verify the WordPress REST API endpoint is reachable: CRM → Settings → Integrations → [market] → Test connection
+    3. Check `deals.provisioning_status` if available — `client_unresolved` means the payment couldn't be linked to a client
+    4. Manual recovery: CRM → Deals → find the deal → Action menu → Activate manually (select `manual` payment method, enter the confirmed payment reference)
+
+    **WordPress sync plugin health:**
+    The activation call goes to `POST /exotic-crm-sync/v1/clients/{postId}/activate` on the WordPress site. If this endpoint is unreachable, activation fails silently. Check that the `exotic-crm-sync` WordPress plugin is active and the Application Password credentials in CRM Settings are valid.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Frequently asked questions
+
+<AccordionGroup>
+  <Accordion title="How long does profile activation take after payment?">
+    Under normal conditions, 30–60 seconds from payment confirmation to profile going live. If it takes more than 5 minutes, something has likely gone wrong — check the deal status in the CRM and escalate to IT if the deal is stuck in `pending`.
+  </Accordion>
+
+  <Accordion title="The escort's deal is 'active' in the CRM but their profile isn't showing on the site — what do I check?">
+    1. Open the client in CRM → check the profile URL field — copy it and open it in a browser
+    2. If the URL loads but shows a private/draft notice, the WordPress sync may not have propagated yet — wait 60 seconds and refresh
+    3. If the URL gives a 404, the `wp_post_id` may be wrong — this is a data issue; escalate to IT to re-link the profile
+    4. If the profile shows but isn't appearing in search results, it may be a caching delay — check again in 5 minutes
+  </Accordion>
+
+  <Accordion title="What is the 'expires_at' date and what happens when it passes?">
+    `expires_at` is the date the subscription period ends. When this date passes, the CRM marks the deal as `expired` and the WordPress profile is automatically set to `private` — it disappears from the public site. The escort must renew (pay for another period) to reactivate. The CRM sends renewal reminders before expiry via the campaigns system.
+  </Accordion>
+
+  <Accordion title="Can staff manually activate a deal without payment?">
+    Yes — using the `free_trial` payment method during deal activation, which requires a supervisor PIN. This is the only way to activate a profile at zero cost. It is tracked in the audit log.
+  </Accordion>
+
+  <Accordion title="What does the timeline event 'deal_activated' mean for a client?">
+    It is a permanent log entry confirming exactly when and how the subscription was activated. It is visible to all staff with access to the client record and is used in audit reviews, dispute resolution, and for confirming the subscription start date.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+| Symptom | Likely cause | Where to look | Fix |
+|---|---|---|---|
+| Deal stuck in `pending` after payment confirmed | WordPress activation API unreachable | `laravel.log`; CRM → Settings → Test connection | Test WP connection; fix credentials; manually activate via CRM |
+| Profile `post_status` not `publish` after deal is `active` | WP sync call failed silently | `laravel.log` for WpSyncService exceptions | Run manual sync from client detail page; or re-activate deal |
+| `client_unresolved` on deal | Payment could not be linked to a CRM client record | `deals.provisioning_status`; `payments.provisioning_status` | Finance manually matches the payment to the correct client |
+| Profile active but not visible in search | WordPress caching delay | Public site search | Wait 5 minutes; clear WordPress cache if admin access available |
+| Deal shows `active` but `expires_at` is in the past | Deal was activated but expiry date not set correctly | `deals.expires_at` | IT: check `SubscriptionProvisioningService` logs; manually update expiry and resync |
+| Free trial activated but approver not recorded | `free_trial_approved_by` is null | `deals` table | Audit: check who had supervisor PIN access at the time; record in deal notes |
+
+---
+
+## Certification — MCQ
+
+<AccordionGroup>
+  <Accordion title="Q1: How long should profile activation normally take after payment is confirmed?">
+    **A.** Instantly — less than 1 second
+
+    **B.** 30–60 seconds ✅
+
+    **C.** 5–10 minutes
+
+    **D.** Up to 24 hours
+  </Accordion>
+
+  <Accordion title="Q2: A deal shows 'active' in the CRM but the profile is private on the WordPress site. What is the MOST likely cause?">
+    **A.** The escort deactivated their own profile
+
+    **B.** The subscription fee was refunded
+
+    **C.** The WordPress sync call failed — `WpSyncService` could not reach the WordPress activation endpoint ✅
+
+    **D.** The escort's package tier is not supported on this market
+  </Accordion>
+
+  <Accordion title="Q3: Where in the CRM can you see the exact moment a profile was activated?">
+    **A.** CRM → Payments → payment detail
+
+    **B.** CRM → Clients → [client] → Timeline → `deal_activated` event ✅
+
+    **C.** CRM → Reports → activation log
+
+    **D.** CRM → Settings → audit log
+  </Accordion>
+
+  <Accordion title="Q4: What happens to an escort's profile when their subscription expires?">
+    **A.** Nothing — the profile stays live until the escort manually removes it
+
+    **B.** The profile is permanently deleted from WordPress
+
+    **C.** The deal is marked `expired` and the WordPress profile is automatically set to `private` ✅
+
+    **D.** The escort receives an email and has 30 days to renew before the profile is removed
+  </Accordion>
+</AccordionGroup>

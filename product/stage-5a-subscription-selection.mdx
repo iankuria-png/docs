@@ -1,0 +1,174 @@
+---
+title: "Stage 5a — Subscription selection"
+description: "How an escort selects a package and duration on the self-checkout page, and what the system does behind the scenes."
+---
+
+## What the customer sees
+
+After registering and setting up their profile, the escort is ready to go live. They navigate to the **Subscribe** or **Activate my listing** page on the public Exotic site. This page is the self-service checkout — it shows every available package for that market, with prices displayed in the local currency (e.g. KES for Kenya).
+
+The escort sees a set of package cards — Basic, Featured, Premium, VIP, VVIP — with a brief description of what each tier includes and the price per billing period. They select a duration (weekly, bi-weekly, or monthly) and click **Proceed to payment**. No login to the CRM is required; this page lives on the WordPress site.
+
+<Info>
+  Escorts often ask sales staff which package is "best." The answer depends on their goals: new escorts typically start on Basic or Featured; established escorts with high enquiry volumes benefit from Premium or VIP.
+</Info>
+
+---
+
+## Under the hood
+
+When the checkout page loads, it calls the platform API to retrieve the available payment options and packages for that specific market.
+
+| What happens | Code reference |
+|---|---|
+| Checkout page requests available packages and payment methods | `PlatformController::show()` + `self_service_payment_options()` — `app/Http/Controllers/API/PlatformController.php:299` |
+| System queries which payment providers are enabled for this market | `BillingMarketProviderBinding` table, filtered by `subscription_push` bindings with type `kopokopo` or `daraja` |
+| Available providers returned to the checkout page | Depends on market config — may include KopoKopo, M-Pesa (Daraja), Paystack, Pesapal, PawaPay |
+| Escort's selection (product, duration, price) stored | A `Payment` record is created with `purpose = 'subscription'`, `status = 'initiated'`, and the selected product details in the `payment_data` JSON field |
+
+The `payment_data` field captures the product ID, duration, and any FX overrides or discounts applicable to the market. This drives every downstream step.
+
+---
+
+## Step-by-step SOP
+
+<Steps>
+  <Step title="Escort opens the subscription page">
+    The escort navigates to the Subscribe / Activate listing page on the public Exotic site. This is typically linked from their profile dashboard after registration.
+
+    **Screenshot slot:** *Subscription page showing package cards for the Kenya market*
+  </Step>
+  <Step title="Escort reviews packages">
+    The page loads with available packages for the market. Each card shows:
+    - Package name (Basic, Featured, Premium, VIP, VVIP)
+    - Price per period in local currency
+    - Key benefits
+
+    **Screenshot slot:** *Package selection screen with duration toggle (weekly / monthly)*
+  </Step>
+  <Step title="Escort selects a package and duration">
+    The escort clicks the package they want. They choose a billing period (weekly, bi-weekly, or monthly). The total amount updates automatically.
+  </Step>
+  <Step title="Escort clicks 'Proceed to payment'">
+    The system creates an initiated payment record and redirects the escort to the payment screen. The journey continues at Stage 5b.
+  </Step>
+</Steps>
+
+---
+
+## Department notes
+
+<AccordionGroup>
+  <Accordion title="Sales & CS">
+    **Handling package questions:** If an escort asks which package to choose, use this quick guide:
+    - New escort, testing the platform → recommend **Basic** or **Featured**
+    - Escort wants more visibility, has some client base → recommend **Premium**
+    - High-volume escort, wants maximum exposure → recommend **VIP** or **VVIP**
+
+    **Handling objection "Why should I pay — there are free sites?"**
+    Use all three points together:
+    1. *Lead quality*: Exotic attracts clients who are serious and willing to pay for a premium, vetted experience. Free sites attract more time-wasters.
+    2. *Visibility*: Paid profiles rank higher on Google and within the site. Free listings are buried below paying profiles.
+    3. *Support*: Exotic provides account management, renewal reminders, and dedicated CS support that free sites don't offer.
+
+    **If an escort can't find the subscription page:** Guide them to their WordPress profile dashboard → look for the "Activate listing" or "Subscribe" button. If it doesn't appear, their profile may still be in draft status — check in CRM → Clients and confirm `profile_status`.
+  </Accordion>
+
+  <Accordion title="Finance">
+    The package and duration selected here determine the invoice amount. If a discount is applied at activation (Stage 5b), Finance should see it in the `discount_percentage` field on the deal record.
+
+    Pricing is configured per market under Settings → Integrations → Packages. If an escort reports a price they were quoted doesn't match the checkout price, check whether the market's `ProductPrice` records have been updated recently.
+  </Accordion>
+
+  <Accordion title="SEO & IT">
+    **SEO:** Package tier directly affects profile placement in search results on the Exotic site. Higher tiers (VIP, VVIP) appear above lower tiers. This is a key selling point for escorts asking about visibility.
+
+    **IT:** If the checkout page doesn't load available packages, the likely cause is `BillingMarketProviderBinding` misconfiguration — no active `subscription_push` binding exists for the market. Check the bindings table and confirm at least one provider is enabled with status `active`.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Frequently asked questions
+
+<AccordionGroup>
+  <Accordion title="Can an escort subscribe without a completed profile?">
+    Yes — payment can be initiated before the profile is fully complete. However, the profile won't appear attractively in search results until photos, bio, and contact details are filled in. Encourage escorts to complete their profile before subscribing for best results.
+  </Accordion>
+
+  <Accordion title="Can an escort change their package after subscribing?">
+    Yes, but not through the self-service checkout. Package upgrades are handled by staff via CRM → Deals → update the product on the active deal. See Stage 8 — Upgrades for the full process.
+  </Accordion>
+
+  <Accordion title="What currencies are supported?">
+    Currency is configured per market. Kenya uses KES, Nigeria uses NGN, Ghana uses GHS. The checkout page always displays in the market's configured currency. Cross-currency payments are not supported.
+  </Accordion>
+
+  <Accordion title="The escort says they don't see the subscription page — what should I check?">
+    1. Confirm the escort is logged into their WordPress account on the correct market site.
+    2. Check CRM → Clients → profile status — if `profile_status` is `draft`, the profile hasn't been submitted for review and the subscription page may not be accessible.
+    3. Confirm at least one payment provider is enabled for the market (Settings → Integrations → market → payment providers).
+  </Accordion>
+
+  <Accordion title="Is there a free trial option at this stage?">
+    Free trials are not self-service. They are granted by staff with supervisor PIN access during deal activation in the CRM (Stage 5b, payment method = `free_trial`). An escort cannot self-select a free trial from the checkout page.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+| Symptom | Likely cause | Where to look | Fix |
+|---|---|---|---|
+| Checkout page loads but shows no packages | No active `subscription_push` provider binding for this market | CRM → Settings → Integrations → market → payment providers | Enable at least one provider; check `BillingMarketProviderBinding` |
+| Checkout page shows wrong currency | Market `currency_code` misconfigured | CRM → Settings → Integrations → market settings | Update `currency_code` to correct ISO code |
+| Escort reports price doesn't match what they were quoted | `ProductPrice` records were recently changed | CRM → Settings → Integrations → market → Packages | Confirm current prices; inform escort of correct pricing |
+| "Proceed to payment" button does nothing | JavaScript error on checkout page; or browser issue | Browser console (F12) → errors tab | Ask escort to try a different browser or clear cache; escalate to IT if persistent |
+| Escort cannot find the subscription page | Profile in draft status or link not visible | CRM → Clients → find client → check `profile_status` | If draft: guide through profile completion and submission |
+
+---
+
+## Certification — MCQ
+
+<AccordionGroup>
+  <Accordion title="Q1: An escort asks why they should choose Exotic over free listing sites. Which response covers all three key points?">
+    **A.** "Exotic has better design and is easier to use."
+
+    **B.** "Exotic profiles get more exposure because we rank higher on Google, attract serious clients rather than time-wasters, and provide dedicated account support — things free sites don't offer." ✅
+
+    **C.** "Free sites are risky. Exotic is safer."
+
+    **D.** "Our prices are competitive with the market."
+  </Accordion>
+
+  <Accordion title="Q2: An escort says they can't see any packages on the subscription page. What is the FIRST thing you check in the CRM?">
+    **A.** The escort's payment history
+
+    **B.** Whether the market has at least one active payment provider binding under Settings → Integrations ✅
+
+    **C.** The escort's profile completeness score
+
+    **D.** The WordPress sync status
+  </Accordion>
+
+  <Accordion title="Q3: Which of the following is TRUE about free trials?">
+    **A.** Escorts can select a free trial themselves on the checkout page
+
+    **B.** Free trials are automatic for new escorts on their first subscription
+
+    **C.** Free trials are granted by staff in the CRM using a supervisor PIN during deal activation ✅
+
+    **D.** Free trials are only available on the Basic package
+  </Accordion>
+
+  <Accordion title="Q4: What does the payment_data field on a Payment record contain at the point of subscription selection?">
+    **A.** The escort's bank account details
+
+    **B.** The product ID, duration, currency, and any applicable discounts or FX overrides ✅
+
+    **C.** The WordPress post ID of the escort's profile
+
+    **D.** The callback URL for the payment provider
+  </Accordion>
+</AccordionGroup>

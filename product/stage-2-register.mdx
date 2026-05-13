@@ -1,0 +1,37 @@
+---
+title: "Stage 2 — Register & account creation"
+description: "How an escort creates a WordPress account and becomes a client record in the CRM."
+---
+
+## What the customer sees
+
+Once an escort decides to join Exotic, they register on the public WordPress site. They fill in a registration form with their display name, phone number, email address, and city. A WordPress account is created for them, along with a profile post (initially in `private` status). They receive login credentials — either by email or via SMS from a staff member.
+
+The escort is now a registered user but not yet listed publicly. Their profile exists but needs photos, bio, and subscription payment before it goes live.
+
+---
+
+## Under the hood
+
+| What happens | Code reference |
+|---|---|
+| Escort's lead record converted to a client in CRM | `LeadConversionService::convert()` — `app/Services/LeadConversionService.php:61` — creates WP user + post, then creates Client row |
+| Client record created with `profile_status = 'private'` | `app/Models/Client.php` |
+| Automatic sync from WordPress → CRM | `ClientSyncService::fullSync()` / `deltaSync()` — `app/Services/ClientSyncService.php:14` |
+| WordPress sync plugin REST endpoint | `class-client-sync-endpoint.php` in `exotic-crm-sync` plugin |
+| Phone deduplication on conversion | Prevents duplicate clients with same phone number |
+
+---
+
+<Note>
+  **Interview pending — content to be added:** Step-by-step SOP, department notes, FAQs, troubleshooting, and certification questions for this stage require input from the Sales & CS team, particularly around credential delivery, common registration errors, and the handoff from lead to client.
+</Note>
+
+<CardGroup cols={2}>
+  <Card title="Next: Profile setup & media →" icon="arrow-right" href="/product/stage-3-media">
+    Uploading photos and completing the profile
+  </Card>
+  <Card title="Client profiles (CRM guide)" icon="user" href="/clients/overview">
+    Managing client records in the CRM
+  </Card>
+</CardGroup>
