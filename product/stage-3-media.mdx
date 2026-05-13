@@ -116,20 +116,24 @@ The quality of this step directly determines how many client enquiries the escor
     2. Wrong file format → suggest JPEG/PNG
     3. Browser issue → recommend Chrome
     4. Slow internet connection → suggest uploading on Wi-Fi
-    5. If all of the above checked and still failing → escalate to RD Team & IT Infrastructure
+    5. If all of the above checked and still failing → escalate to IT Infrastructure for upload/environment issues, or R&D/Product if the behavior looks like a product bug
 
     **Completeness coaching script:**
     > *"Your profile is looking good! The thing that will make the biggest difference to the number of clients who message you is your main photo — it's the first thing they see in search. Can we take a moment to make sure your cover photo is your best one?"*
   </Accordion>
 
-  <Accordion title="RD Team & IT Infrastructure">
-    RD owns decisions about:
+  <Accordion title="R&D/Product">
+    R&D/Product owns decisions about:
     - Which content categories and service types are available in each market (the services checklist varies by country)
     - Any market-specific content policies
 
     If escorts in a specific market are asking about service categories that don't appear in their profile editor, this is a configuration decision for RD — not something CS or SEO & Marketing should add unilaterally.
 
-    Photo upload failures that persist after standard troubleshooting (wrong size, wrong format, browser change) should be escalated here. Check `laravel.log` for `ClientProfileImageService` exceptions and the `exotic-crm-sync` plugin media endpoint for errors. Recent commits added a non-blocking upload queue — if uploads are timing out, confirm the latest plugin version is deployed on the WordPress site.
+    If the completeness score appears wrong despite the profile being filled in, or if CRM/WordPress profile data is clearly mismatched, escalate to R&D/Product to inspect the scoring and sync logic.
+  </Accordion>
+
+  <Accordion title="IT Infrastructure">
+    Photo upload failures that persist after standard troubleshooting (wrong size, wrong format, browser change) should be escalated here. Check `laravel.log` for `ClientProfileImageService` exceptions and the `exotic-crm-sync` plugin media endpoint for errors. Confirm the latest plugin version is deployed on the WordPress site and the environment is healthy enough to accept uploads.
   </Accordion>
 
   <Accordion title="SEO & Marketing">
@@ -176,7 +180,7 @@ The quality of this step directly determines how many client enquiries the escor
 | Symptom | Likely cause | Where to look | Fix |
 |---|---|---|---|
 | Photo upload fails immediately | File size over 5 MB or unsupported format | Check file size and format | Ask escort to compress photo or convert to JPEG/PNG |
-| Photo upload starts but times out | Slow internet connection or server issue | Check escort's connection; check `laravel.log` | Advise Wi-Fi upload; if server-side, escalate to RD Team & IT Infrastructure |
+| Photo upload starts but times out | Slow internet connection or server issue | Check escort's connection; check `laravel.log` | Advise Wi-Fi upload; if server-side, escalate to IT Infrastructure |
 | Uploaded photos don't appear after refresh | Browser cache or sync delay | Hard-refresh (Ctrl/Cmd+Shift+R) | Clear cache; if still missing, check `class-media-endpoint.php` logs |
 | Cover image not updating in CRM thumbnail | `ClientProfileImageService` sync delay | CRM → Clients → [client] → sync | Run manual sync from client detail page |
 | Completeness score not updating after filling fields | Sync hasn't run since profile was updated | CRM → Clients → [client] → Overview | Trigger a client sync or wait for scheduled sync |
@@ -200,7 +204,7 @@ The quality of this step directly determines how many client enquiries the escor
   <Accordion title="Q2: An escort says their photos aren't uploading. You've confirmed the file sizes are under 5 MB and the format is JPEG. What do you try next?">
     **A.** Tell them to wait 24 hours and try again
 
-    **B.** Ask them to try uploading from Chrome browser, and if that fails, escalate to RD Team & IT Infrastructure ✅
+    **B.** Ask them to try uploading from Chrome browser, and if that fails, escalate to IT Infrastructure ✅
 
     **C.** Create a new client record for them
 
@@ -212,7 +216,7 @@ The quality of this step directly determines how many client enquiries the escor
 
     **B.** Guide the escort to complete the missing profile fields first, targeting at least 80% before going live ✅
 
-    **C.** Escalate to RD Team & IT Infrastructure to fix the completeness calculation
+    **C.** Escalate to R&D/Product to fix the completeness calculation
 
     **D.** Mark the profile as verified and bypass the completeness check
   </Accordion>

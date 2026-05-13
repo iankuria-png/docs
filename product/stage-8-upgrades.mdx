@@ -6,7 +6,7 @@ icon: "circle-arrow-up"
 ---
 
 <Card title="Stage 8 of 8 — Upgrades" icon="circle-arrow-up" horizontal>
-  Escort moves from Basic/Featured → Premium/VIP/VVIP. Staff-assisted via CRM deal update — not self-service. Profile re-provisions at the new tier within 30–60 seconds of payment. **Owner: Sales & CS for tier and pricing decisions; RD Team & IT Infrastructure for re-provisioning support.**
+  Escort moves from Basic/Featured → Premium/VIP/VVIP. Staff-assisted via CRM deal update — not self-service. Profile re-provisions at the new tier within 30–60 seconds of payment. **Owner: Sales & CS for tier and pricing decisions; R&D/Product for workflow and provisioning logic; IT Infrastructure for environment support.**
 </Card>
 
 ## What the customer sees
@@ -16,6 +16,8 @@ After being on the platform for a period, an escort on a lower tier — Basic or
 The escort contacts their sales agent or CS, expresses interest in moving to a higher tier (Featured → Premium, or Premium → VIP, etc.), and the agent processes the upgrade through the CRM. **Upgrades are not self-service** — they are handled by staff via the CRM's deal management.
 
 Once upgraded and payment is confirmed, the escort's profile is re-provisioned at the new tier on WordPress immediately — their listing moves to the higher tier position in search results, and any additional features of the new package become active.
+
+The same commercial and technical pattern is also useful for **reactivation conversations**: when a previously expired escort wants to return, Sales & CS should use the same visibility/value framing while routing them back through renewal or upgrade payment flow as appropriate.
 
 **Available package tiers (highest to lowest visibility):**
 - VVIP
@@ -125,12 +127,16 @@ Once upgraded and payment is confirmed, the escort's profile is re-provisioned a
     **Discount reconciliation:** All deals with `discount_percentage > 0` are flagged in Finance reconciliation reports. Confirm every discounted deal has a `discount_approved_by` value — if it's null, that's an unapproved discount and must be investigated.
   </Accordion>
 
-  <Accordion title="RD Team & IT Infrastructure">
-    RD Team & IT Infrastructure do not own the commercial decision for tier structure or pricing. Those decisions sit with the **CS head for each market or region** and require approval from the **Head of CS/Sales**.
+  <Accordion title="R&D/Product">
+    R&D/Product does not own the commercial decision for tier structure or pricing. Those decisions sit with the **CS head for each market or region** and require approval from the **Head of CS/Sales**.
 
-    If sales agents notice that a tier's pricing is losing upgrades to a competitor, or if escorts are asking for features that no current tier provides, feed that back through Sales & CS leadership. IT Infrastructure only supports the technical reconfiguration after approval.
+    If sales agents notice that a tier's pricing is losing upgrades to a competitor, or if escorts are asking for features that no current tier provides, feed that back through Sales & CS leadership. R&D/Product supports the technical reconfiguration after approval.
 
     Profile re-provisioning at a new tier follows the same path as Stage 5d activation. If a profile doesn't update to the new tier after the upgrade payment confirms, check `laravel.log` for `WpSyncService` errors. Manual recovery: CRM → Deals → [deal] → Activate manually, which re-sends the `product_type` to WordPress.
+  </Accordion>
+
+  <Accordion title="IT Infrastructure">
+    IT Infrastructure supports the environment around upgrade delivery: WordPress connection health, plugin deployment, credentials, market environment access, and any page or server issue that blocks the re-provisioning step.
   </Accordion>
 
   <Accordion title="SEO & Marketing">
@@ -159,7 +165,7 @@ Once upgraded and payment is confirmed, the escort's profile is re-provisioned a
     1. CRM → Clients → [client] → active deal — confirm the `product_id` shows the new product
     2. Check `laravel.log` for WordPress sync errors during the re-activation step
     3. If the deal is active but the WordPress profile still shows the old tier: CRM → Deals → [deal] → Activate manually (re-sends the product type to WordPress)
-    4. If the issue persists, escalate to RD Team & IT Infrastructure
+    4. If the issue persists, escalate to R&D/Product first, then involve IT Infrastructure if the WordPress environment looks unhealthy
   </Accordion>
 
   <Accordion title="Who approves an upgrade discount above the standard threshold?">
@@ -177,7 +183,7 @@ Once upgraded and payment is confirmed, the escort's profile is re-provisioned a
 | Deal shows updated product but profile not re-activated | `WpSyncService` call failed silently | `laravel.log` for WpSyncService exceptions | Run manual activation; check WP connection: Settings → Integrations → Test connection |
 | Upgrade discount not recorded | `discount_percentage` field left empty | `deals.discount_percentage` | Update the deal record with the agreed discount; get supervisor approval |
 | Escort upgraded but search position hasn't changed | WordPress tier not updated; or caching delay | Profile URL → tier badge; CRM deal product | Verify WP sync completed; clear WordPress cache if available; check again in 5 minutes |
-| Supervisor PIN prompt not appearing for above-threshold discount | Threshold not configured for this market | CRM → Settings → market config | Contact IT Infrastructure to confirm supervisor PIN threshold is set for the market |
+| Supervisor PIN prompt not appearing for above-threshold discount | Threshold not configured for this market | CRM → Settings → market config | Contact R&D/Product to confirm discount-threshold logic; involve IT Infrastructure only if the environment or access path is failing |
 
 ---
 

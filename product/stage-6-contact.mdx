@@ -117,13 +117,29 @@ Once an escort's profile is live, website visitors can contact them immediately.
 
     **Exotic Chat — talking point:**
     When escorts ask how Exotic will stay in touch more reliably beyond normal WhatsApp follow-ups, you can mention Exotic Chat:
-    > *"We're also building Exotic Chat to help us maintain more consistent communication with escorts for support, renewal reminders, and important platform updates. It's coming soon, and we'll share rollout details once RD Team & IT Infrastructure finalise the launch."*
+    > *"We're also building Exotic Chat to help us maintain more consistent communication with escorts for support, renewal reminders, and important platform updates. It's coming soon, and we'll share rollout details once the R&D/Product and IT teams finalise the launch."*
+
+    **Operational logging rule:**
+    WhatsApp itself is not the CRM, but important outcomes still belong in the CRM timeline. Log things like:
+    - "No contacts" complaints
+    - Harassment or safety complaints
+    - Contact-number corrections
+    - Escalations tied to profile visibility or contact-channel issues
   </Accordion>
 
-  <Accordion title="RD Team & IT Infrastructure">
-    RD owns the roadmap for Exotic Chat and any new contact channels. The decision to add, remove, or change public contact channel types on the profile page is a product decision made by RD. If escorts or staff request new channels (Telegram, Signal, Instagram DM link, etc.), log the feedback and submit it here via the standard product feedback process.
+  <Accordion title="R&D/Product">
+    R&D/Product owns the roadmap for Exotic Chat and any new contact channels. The decision to add, remove, or change public contact channel types on the profile page is a product decision made here. If escorts or staff request new channels (Telegram, Signal, Instagram DM link, etc.), log the feedback and submit it via the standard product feedback process.
 
-    Exotic Chat is intended to help Exotic maintain consistent communication with escorts across onboarding, support, renewals, and important updates. Launch timeline, integration scope, analytics instrumentation, and tag setup sit with the combined RD Team & IT Infrastructure function. Do not make promises to escorts about launch dates.
+    Exotic Chat is intended to help Exotic maintain consistent communication with escorts across onboarding, support, renewals, and important updates. Product scope, rollout order, and communication behavior sit with R&D/Product. Do not make promises to escorts about launch dates.
+  </Accordion>
+
+  <Accordion title="IT Infrastructure">
+    IT Infrastructure supports the delivery environment for contact and communication tooling:
+    - Analytics tagging implementation
+    - Tracker loading on profile pages
+    - Environment, access, and site issues affecting contact buttons or reporting
+
+    If a contact button fails because of page-level JavaScript, missing tracking deployment, or WordPress/plugin environment issues, involve IT Infrastructure.
   </Accordion>
 
   <Accordion title="SEO & Marketing">
@@ -132,7 +148,7 @@ Once an escort's profile is live, website visitors can contact them immediately.
     - **WhatsApp links** are followed by some crawlers but don't count as outbound links for ranking purposes
     - The **contact rate** (how often visitors tap a contact button) is an engagement signal — profiles with clear, prominent contact buttons typically have higher engagement, which correlates with better internal ranking
 
-    SEO & Marketing use Google Analytics and reporting dashboards to monitor contact taps, landing-page engagement, and conversion trends. RD Team & IT Infrastructure handle the underlying tag and tracker setup; SEO & Marketing should flag anomalies when reported data drops unexpectedly.
+    SEO & Marketing use Google Analytics and reporting dashboards to monitor contact taps, landing-page engagement, and conversion trends. IT Infrastructure handles the underlying tag deployment and environment health; R&D/Product supports contact event definitions and future communication-product changes.
   </Accordion>
 </AccordionGroup>
 
@@ -154,7 +170,7 @@ Once an escort's profile is live, website visitors can contact them immediately.
   </Accordion>
 
   <Accordion title="What is Exotic Chat and when is it launching?">
-    Exotic Chat is a future Exotic-to-escort communication channel being developed to help the company maintain more consistent communication with escorts around support, renewals, and important updates. It is **not** the public client contact method on profile pages. Launch timing is owned by RD Team & IT Infrastructure — do not promise a specific date.
+    Exotic Chat is a future Exotic-to-escort communication channel being developed to help the company maintain more consistent communication with escorts around support, renewals, and important updates. It is **not** the public client contact method on profile pages. Launch timing depends on R&D/Product rollout plans and IT delivery readiness — do not promise a specific date.
   </Accordion>
 
   <Accordion title="An escort says a client is harassing them via WhatsApp — what do we do?">
@@ -178,7 +194,7 @@ Once an escort's profile is live, website visitors can contact them immediately.
 | WhatsApp button not visible on profile | Channel not enabled in profile contact preferences | WordPress → Edit Profile → Contact channels | Enable WhatsApp channel in contact preferences |
 | Viber button not working | Viber app not installed on visitor's device | N/A | Inform escort — Viber links only work for visitors who have Viber installed |
 | Escort reporting no contacts at all | Profile quality, tier, or search visibility issue | CRM → Clients → profile completeness; subscription tier | Walk through profile quality checklist; discuss tier upgrade |
-| Analytics showing zero contact taps for a week | Analytics tracker not loading on profile pages | `class-analytics-tracker.php`; browser console for JS errors | Check plugin version; escalate to RD Team & IT Infrastructure if tracker JS has errors |
+| Analytics showing zero contact taps for a week | Analytics tracker not loading on profile pages | `class-analytics-tracker.php`; browser console for JS errors | Check plugin version; escalate to IT Infrastructure if tracker JS has errors, and involve R&D/Product if event logic looks wrong |
 
 ---
 

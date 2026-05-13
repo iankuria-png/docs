@@ -6,7 +6,7 @@ icon: "circle-check"
 ---
 
 <Card title="Stage 5c of 8 — Payment confirmation" icon="circle-check" horizontal>
-  Provider webhook fires into the CRM, payment is matched to the client record, and subscription provisioning is triggered. **Owner: RD Team & IT Infrastructure (webhooks and provisioning); Finance (reconciliation & manual review).**
+  Provider webhook fires into the CRM, payment is matched to the client record, and subscription provisioning is triggered. **Owner: Sales & CS market operations for daily receipt confirmation and payment matching; Finance for weekly reconciliation and exceptions; R&D/Product for webhooks and provisioning logic; IT Infrastructure for environment failures.**
 </Card>
 
 ## What the customer sees
@@ -55,7 +55,7 @@ This is the most technically complex stage. A webhook (callback) fires from the 
   <Step title="CRM matches payment to client">
     The system uses the `payment_id` embedded in the webhook metadata to locate the CRM payment record and link it to the correct client. Match confidence is scored (high / medium / low).
 
-    If the match confidence is **low**, the payment enters the **manual review queue**. Finance must confirm the match before provisioning proceeds.
+    If the match confidence is **low**, the payment enters the recovery / review queue. The market lead or designated Head of Markets function inside Sales & CS should confirm the client match the same day. Finance steps in when the amount is unclear, the receipt is disputed, or the case needs exception review.
   </Step>
   <Step title="Payment status updates to 'completed'">
     The payment record is updated: status → `completed`, transaction reference (M-Pesa code) stored, timestamps set. This is what Finance uses for reconciliation.
@@ -82,20 +82,21 @@ This is the most technically complex stage. A webhook (callback) fires from the 
     2. In the CRM, go to **Payments** → search by transaction reference or phone number.
     3. Check the payment status:
        - `completed` + deal `active` → profile should be live; check WordPress directly. If not live, see Stage 5d troubleshooting.
-       - `completed` + deal `pending` → provisioning is stuck. Escalate to RD Team & IT Infrastructure.
+       - `completed` + deal `pending` → provisioning is stuck. Check whether the payment is sitting in the recovery queue waiting for a client match; if not, escalate to R&D/Product.
        - `pending` or `initiated` → payment not confirmed yet. Ask escort to wait 5–10 minutes; check M-Pesa message again.
        - No record found → the payment may not have been made yet, or the phone number was different. Ask for the full M-Pesa SMS.
        - `reversed` → M-Pesa reversed the transaction. Inform escort; they need to pay again.
-    4. If `manual_review` badge is showing, Finance needs to confirm the match before the profile activates.
+    4. If a review badge is showing, the market lead / Head of Markets function should confirm the customer match the same day. Bring Finance in if the amount is unclear, the receipt is disputed, or the payment is in settlement review.
 
     **Key rule:** Always ask for the M-Pesa transaction code before investigating. It is the single fastest way to locate a payment.
   </Accordion>
 
   <Accordion title="Finance">
-    **Reconciliation:**
-    Each `completed` payment record stores the M-Pesa transaction reference (`payments.transaction_reference`), amount, currency, and timestamp. For daily reconciliation:
-    - CRM → Payments → filter: Status = completed, Date range = today → Export to XLSX
+    **Finance owns weekly reconciliation and exception review, not day-to-day payment chasing.**
+    Each `completed` payment record stores the M-Pesa transaction reference (`payments.transaction_reference`), amount, currency, and timestamp. In the weekly reconciliation cycle:
+    - CRM → Payments → filter: Status = completed, Date range = review period → Export to XLSX
     - Cross-reference with your KopoKopo/M-Pesa settlement report using the transaction reference
+    - Review reversals, disputes, and anything escalated from market operations because the amount or receipt is unclear
 
     **Reversals:**
     If M-Pesa reverses a transaction after completion, the CRM receives a reversal callback and sets `payments.status = 'reversed'`. The associated deal is automatically deactivated. The escort's profile goes private. Finance should note the reversal in the reconciliation log.
@@ -106,10 +107,10 @@ This is the most technically complex stage. A webhook (callback) fires from the 
     - Paystack / Pesapal / PawaPay: varies by agreement — check your provider dashboard for settlement dates
 
     **Settlement tolerance (±5% mismatch):**
-    If the amount received differs from the expected amount by more than 5%, the payment enters `wallet_funding_settlement_review` state and requires manual Finance approval before provisioning. Check the CRM manual review queue daily.
+    If the amount received differs from the expected amount by more than 5%, the payment enters `wallet_funding_settlement_review` state and requires Finance approval before provisioning. This is a Finance exception case even if day-to-day client matching sits inside Sales & CS market operations.
   </Accordion>
 
-  <Accordion title="RD Team & IT Infrastructure">
+  <Accordion title="R&D/Product">
     **Webhook health monitoring:**
     If escorts start reporting payment confirmations but profiles not activating, check:
     1. `BillingWebhookEvent` table — are callbacks being received?
@@ -124,8 +125,17 @@ This is the most technically complex stage. A webhook (callback) fires from the 
     | Duplicate webhook | Provider retrying a callback | Handled automatically by `BillingWebhookEvent` dedup; no action needed |
   </Accordion>
 
+  <Accordion title="IT Infrastructure">
+    IT Infrastructure supports environment-level payment issues:
+    1. Provider dashboard or CRM cannot be reached because of network/access problems
+    2. Server, DNS, SSL, or environment outages delay callbacks or block investigation
+    3. Staff access to the relevant market environment is failing during an incident
+
+    If the callback logic itself is wrong, that stays with R&D/Product. If the environment needed to receive or inspect the callback is unhealthy, involve IT Infrastructure.
+  </Accordion>
+
   <Accordion title="SEO & Marketing">
-    SEO & Marketing do not own webhook operations, but they should watch for sudden drops in successful payment completion by market or campaign source. If payment confirmations fall while traffic holds steady, escalate that signal to RD Team & IT Infrastructure quickly.
+    SEO & Marketing do not own webhook operations, but they should watch for sudden drops in successful payment completion by market or campaign source. If payment confirmations fall while traffic holds steady, escalate that signal quickly to Sales & CS leadership, R&D/Product, and IT Infrastructure depending on what the pattern suggests.
   </Accordion>
 </AccordionGroup>
 
@@ -150,7 +160,7 @@ This is the most technically complex stage. A webhook (callback) fires from the 
     - **Medium**: One signal matched — review recommended
     - **Low**: Weak or ambiguous match — manual review required before provisioning
     
-    Finance reviews low-confidence payments in the recovery queue.
+    In day-to-day operations, the market lead / Head of Markets function inside Sales & CS should resolve low-confidence customer matches quickly. Finance joins when the amount is unclear, the receipt is disputed, or the case needs weekly exception review.
   </Accordion>
 
   <Accordion title="What happens if M-Pesa reverses a payment after the profile was already activated?">
@@ -158,7 +168,7 @@ This is the most technically complex stage. A webhook (callback) fires from the 
   </Accordion>
 
   <Accordion title="Can a payment be matched to a client manually if auto-match fails?">
-    Yes. Finance can manually match a payment in the CRM recovery queue by selecting the unmatched payment and confirming the correct client. This is recorded in the audit log with the Finance agent's identity.
+    Yes. The market lead / Head of Markets function inside Sales & CS can manually confirm the correct client in the recovery queue as part of daily payment matching. Finance should be brought in if the amount is wrong, the receipt is unclear, or the case becomes a reconciliation exception.
   </Accordion>
 </AccordionGroup>
 
@@ -169,9 +179,9 @@ This is the most technically complex stage. A webhook (callback) fires from the 
 | Symptom | Likely cause | Where to look | Fix |
 |---|---|---|---|
 | Escort has M-Pesa SMS but CRM shows no record | Webhook not received | `BillingWebhookEvent` table; KopoKopo webhook delivery logs | Check provider dashboard; re-trigger delivery if available |
-| Payment shows `completed` but provisioning not triggered | `client_unresolved` — payment matched to no client | `payments.provisioning_status` | Finance manually matches payment in recovery queue |
+| Payment shows `completed` but provisioning not triggered | `client_unresolved` — payment matched to no client | `payments.provisioning_status` | Sales & CS market operations confirm the client match in recovery queue; escalate recurring spikes to R&D/Product |
 | `webhook_verification_failed` in logs | HMAC secret mismatch | `laravel.log`; KopoKopo settings | Update KopoKopo webhook secret in CRM Settings → Integrations |
-| Payment in `manual_review` | Amount mismatch (±5%) or low match confidence | CRM → Payments → filter: Review state = manual review | Finance reviews and confirms or rejects the match |
+| Payment in `manual_review` | Amount mismatch (±5%) or low match confidence | CRM → Payments → filter: Review state = manual review | Sales & CS market operations resolve the client match; Finance handles amount mismatch or disputed receipt |
 | Payment reversed after activation | M-Pesa reversal received | `payments.status = 'reversed'`; deal deactivated | Contact escort; arrange repayment; re-activate deal when paid |
 | Duplicate payment record | Provider retried the webhook | `BillingWebhookEvent` dedup | System handles automatically; no action needed |
 

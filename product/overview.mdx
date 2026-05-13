@@ -11,7 +11,7 @@ icon: "house"
 
 ## What this is and why it exists
 
-No one can effectively sell, support, market, or improve a product they don't fully understand. The Exotic Online University gives every team member — Sales & CS, Finance, RD Team & IT Infrastructure, and SEO & Marketing — a shared, accurate view of how the platform works from the **escort's perspective**.
+No one can effectively sell, support, market, or improve a product they don't fully understand. The Exotic Online University gives every team member — Sales & CS, Finance, R&D/Product, IT Infrastructure, and SEO & Marketing — a shared, accurate view of how the platform works from the **escort's perspective**.
 
 Every stage is documented with real system behaviour, department-specific guidance, SOPs, troubleshooting, and certification questions.
 
@@ -139,8 +139,9 @@ Package tiers are proposed and managed by the **CS head for each market or regio
     | Register | Guide registration, deliver credentials, handle failed signups |
     | Profile setup | Coach bio quality, completeness check before subscription |
     | Verification | **Full ownership** — WhatsApp ID collection, age check, CRM toggle |
-    | Payment | Retry failed STK Push, send payment links, troubleshoot F2/F3 |
-    | Activation | Confirm profile is live; handle "I paid but profile isn't live" |
+    | Payment | Retry failed STK Push, send payment links, collect receipts, and handle first-line payment recovery |
+    | Payment confirmation | Daily receipt confirmation, payment matching follow-up, and activation coordination through market leads / Head of Markets |
+    | Activation | Confirm profile is live; handle "I paid but profile isn't live" and log the outcome |
     | Renewal | **Full ownership** — campaigns, calls, objection handling, close |
     | Upgrades | Pitch, process, and confirm upgrades |
   </Accordion>
@@ -148,23 +149,31 @@ Package tiers are proposed and managed by the **CS head for each market or regio
   <Accordion title="Finance — what you own" icon="calculator">
     | Stage | Responsibility |
     | --- | --- |
-    | Payment confirmation | **Full ownership** — weekly reconciliation, manual review queue, reversals |
+    | Payment confirmation | Weekly reconciliation, payment exception review, and reversals |
     | Settlement review | Approve/reject amount-mismatch payments (±5% tolerance) |
-    | Client resolution | Match payments to clients when auto-match fails (during review) |
+    | Disputes | Review unclear receipts, disputed payments, and suspicious mismatches escalated from market operations |
     | Renewal revenue | Track renewal MRR |
     | Discounts | Review deals and flag any suspicious payment that needs review |
   </Accordion>
 
-  <Accordion title="RD Team & IT Infrastructure — what you own" icon="lightbulb">
+  <Accordion title="R&D/Product — what you own" icon="lightbulb">
     | Area | Responsibility |
     |---|---|
     | Verification policy | Set ID types accepted, age threshold, re-verification rules |
     | Exotic Chat | Product roadmap for Exotic-to-escort communication, plus rollout planning and technical delivery |
     | Contact channels | Add, remove, or change public contact channel types on profiles |
-    | Payment infrastructure | Provider routing, webhooks, gateway health, and `BillingMarketProviderBinding` config |
-    | WordPress sync | `WpSyncService` health, activation endpoint, plugin maintenance |
-    | Tracking setup | Google Analytics tag setup, contact-tap instrumentation, and platform event wiring |
-    | Monitoring | `laravel.log`, webhook dashboards, scheduled tasks, and activation recovery |
+    | Payment workflow logic | Provider routing rules, webhooks, callback validation, and `BillingMarketProviderBinding` product config |
+    | CRM/WordPress sync logic | `WpSyncService` behavior, broken CRM/profile links, activation workflow, and provisioning recovery logic |
+    | Product reporting definitions | Discovery, checkout, and contact event requirements used by reporting and analytics |
+  </Accordion>
+
+  <Accordion title="IT Infrastructure — what you own" icon="server">
+    | Area | Responsibility |
+    |---|---|
+    | WordPress environment | Admin configuration, plugin deployment, application passwords, and site access |
+    | Infrastructure | Server uptime, network access, environment health, and browser/device blocking issues |
+    | Tracking implementation | Google Analytics tag deployment, tracker loading, and environment-level instrumentation support |
+    | Technical monitoring | Scheduler health, connection tests, outage recovery, and environment diagnostics |
   </Accordion>
 
   <Accordion title="Commercial leadership — what you own" icon="briefcase">
@@ -183,7 +192,7 @@ Package tiers are proposed and managed by the **CS head for each market or regio
     | SEO | Organic search ranking, landing page quality, and profile SEO signals |
     | Marketing | Campaign messaging, market-facing positioning, and conversion support content |
     | Analytics reporting | Google Analytics traffic, landing-page conversion, and funnel reporting |
-    | Performance monitoring | Flag drop-offs in registrations, payments, and contact engagement back to RD Team & IT Infrastructure |
+    | Performance monitoring | Flag drop-offs in registrations, payments, and contact engagement back to Sales & CS, R&D/Product, or IT Infrastructure depending on the issue |
   </Accordion>
 </AccordionGroup>
 
@@ -201,8 +210,11 @@ Choose the path that matches your role:
   <Card title="Finance team" icon="calculator" href="/product/stage-5c-payment-confirmation">
     Start at Stage 5c — Payment confirmation. Then read 5e — Failures, then Stage 7 — Renewal for revenue context.
   </Card>
-  <Card title="RD Team & IT Infrastructure" icon="lightbulb" href="/product/stage-5a-subscription-selection">
-    Start at Stage 5a — Subscription selection, then 5b, 5c, 5d, and 5e to understand pricing, routing, activation, and failure recovery.
+  <Card title="R&D/Product" icon="lightbulb" href="/product/stage-5a-subscription-selection">
+    Start at Stage 5a — Subscription selection, then 5b, 5c, 5d, and 5e to understand payment workflow logic, callbacks, activation, and failure recovery.
+  </Card>
+  <Card title="IT Infrastructure" icon="server" href="/product/stage-5d-profile-activation">
+    Start at Stage 5d — Profile activation, then 5b, 5c, and 5e to understand WordPress environment health, tracking implementation, and outage recovery.
   </Card>
   <Card title="SEO & Marketing" icon="chart-line" href="/product/stage-1-discover">
     Start at Stage 1 — Discover, then Stages 3 and 6 to understand SEO signals, organic conversion, contact behaviour, and analytics reporting.

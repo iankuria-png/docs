@@ -1,7 +1,8 @@
 const departments = [
   "Sales & CS",
   "Finance",
-  "RD Team & IT Infrastructure",
+  "R&D/Product",
+  "IT Infrastructure",
   "SEO & Marketing",
 ]
 
@@ -44,7 +45,7 @@ const questions = [
       "Create a new client record manually",
       "Ask them to register again with a different email",
       "Run a manual sync from CRM -> Settings -> Integrations -> [market] -> Sync clients",
-      "Escalate to RD Team & IT Infrastructure immediately",
+      "Escalate to R&D/Product immediately",
     ],
     correct: 2,
     explanation: "Run the sync first. The record often exists in WordPress and just has not synced across yet.",
@@ -67,7 +68,7 @@ const questions = [
     options: [
       "Upgrade their subscription tier immediately",
       "Guide them to complete missing profile fields and target 80%+",
-      "Escalate to RD Team & IT Infrastructure to inspect the completeness calculation",
+      "Escalate to R&D/Product to inspect the completeness calculation",
       "Tell them to wait because all new profiles take time",
     ],
     correct: 1,
@@ -162,7 +163,7 @@ const questions = [
       "The WordPress site was offline",
     ],
     correct: 2,
-    explanation: "The payment reached the CRM but could not be matched automatically to a client record.",
+    explanation: "The payment reached the CRM but could not be matched automatically to a client record, so Sales & CS market operations need to confirm the correct client before provisioning can complete.",
   },
   {
     stage: "Stage 5e - Failures",
@@ -228,10 +229,10 @@ const questions = [
     stage: "Cross-stage - Ownership",
     text: "Who owns package tiers and pricing, and who makes the final decision to open a new market?",
     options: [
-      "Finance owns tiers and pricing, while RD Team & IT Infrastructure decides new markets",
+      "Finance owns tiers and pricing, while R&D/Product decides new markets",
       "The CS head for each market or region owns tiers and pricing with Head of CS/Sales approval, while the CEO decides on market expansion",
       "SEO & Marketing owns tiers and pricing, while Sales & CS decides on market expansion",
-      "RD Team & IT Infrastructure owns tiers, pricing, and market expansion",
+      "R&D/Product owns tiers, pricing, and market expansion",
     ],
     correct: 1,
     explanation: "Commercial ownership sits with market or regional CS leadership, with Head of CS/Sales approval. The CEO makes the final market-expansion decision, guided by Sales, RD, and market research.",

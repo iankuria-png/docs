@@ -47,7 +47,7 @@ This is also the moment a **Lead** in the CRM becomes a **Client**. The sales ag
     - They have an email address (required for the WordPress account)
     - They are in a market Exotic currently operates in
 
-    If the market is not yet configured, do **not** attempt registration — escalate to your manager for RD Team to review. Opening a new market is RD's decision.
+    If the market is not yet configured, do **not** attempt registration — escalate to your manager for leadership review. Opening a new market is a CEO decision informed by Sales, R&D/Product, and market research.
   </Step>
   <Step title="Create the client via Lead Conversion">
     **Agent-assisted (most common):**
@@ -91,7 +91,7 @@ This is also the moment a **Lead** in the CRM becomes a **Client**. The sales ag
     - Open the client record and confirm `wp_post_id` is populated (confirms the WordPress profile exists)
     - Add a timeline note: "Account created. Credentials delivered via [channel]. Guiding through profile setup."
 
-    If `wp_post_id` is missing, the WordPress creation step may have failed — escalate to RD Team & IT Infrastructure.
+    If `wp_post_id` is missing, the WordPress creation step may have failed — escalate to R&D/Product first, and involve IT Infrastructure if the issue points to WordPress environment or access.
   </Step>
 </Steps>
 
@@ -114,15 +114,19 @@ This is also the moment a **Lead** in the CRM becomes a **Client**. The sales ag
     **Pan-African note:** Registration works identically across all 54 markets. The market determines which WordPress site the account is created on and which payment options appear at subscription time.
   </Accordion>
 
-  <Accordion title="RD Team & IT Infrastructure">
-    RD Team & IT Infrastructure do not own the decision to open new markets. A market can only accept registrations after the **CEO** approves launch, guided by Sales input, RD input, and market research. Once approved, the technical rollout must include:
-    - A configured WordPress site with the `exotic-crm-sync` plugin installed and credentials set up in the CRM
-    - A Platform record in the CRM with country code, currency, phone prefix, and timezone
-    - At least one payment provider configured
+  <Accordion title="R&D/Product">
+    R&D/Product does not own the final decision to open new markets. A market can only accept registrations after the **CEO** approves launch, guided by Sales input, R&D/Product input, and market research.
 
-    If a prospect is in an unconfigured country, log the lead with a note, escalate to your manager, and do **not** promise a launch date. The CEO owns the final launch decision; IT Infrastructure handles the technical rollout once that decision is made.
+    Registration failures — where a client record is created in the CRM but the `wp_post_id` is missing — are usually product workflow or sync issues. Check `laravel.log` for `WpSyncService` exceptions around the time of registration. Run a manual sync (CRM → Settings → Integrations → [market] → Sync clients) or re-trigger the WordPress profile creation manually.
+  </Accordion>
 
-    Registration failures — where a client record is created in the CRM but the `wp_post_id` is missing — indicate the WordPress API call failed. Check `laravel.log` for `WpSyncService` exceptions around the time of registration. Run a manual sync (CRM → Settings → Integrations → [market] → Sync clients) or re-trigger the WordPress profile creation manually.
+  <Accordion title="IT Infrastructure">
+    Once a market is approved, IT Infrastructure supports the launch environment:
+    - WordPress site readiness and admin access
+    - Plugin deployment and credentials
+    - Site-level access, connectivity, and environment health
+
+    If a prospect is in an unconfigured country, log the lead with a note, escalate to your manager, and do **not** promise a launch date. IT Infrastructure only executes the technical rollout after the commercial decision is made.
   </Accordion>
 
   <Accordion title="SEO & Marketing">
@@ -144,7 +148,7 @@ This is also the moment a **Lead** in the CRM becomes a **Client**. The sales ag
   <Accordion title="The escort says they registered on the site but I can't find them in the CRM — what do I check?">
     1. CRM → Clients → search by phone number and by name
     2. If not found: CRM → Settings → Integrations → [market] → Sync clients (run manual sync)
-    3. Still missing after sync? Check `laravel.log` for WordPress sync errors — the registration may have failed on the WordPress side. Escalate to RD Team & IT Infrastructure with the escort's name and registration timestamp.
+    3. Still missing after sync? Check `laravel.log` for WordPress sync errors — the registration may have failed on the WordPress side. Escalate to R&D/Product with the escort's name and registration timestamp, and involve IT Infrastructure if the issue looks environmental.
   </Accordion>
 
   <Accordion title="What if two agents accidentally register the same escort twice?">
@@ -194,7 +198,7 @@ This is also the moment a **Lead** in the CRM becomes a **Client**. The sales ag
 
     **C.** Ask the escort to register again
 
-    **D.** Escalate to RD Team & IT Infrastructure immediately
+    **D.** Escalate to R&D/Product immediately
   </Accordion>
 
   <Accordion title="Q3: How should login credentials be delivered to a newly registered escort?">
@@ -210,7 +214,7 @@ This is also the moment a **Lead** in the CRM becomes a **Client**. The sales ag
   <Accordion title="Q4: A client record was created but the wp_post_id field is empty. What does this mean and who should you escalate to?">
     **A.** The escort has not uploaded photos yet — no action needed
 
-    **B.** The WordPress profile post was not created — escalate to RD Team & IT Infrastructure ✅
+    **B.** The WordPress profile post was not created — escalate to R&D/Product ✅
 
     **C.** The escort is not verified — escalate to the verification team
 

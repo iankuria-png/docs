@@ -6,7 +6,7 @@ icon: "rocket"
 ---
 
 <Card title="Stage 5d of 8 — Profile activation" icon="rocket" horizontal>
-  CRM creates the Deal, calls WordPress to publish the profile, syncs back the result. Profile goes live in **30–60 seconds**. **Owner: RD Team & IT Infrastructure for activation failures; CS for escort confirmation.**
+  CRM creates the Deal, calls WordPress to publish the profile, syncs back the result. Profile goes live in **30–60 seconds**. **Owner: R&D/Product for activation logic; IT Infrastructure for WordPress environment failures; CS for escort confirmation.**
 </Card>
 
 ## What the customer sees
@@ -82,7 +82,7 @@ Activation is a multi-step automated sequence: the CRM creates a deal, calls Wor
     **"My profile is active in the CRM but I can't find it on the site":**
     - Check the profile's WordPress `post_status` — if it's `publish` but the escort can't find it, it may take up to 60 seconds for caching to clear
     - Ask them to search by their profile name (not URL) — newly activated profiles sometimes take a moment to appear in search index
-    - If `post_status` is NOT `publish` in the CRM, the WordPress sync may have failed — escalate to RD Team & IT Infrastructure
+    - If `post_status` is NOT `publish` in the CRM, the WordPress sync may have failed — escalate to R&D/Product first, and involve IT Infrastructure if the WordPress environment looks unhealthy
 
     **Setting renewal expectations:**
     At activation, always tell the escort (or note in their CRM timeline) when their subscription expires. This sets a clear renewal expectation and reduces "why was my profile deactivated?" surprises later.
@@ -94,21 +94,24 @@ Activation is a multi-step automated sequence: the CRM creates a deal, calls Wor
     **Free trials:** Deals with `is_free_trial = true` represent zero-revenue activations. Finance reports should separate trial activations from paid activations. The `free_trial_approved_by` field identifies who approved the trial for audit purposes.
   </Accordion>
 
-  <Accordion title="RD Team & IT Infrastructure">
-    **Profile activation failure diagnostic:**
+  <Accordion title="R&D/Product">
+    **Profile activation logic diagnostic:**
     If a deal shows `pending` status after payment is confirmed and several minutes have passed:
 
     1. Check `laravel.log` for WordPress connection errors — `WpSyncService` exceptions will appear here
-    2. Verify the WordPress REST API endpoint is reachable: CRM → Settings → Integrations → [market] → Test connection
-    3. Check `deals.provisioning_status` if available — `client_unresolved` means the payment couldn't be linked to a client
+    2. Check `deals.provisioning_status` if available — `client_unresolved` means the payment couldn't be linked to a client
+    3. Confirm whether the activation workflow stalled before or after the WordPress publish step
     4. Manual recovery: CRM → Deals → find the deal → Action menu → Activate manually (select `manual` payment method, enter the confirmed payment reference)
+  </Accordion>
 
+  <Accordion title="IT Infrastructure">
     **WordPress sync plugin health:**
+    1. Verify the WordPress REST API endpoint is reachable: CRM → Settings → Integrations → [market] → Test connection
     The activation call goes to `POST /exotic-crm-sync/v1/clients/{postId}/activate` on the WordPress site. If this endpoint is unreachable, activation fails silently. Check that the `exotic-crm-sync` WordPress plugin is active and the Application Password credentials in CRM Settings are valid.
   </Accordion>
 
   <Accordion title="SEO & Marketing">
-    Activation lag affects trust and conversion. If SEO & Marketing notice rising "paid but not live" complaints, lower activation conversion, or campaigns sending traffic into a broken activation flow, surface it immediately to RD Team & IT Infrastructure so the technical issue is prioritised.
+    Activation lag affects trust and conversion. If SEO & Marketing notice rising "paid but not live" complaints, lower activation conversion, or campaigns sending traffic into a broken activation flow, surface it immediately to R&D/Product and IT Infrastructure so the technical issue is prioritised.
   </Accordion>
 </AccordionGroup>
 
@@ -118,13 +121,13 @@ Activation is a multi-step automated sequence: the CRM creates a deal, calls Wor
 
 <AccordionGroup>
   <Accordion title="How long does profile activation take after payment?">
-    Under normal conditions, 30–60 seconds from payment confirmation to profile going live. If it takes more than 5 minutes, something has likely gone wrong — check the deal status in the CRM and escalate to RD Team & IT Infrastructure if the deal is stuck in `pending`.
+    Under normal conditions, 30–60 seconds from payment confirmation to profile going live. If it takes more than 5 minutes, something has likely gone wrong — check the deal status in the CRM and escalate to R&D/Product if the deal is stuck in `pending`, then involve IT Infrastructure if the WordPress environment is failing.
   </Accordion>
 
   <Accordion title="The escort's deal is 'active' in the CRM but their profile isn't showing on the site — what do I check?">
     1. Open the client in CRM → check the profile URL field — copy it and open it in a browser
     2. If the URL loads but shows a private/draft notice, the WordPress sync may not have propagated yet — wait 60 seconds and refresh
-    3. If the URL gives a 404, the `wp_post_id` may be wrong — this is a data issue; escalate to RD Team & IT Infrastructure to re-link the profile
+    3. If the URL gives a 404, the `wp_post_id` may be wrong — this is a data issue; escalate to R&D/Product to re-link the profile
     4. If the profile shows but isn't appearing in search results, it may be a caching delay — check again in 5 minutes
   </Accordion>
 
@@ -149,9 +152,9 @@ Activation is a multi-step automated sequence: the CRM creates a deal, calls Wor
 |---|---|---|---|
 | Deal stuck in `pending` after payment confirmed | WordPress activation API unreachable | `laravel.log`; CRM → Settings → Test connection | Test WP connection; fix credentials; manually activate via CRM |
 | Profile `post_status` not `publish` after deal is `active` | WP sync call failed silently | `laravel.log` for WpSyncService exceptions | Run manual sync from client detail page; or re-activate deal |
-| `client_unresolved` on deal | Payment could not be linked to a CRM client record | `deals.provisioning_status`; `payments.provisioning_status` | Finance manually matches the payment to the correct client |
+| `client_unresolved` on deal | Payment could not be linked to a CRM client record | `deals.provisioning_status`; `payments.provisioning_status` | Sales & CS market operations manually matches the payment to the correct client; escalate repeat spikes to R&D/Product |
 | Profile active but not visible in search | WordPress caching delay | Public site search | Wait 5 minutes; clear WordPress cache if admin access available |
-| Deal shows `active` but `expires_at` is in the past | Deal was activated but expiry date not set correctly | `deals.expires_at` | IT: check `SubscriptionProvisioningService` logs; manually update expiry and resync |
+| Deal shows `active` but `expires_at` is in the past | Deal was activated but expiry date not set correctly | `deals.expires_at` | R&D/Product: check `SubscriptionProvisioningService` logs; manually update expiry and resync |
 | Free trial activated but approver not recorded | `free_trial_approved_by` is null | `deals` table | Audit: check who had supervisor PIN access at the time; record in deal notes |
 
 ---

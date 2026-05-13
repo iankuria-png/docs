@@ -356,7 +356,8 @@
           <option value="">Select department…</option>
           <option>Sales & CS</option>
           <option>Finance</option>
-          <option>RD Team & IT Infrastructure</option>
+          <option>R&D/Product</option>
+          <option>IT Infrastructure</option>
           <option>SEO & Marketing</option>
         </select>
       </div>
@@ -484,7 +485,7 @@ const QUESTIONS = [
       "Create a new client record manually in the CRM",
       "Ask the escort to register again using a different email",
       "Run a manual sync from CRM → Settings → Integrations → [market] → Sync clients",
-      "Escalate to RD Team & IT Infrastructure immediately"
+      "Escalate to R&D/Product immediately"
     ],
     correct: 2,
     explanation: "Self-service registrations are pulled into the CRM by the sync process. Run a manual sync first — the client record likely exists in WordPress and just needs to be synced across."
@@ -507,7 +508,7 @@ const QUESTIONS = [
     options: [
       "Upgrade their subscription tier",
       "Guide them to complete missing profile fields — target 80%+ before expecting results",
-      "Escalate to RD Team & IT Infrastructure to investigate the completeness calculation",
+      "Escalate to R&D/Product to investigate the completeness calculation",
       "Advise them to wait — it takes time for new profiles to get traction"
     ],
     correct: 1,
@@ -607,7 +608,7 @@ const QUESTIONS = [
       "The WordPress site was unavailable at the time of activation"
     ],
     correct: 2,
-    explanation: "client_unresolved means the phone number on the payment doesn't match any client record — often the escort paid from a different number than they registered with. Finance manually matches the payment to the correct client to resolve it."
+    explanation: "client_unresolved means the phone number on the payment doesn't match any client record — often the escort paid from a different number than they registered with. Sales & CS market operations confirms the correct client match so provisioning can continue."
   },
   {
     stage: "Stage 5e — Failures & recovery",
@@ -673,10 +674,10 @@ const QUESTIONS = [
     stage: "Cross-stage — Departments",
     text: "Who owns package tiers and pricing, and who makes the final decision to open a new market?",
     options: [
-      "Finance owns tiers and pricing, while RD Team & IT Infrastructure decides new markets",
+      "Finance owns tiers and pricing, while R&D/Product decides new markets",
       "The CS head for each market or region owns tiers and pricing with Head of CS/Sales approval, while the CEO decides on market expansion",
       "SEO & Marketing owns tiers and pricing, while Sales & CS decides on market expansion",
-      "RD Team & IT Infrastructure owns tiers, pricing, and market expansion"
+      "R&D/Product owns tiers, pricing, and market expansion"
     ],
     correct: 1,
     explanation: "Commercial ownership sits with market or regional CS leadership, with Head of CS/Sales approval. The CEO makes the final market-expansion decision, guided by Sales, RD, and market research."

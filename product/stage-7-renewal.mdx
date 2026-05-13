@@ -6,7 +6,7 @@ icon: "rotate-right"
 ---
 
 <Card title="Stage 7 of 8 — Renewal" icon="rotate-right" horizontal>
-  Profile goes private at expiry. CRM sends automated reminders at 14 / 7 / 3 / 0 days. Personal agent call dramatically improves conversion. All data preserved — nothing deleted on expiry. **Owner: Sales & CS.**
+  Profile goes private at expiry. CRM sends automated reminders at 14 / 7 / 3 / 0 days. Personal agent call dramatically improves conversion. All data preserved — nothing deleted on expiry. **Owner: Sales & CS, with Head of Markets oversight on market-level renewal discipline and payment confirmation.**
 </Card>
 
 ## What the customer sees
@@ -108,6 +108,8 @@ When the escort renews, their profile goes live again immediately — the same f
   <Accordion title="Sales & CS">
     **Renewal is your highest-ROI sales activity.** A renewal is far easier than acquiring a new escort — the relationship already exists, the profile is already built, and verification is already done. Treat every renewal conversation as a relationship management call, not just a transaction.
 
+    **Market-operations note:** Inside Sales & CS, the Head of Markets function is responsible for making sure renewal payments are being confirmed, matched, and moved toward activation consistently in each market.
+
     **When to offer a discount:** Renewal discounts are at supervisor discretion. As a guideline:
 
     - An escort who has renewed 3\+ times and has a genuine complaint about low traffic → discuss a one-period discount while addressing the profile issue
@@ -131,15 +133,19 @@ When the escort renews, their profile goes live again immediately — the same f
     **Lapsed escorts:** Escorts in the `lapsed` bucket represent lost revenue. Finance tracks the conversion rate from `lapsed → renewed` as a churn recovery metric.
   </Accordion>
 
-  <Accordion title="RD Team & IT Infrastructure">
-    RD Team & IT Infrastructure do not own renewal pricing. Commercial ownership sits with Sales & CS leadership:
+  <Accordion title="R&D/Product">
+    R&D/Product does not own renewal pricing. Commercial ownership sits with Sales & CS leadership:
     - CS head for each market or region proposes renewal pricing or market-specific adjustments
     - Head of CS/Sales approves renewal pricing changes
     - Any loyalty or long-tenure pricing programmes
     - New renewal campaign types (e.g. annual subscription options, multi-period discounts)
 
-    If sales agents are fielding frequent requests for annual subscriptions or long-term discounts that aren't currently available, escalate that feedback through Sales & CS leadership first. IT Infrastructure only supports the technical setup after commercial approval.
+    If sales agents are fielding frequent requests for annual subscriptions or long-term discounts that aren't currently available, escalate that feedback through Sales & CS leadership first. R&D/Product supports the workflow and automation changes after commercial approval.
 
+    Renewal workflow bugs, campaign logic issues, stuck statuses, and incorrect renewal automation belong here.
+  </Accordion>
+
+  <Accordion title="IT Infrastructure">
     The expiry job that sets deals to `expired` and profiles to `private` runs on a scheduled cron task. If profiles are not going private after expiry, check the Laravel scheduler health. If profiles are going private prematurely (before the `expires_at` date), check for timezone mismatch between the CRM server timezone and `deals.expires_at` storage.
   </Accordion>
 
@@ -168,7 +174,7 @@ When the escort renews, their profile goes live again immediately — the same f
   </Accordion>
 
   <Accordion title="An escort renewed but their profile is still private — what happened?">
-    Check the deal status: CRM → Clients → [client] → active deal. If the deal shows `active` but the profile is still private, the WordPress sync failed — escalate to RD Team & IT Infrastructure (same as Stage 5d profile activation failures). If the deal is `pending`, the payment may not have confirmed yet — check the payment record.
+    Check the deal status: CRM → Clients → [client] → active deal. If the deal shows `active` but the profile is still private, the WordPress sync failed — escalate to R&D/Product first, and involve IT Infrastructure if the WordPress environment is unhealthy (same as Stage 5d profile activation failures). If the deal is `pending`, the payment may not have confirmed yet — check the payment record.
   </Accordion>
 
   <Accordion title="Can a lapsed escort use the same profile, photos, and contact details?">

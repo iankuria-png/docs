@@ -24,10 +24,14 @@ This exam consolidates knowledge from all stages of the Exotic escort lifecycle.
     1. Discover
     2. Register & account creation
     3. Profile setup & media upload
-    4. Verification 5a. Subscription selection 5b. Payment initiation 5c. Payment confirmation 5d. Profile activation
-    5. Customer contact
-    6. Renewal
-    7. Upgrades
+    4. Verification
+    5. Subscription selection
+    6. Payment initiation
+    7. Payment confirmation
+    8. Profile activation
+    9. Customer contact
+    10. Renewal
+    11. Upgrades
   </Accordion>
 
   <Accordion title="Q2: What is the SINGLE fastest way to locate a payment record in the CRM?">
@@ -71,15 +75,15 @@ This exam consolidates knowledge from all stages of the Exotic escort lifecycle.
   </Accordion>
 
   <Accordion title="Q8 (Commercial leadership): Who owns package tiers, pricing, and the decision to open new markets?">
-    **Answer:** Package tiers, features, and pricing are owned by the **CS head for each market or region** and require approval from the **Head of CS/Sales**. The decision to open a new African market sits with the **CEO**, guided by Sales input, RD input, and market research. IT Infrastructure executes the technical rollout after the decision is approved.
+    **Answer:** Package tiers, features, and pricing are owned by the **CS head for each market or region** and require approval from the **Head of CS/Sales**. The decision to open a new African market sits with the **CEO**, guided by Sales input, R&D/Product input, and market research. IT Infrastructure executes the technical rollout after the decision is approved.
   </Accordion>
 
-  <Accordion title="Q9 (RD Team & IT Infrastructure): A batch of webhook callbacks is being rejected with status 401. What is the cause and fix?">
+  <Accordion title="Q9 (R&D/Product): A batch of webhook callbacks is being rejected with status 401. What is the cause and fix?">
     **Answer:** **Cause:** HMAC signature mismatch — the webhook secret in the CRM doesn't match the secret configured in KopoKopo. **Fix:** Log into KopoKopo dashboard → copy current webhook secret → CRM → Settings → Integrations → [market] → update KopoKopo webhook secret. Then manually re-activate any deals that missed activation during the failure window.
   </Accordion>
 
   <Accordion title="Q10 (SEO & Marketing): What determines which package tier position an escort appears at in search results?">
-    **Answer:** The `products.tier` field on the deal's linked product. Higher tiers (VIP, VVIP) appear above lower tiers (Featured, Basic) in all search results. Tier is configured per market in CRM → Settings → Integrations → Packages — this is owned by RD Team.
+    **Answer:** The `products.tier` field on the deal's linked product. Higher tiers (VIP, VVIP) appear above lower tiers (Featured, Basic) in all search results. Commercial tier and pricing decisions come from CS leadership, while the approved configuration is applied in the platform by R&D/Product with IT support where needed.
   </Accordion>
 </AccordionGroup>
 
@@ -98,11 +102,11 @@ This exam consolidates knowledge from all stages of the Exotic escort lifecycle.
     1. Note the transaction code: `QWE9876543`
     2. CRM → Payments → search `QWE9876543`
     3. Diagnose based on what you find:
-       - **Payment not found:** Escalate to RD Team & IT Infrastructure — webhook may not have arrived. Ask escort to wait and call back in 15 minutes.
-       - **`initiated` or `pending`:** Payment not confirmed yet. Ask her to check her M-Pesa messages — did she receive a confirmation SMS? If yes, escalate to RD Team & IT Infrastructure (callback delayed). If no, she may not have completed PIN entry — retry via payment link.
+       - **Payment not found:** Escalate to R&D/Product — webhook may not have arrived. Involve IT Infrastructure if there are environment or dashboard-access issues. Ask escort to wait and call back in 15 minutes.
+       - **`initiated` or `pending`:** Payment not confirmed yet. Ask her to check her M-Pesa messages — did she receive a confirmation SMS? If yes, escalate to R&D/Product (callback delayed). If no, she may not have completed PIN entry — retry via payment link.
        - **`completed` + deal `active`:** Her profile should be live. Ask her to hard-refresh her browser and search for her name directly on the site.
-       - **`completed` + deal `pending`:** Provisioning is stuck. Escalate to RD Team & IT Infrastructure with deal ID and payment ID.
-        - **`manual_review`:** Finance needs to confirm the payment match — inform Finance, give escort ETA of 2–4 hours.
+       - **`completed` + deal `pending`:** Provisioning is stuck. Check whether the payment still needs a client match; if not, escalate to R&D/Product with deal ID and payment ID.
+        - **`manual_review`:** Sales & CS market operations should confirm the client match quickly; involve Finance if the amount or receipt is unclear.
         - **`reversed`:** M-Pesa reversed her payment. Inform her clearly and empathetically — she needs to pay again.
     4. Whatever the outcome: create a timeline note on her CRM record documenting the complaint and your action.
   </Accordion>
@@ -132,10 +136,10 @@ This exam consolidates knowledge from all stages of the Exotic escort lifecycle.
 
     1. Run the M-Pesa review panel: CRM → Payments → M-Pesa review — this surfaces exactly these unmatched payments
     2. For each unmatched payment: check the phone number on the payment → search for a matching client in CRM → Clients
-    3. If a match is found: Finance confirms the payment match → provisioning triggers automatically → profile goes live
+    3. If a match is found: Sales & CS market operations confirms the payment match → provisioning triggers automatically → profile goes live
     4. If no match: check if the escort registered with a different number; create the client record if needed; then match
     5. Contact each affected escort to confirm their profile is now live and apologise for the delay
-    6. Flag the batch to RD Team & IT Infrastructure — a spike of 12 `client_unresolved` payments over a weekend warrants investigation into the auto-matching logic
+    6. Flag the batch to R&D/Product — a spike of 12 `client_unresolved` payments over a weekend warrants investigation into the auto-matching logic
   </Accordion>
 </AccordionGroup>
 
@@ -153,15 +157,15 @@ This section tests whether you can describe a complete working shift as a Sales 
 
     **Morning (8:00–10:00) — Operations check:**
 
-    - Check the **recovery queue**: CRM → Payments → filter Status = Recovery queue. Any `completed` payments not yet matched to a client need immediate attention.
-    - Check Failed **queue - failed payments - customers who are willing to pay but experiencing friction - check payment drawer - to identify failure reason and reach out - with a payment link**
-    - **Check message backglog (Chat/Telegram/WhatsApp/SMS) - prioritize paying customers and customers showing payment intent, customers sharing payment receipts for activation**
-    - **Check Expired subscriptions - reach out (prioritize high value - tiers)**
+    - Check the **recovery queue**: CRM → Payments → filter Status = Recovery queue. Any `completed` payments not yet matched to a client need immediate attention from market operations.
+    - Check the **failed payment queue** and identify customers who still show payment intent, then reach out with the right recovery option or payment link.
+    - Check the **message backlog** (WhatsApp/SMS/chat) and prioritise paying customers, receipt-sharing customers, and activation blockers.
+    - Check **expired subscriptions** and prioritise high-value tiers for follow-up.
     - Check **at-risk renewals**: CRM → Renewals → Overview → at\_risk bucket. Who expires in the next 7 days? Build your call list.
 
     **Mid-morning (10:00–11:30) — Outbound sales:**
 
-    - Work through the CRM → Clinets list: new sign ups (clients who signed up - but have not activated their profile), or overnight registrations
+    - Work through the CRM → Clients list: new sign-ups and overnight registrations that still need conversion help
     - Make outbound calls on the at-risk renewal list — personal calls convert far better than automated reminders
     - For new leads: follow Stage 1 SOP — confirm interest, qualify, guide toward registration
 
@@ -179,7 +183,7 @@ This section tests whether you can describe a complete working shift as a Sales 
     **End of day (16:00–17:00) — Wrap-up:**
 
     - Complete any open CRM timeline notes
-    - Check the recovery queue one more time — anything that arrived during the day that needs Check up - matching, pending, review?
+    - Check the recovery queue one more time — anything that arrived during the day that still needs matching, review, or escalation?
     - Review your contact pipeline: any client/lead/contact that have been in `contacted` status for more than 21 days without progress → move to `lost` with reason, or re-engage
     - Log any product feedback or recurring escort complaints for the weekly team meeting
 
@@ -188,7 +192,7 @@ This section tests whether you can describe a complete working shift as a Sales 
     - Prioritising the verification queue every morning — an escort waiting for verification is on the edge of dropping off
     - Outbound sales - users who signed up by themselves are halfway through the pipeline - reach out and convert
     - Not pushing for payment before a profile is complete — a disappointed escort who goes live with bad photos churns within a week
-    - Knowing which payment failures to fix yourself (F2, F3) vs. escalating to RD Team & IT Infrastructure (F5, F6, F10) vs. handing to Finance (F7, F8, F9)
+    - Knowing which payment failures to fix yourself (F2, F3) vs. escalating to R&D/Product (F5, F6), IT Infrastructure (F10), or Finance (F7, F8)
     - Treating renewal calls as relationship calls, not sales calls — asking "how's it going?" before pitching renewal
 
     Note: This is a theoretical cover - it is not meant to restrict you to doing this tasks step by step - it is meant to give you a mental guide/map (Operational check → Outbound Sales →Inbound Support→Profile Activation Work) on what needs to be covered during a usual sales operation day to ensure we are moving the needle across. (As we say, kwa ground vitu ni different - optimize and adapt this mental models to help guide your workflow not restrict you)
@@ -203,7 +207,7 @@ This section tests whether you can describe a complete working shift as a Sales 
 
     1. CRM → Payments → filter: Status = completed, Date = yesterday → Export to XLSX
     2. Cross-reference each transaction reference with the KopoKopo / M-Pesa settlement report for the same date
-    3. Check the **manual review queue**: CRM → Payments → filter: Review state = manual review. Any amount-mismatch payments need confirmation or rejection today.
+    3. Check the **manual review queue**: CRM → Payments → filter: Review state = manual review. Any amount-mismatch or disputed payments need confirmation or rejection today.
     4. Note any `reversed` payments — update the reconciliation log; check if the reversal was M-Pesa's error or fraud-related.
     5. Check the **recovery queue**: any `completed` payments with no linked deal — coordinate with CS to match them to clients.
 
